@@ -1,6 +1,0 @@
-Main Developer:
-    Carlos Pais <freemind@lavabit.com>
-    
-Thanks To:
-    Qt4 Libraries <http://qt.nokia.com/products/>
-    Eeli Reilin, Luis Gustavo S., Stephen Kockentiedt <https://github.com/jmullen/qt-json>
