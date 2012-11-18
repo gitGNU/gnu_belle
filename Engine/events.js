@@ -85,9 +85,8 @@ document.onkeyup = function(event)
         case 13: //ENTER
         case 32: //SPACE
             //if (Novel.currentAction instanceof Dialogue || Novel.currentAction instanceof Wait)
+            if (Novel.currentAction)
                 Novel.currentAction.skip();
-            break;
-        
     }
 }
 
