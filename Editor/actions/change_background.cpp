@@ -68,10 +68,6 @@ void ChangeBackground::setBackground(const QString & background)
     mBackground = background;
     QFileInfo info(mBackground);
     setDisplayText(info.fileName());
-    if (SceneManager::currentScene()) {
-        mCurrentSceneBackground = SceneManager::currentScene()->backgroundImage();
-        SceneManager::currentScene()->setBackground(mBackground);
-    }
     emit dataChanged();
 }
 
