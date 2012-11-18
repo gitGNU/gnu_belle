@@ -770,7 +770,7 @@ void Object::setResource(Object* resource)
         mResource->disconnect(this);
 
     mResource = resource;
-    connect(mResource, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(setProperties(const QVariantMap&)));
+    connect(mResource, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(onResourceChanged(const QVariantMap&)));
     connect(mResource, SIGNAL(destroyed()), this, SLOT(onResourceDestroyed()));
 }
 
@@ -1015,6 +1015,17 @@ bool Object::isValidName(const QString& name)
         return resourceManager->isValidName(name);
 
     return true;
+}
+
+void Object::onResourceChanged(const QVariantMap & data)
+{
+    QVariantMap _data = data;
+    //ignore coordinates
+    if (_data.contains("x"))
+        _data.remove("x");
+    if (_data.contains("y"))
+        _data.remove("y");
+    setProperties(_data);
 }
 
 /*void Object::setEditorWidgetFilters(const QStringList& filters)

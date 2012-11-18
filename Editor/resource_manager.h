@@ -64,6 +64,7 @@ signals:
     void resourceAdded(Object*);
     void resourceRemoved(Object*);
     void resourceRemoved(int);
+    void resourceChanged();
 
 public slots:
 

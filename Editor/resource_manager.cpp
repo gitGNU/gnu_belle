@@ -46,6 +46,7 @@ void ResourceManager::addResource(Object * obj)
         if (! obj->parent())
             obj->setParent(this);
 
+        connect(obj, SIGNAL(dataChanged()), this, SIGNAL(resourceChanged()));
         mResources.append(obj);
         emit resourceAdded(obj);
     }
@@ -139,6 +140,7 @@ void ResourceManager::removeResource(Object *object, bool del)
 {
     if (mResources.contains(object)) {
         mResources.removeOne(object);
+        object->disconnect(this);
 
         if (del && object)
             object->deleteLater();

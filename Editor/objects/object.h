@@ -188,6 +188,8 @@ class Object : public QObject
 
 private slots:
         void onResourceDestroyed();
+        void onResourceChanged(const QVariantMap&);
+
 };
 
 

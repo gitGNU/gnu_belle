@@ -35,8 +35,7 @@ DrawingSurfaceWidget::DrawingSurfaceWidget(SceneManager *sceneManager, QWidget *
     mSceneManager = sceneManager;
     setContextMenuPolicy(Qt::CustomContextMenu);
 
-    this->setFixedHeight(Scene::height());
-    this->setFixedWidth(Scene::width());
+    setFixedSize(QSize(Scene::width(), Scene::height()));
     setMouseTracking (true);
 
     mInstance = this;
@@ -89,6 +88,7 @@ DrawingSurfaceWidget::DrawingSurfaceWidget(SceneManager *sceneManager, QWidget *
     connect(mClearBackground, SIGNAL(triggered()), this, SLOT(onClearBackgroundTriggered()));
     connect(mSceneManager, SIGNAL(updateDrawingSurfaceWidget()), this, SLOT(update()));
     connect(mSceneManager, SIGNAL(resized(const QResizeEvent&)), this, SLOT(onResize(const QResizeEvent&)));
+    //connect(ResourceManager::instance(), SIGNAL(resourceChanged()), this, SLOT(update()));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onCustomContextMenuRequested(const QPoint&)));
 }
 
@@ -98,15 +98,13 @@ DrawingSurfaceWidget::~DrawingSurfaceWidget()
 
 void DrawingSurfaceWidget::paintEvent(QPaintEvent* paint)
 {
-    Scene *scene = mSceneManager->currentScene();
-
-    if (! scene)
-        return;
 
     if (mObject)
         paintObject(this);
-    else
+    else if (mSceneManager->currentScene())
         paintSceneTo(this);
+    else
+        return;
 
     emit paintFinished();
 }
@@ -125,13 +123,13 @@ void DrawingSurfaceWidget::setObject(Object* obj)
 {
     mObject = obj;
     if (mObject) {
-        mObject->setX(Scene::width()/2-(mObject->width()/2));
-        mObject->setY(Scene::height()/2-(mObject->height()/2));
-        this->setMinimumSize(mObject->width()+MARGIN, mObject->height()+MARGIN);
+        mObject->setX(RESIZE_RECT_WIDTH/2);
+        mObject->setY(RESIZE_RECT_WIDTH/2);
+        setFixedSize(QSize(mObject->width()+RESIZE_RECT_WIDTH, mObject->height()+RESIZE_RECT_WIDTH));
         update();
     }
     else {
-        this->resize(Scene::width(), Scene::height());
+        setFixedSize(QSize(Scene::width(), Scene::height()));
     }
 }
 
@@ -358,7 +356,7 @@ void DrawingSurfaceWidget::resizeEvent(QResizeEvent * event)
 
 void DrawingSurfaceWidget::onCustomContextMenuRequested(const QPoint& point)
 {
-    if (! mSceneManager->currentScene())
+    if (! mSceneManager->currentScene() || mObject)
         return;
 
     QMenu menu;
