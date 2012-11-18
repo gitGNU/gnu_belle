@@ -28,18 +28,19 @@ body, html
   margin: 0 auto;
   position: relative;
   background-color: black;
-  text-align: center;
 }
 
 #container #backgroundCanvas 
 {
     position: absolute; 
+    margin: 0 auto;
     z-index: 0;
 }
 
 #container #myCanvas 
 {
     position: absolute; 
+    margin: 0 auto;
     z-index: 1;
 }
 
@@ -47,6 +48,7 @@ body, html
 {
     position: absolute;
     font: 10pt calibre;
+    z-index: 2;
 }
 
 #loading {

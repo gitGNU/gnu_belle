@@ -27,7 +27,6 @@ var countFpsInterval = null;
 var scaleWidth = 1;
 var scaleHeight = 1;
 var redrawing = false;
-var view = 'portrait';
 var showFps = true;
 var Novel = {
     "resources" : {},

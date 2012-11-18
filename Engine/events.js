@@ -91,13 +91,21 @@ document.onkeyup = function(event)
     }
 }
 
-window.addEventListener('resize', function() {
-  var _view = 'portrait';  
-  if (window.innerWidth > window.innerHeight)
-    _view = 'landscape';
-    
-  if (window.view != _view) {
-    window.view = _view;    
-    initDisplay();
-  }
-}, false);
+function resize() 
+{
+    var _view = 'portrait';  
+    if (window.innerWidth > window.innerHeight)
+        _view = 'landscape';
+        
+    if (window.view != _view) {
+        window.view = _view;    
+        initDisplay();
+    }
+}
+
+if (window.addEventListener) 
+    window.addEventListener('resize', resize, false);
+else if (window.attachEvent)
+  window.attachEvent('resize', resize);
+
+
