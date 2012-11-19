@@ -47,7 +47,7 @@ void SceneEditorWidget::updateData(Scene * scene)
 void SceneEditorWidget::onBackgroundSelected(const QString & path)
 {
     if (mCurrentScene)
-        mCurrentScene->setBackground(path);
+        mCurrentScene->setBackgroundImage(path);
 }
 
 void SceneEditorWidget::onBackgroundColorSelected(const QColor & color)

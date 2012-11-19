@@ -69,7 +69,7 @@ class Scene : public QObject
         void moveSelectedObject(int, int);
         void stopMoveSelectedObject();
         Object *selectedObject();
-        void setBackground(const QString&);
+        void setBackgroundImage(const QString&);
         void setBackgroundImage(QPixmap*);
         QPixmap* backgroundImage();
         void setBackgroundColor(const QColor&);

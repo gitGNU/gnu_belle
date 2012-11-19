@@ -41,8 +41,11 @@ Scene::Scene(const QVariantMap& data, QObject *parent):
     if (data.contains("name") && data.value("name").type() == QVariant::String)
         setObjectName(SceneManager::validSceneName(data.value("name").toString()));
 
-    if (data.contains("background") && data.value("background").type() == QVariant::String)
-        setBackground(data.value("background").toString());
+    if (data.contains("backgroundImage") && data.value("backgroundImage").type() == QVariant::String)
+        setBackgroundImage(data.value("backgroundImage").toString());
+
+    if (data.contains("backgroundColor") && data.value("backgroundColor").type() == QVariant::List)
+        setBackgroundColor(Utils::listToColor(data.value("backgroundColor").toList()));
 
     if (data.contains("objects") && data.value("objects").type() == QVariant::List) {
         QVariantList objects = data.value("objects").toList();
@@ -271,21 +274,25 @@ void Scene::fillWidth()
     emit dataChanged();
 }
 
-void Scene::setBackground(const QString & path)
+void Scene::setBackgroundImage(const QString & path)
 {
-    ResourceManager::decrementReference(mBackgroundImage);
-    mBackgroundImage = ResourceManager::newImage(path);
+    QPixmap* image = ResourceManager::newImage(path);
 
-    if (mBackgroundImage)
-        *mBackgroundImage = mBackgroundImage->scaled(Scene::size());
+    if (mBackgroundImage != image) {
+        ResourceManager::decrementReference(mBackgroundImage);
+        if (mBackgroundImage)
+            *mBackgroundImage = mBackgroundImage->scaled(Scene::size());
 
-    emit dataChanged();
+        emit dataChanged();
+    }
 }
 
 void Scene::setBackgroundImage(QPixmap* image)
 {
-    mBackgroundImage = image;
-    emit dataChanged();
+    if (mBackgroundImage != image) {
+        mBackgroundImage = image;
+        emit dataChanged();
+    }
 }
 
 QPixmap* Scene::backgroundImage()
@@ -295,8 +302,10 @@ QPixmap* Scene::backgroundImage()
 
 void Scene::setBackgroundColor(const QColor& color)
 {
-    mBackgroundColor = color;
-    emit dataChanged();
+    if (mBackgroundColor != color) {
+        mBackgroundColor = color;
+        emit dataChanged();
+    }
 }
 
 QColor Scene::backgroundColor()
@@ -443,11 +452,19 @@ QPixmap* Scene::pixmap()
 QVariantMap Scene::toJsonObject()
 {
     QVariantMap scene;
-    QFileInfo imageInfo(ResourceManager::imagePath(mBackgroundImage));
 
+    //focus out active action in case it changed something temporarily in the scene
+    for(int i=0; i < mActions.size(); i++)
+        if (mActions[i]->isActive())
+            mActions[i]->focusOut();
+
+    QFileInfo imageInfo(ResourceManager::imagePath(mBackgroundImage));
     scene.insert("name", objectName());
     scene.insert("type", "Scene");
-    scene.insert("background", imageInfo.fileName());
+    if (imageInfo.exists())
+        scene.insert("backgroundImage", imageInfo.fileName());
+    if (mBackgroundColor.isValid())
+        scene.insert("backgroundColor", Utils::colorToList(mBackgroundColor));
 
     QVariantList objects;
     for(int i=0; i < mObjects.size(); i++) {
