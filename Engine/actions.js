@@ -391,8 +391,8 @@ function Wait(data)
 {
     Action.call(this, data);
     
-    if ( "time" in data )
-        this.time = data["time"];
+    if ( "time" in data)
+        this.time = data["time"] * 1000;
     if ("waitType" in data) {
         this.waitType = data["waitType"];
         if (this.waitType == "MouseClick")
@@ -611,11 +611,14 @@ function ChangeBackground(data)
 {
     Action.call(this, data);
     
-    this.background = "";
+    this.backgroundImage = null;
+    this.backgroundColor = null;
     
-    if ("background" in data) {
-         this.background = data["background"];
+    if ("backgroundImage" in data) {
+         this.backgroundImage = data["backgroundImage"];
     }
+    if ("backgroundColor" in data)
+        this.backgroundColor = data["backgroundColor"];
 }
 
 extend(Action, ChangeBackground);
@@ -624,8 +627,12 @@ ChangeBackground.prototype.execute = function ()
 {
     this.reset();
     
-    if (Novel.currentScene)
-        Novel.currentScene.setBackgroundImage(this.background);
+    if (Novel.currentScene) {
+        if (this.backgroundImage)
+            Novel.currentScene.setBackgroundImage(this.backgroundImage);
+        if (this.backgroundColor)
+            Novel.currentScene.setBackgroundColor(this.backgroundColor);
+    }
     
     this.setFinished(true);
 }
