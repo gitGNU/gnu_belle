@@ -50,6 +50,7 @@ public:
     virtual void setSceneObject(Object*);
     static void setActionInfo(ActionInfo*);
     Scene* scene();
+    bool isActive();
 
     void setIcon(const QIcon&);
     QIcon icon() const;
@@ -107,6 +108,7 @@ private:
     bool mAllowSkipping;
     Interaction::InputEvents mSupportedEvents;
     bool mMouseClickOnFinish;
+    bool mActive;
 
     void init();
 

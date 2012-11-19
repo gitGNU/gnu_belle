@@ -68,6 +68,7 @@ Action::Action(const QVariantMap& data, QObject *parent) :
 void Action::init()
 {
     mObject = 0;
+    mActive = false;
     mAllowSkipping = false;
     mMouseClickOnFinish = false;
     mSupportedEvents = Interaction::None;
@@ -235,10 +236,12 @@ void Action::setObjectName(const QString &name)
 
 void Action::focusIn()
 {
+    mActive = true;
 }
 
 void Action::focusOut()
 {
+    mActive = false;
 }
 
 Scene* Action::scene()
@@ -260,4 +263,9 @@ Scene* Action::scene()
 
     //shouldn't happen either, but just in case
     return SceneManager::currentScene();
+}
+
+bool Action::isActive()
+{
+    return mActive;
 }
