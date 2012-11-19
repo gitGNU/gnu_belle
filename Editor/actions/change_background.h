@@ -26,8 +26,12 @@ class ChangeBackground : public Action
 {
     Q_OBJECT
 
-    QPixmap *mCurrentSceneBackground;
-    QString mBackground;
+    QPixmap *mCurrentSceneBackgroundImage;
+    QPixmap* mBackgroundImage;
+    QColor mBackgroundColor;
+    QColor mCurrentSceneBackgroundColor;
+    bool mBackgroundImageChanged;
+    bool mBackgroundColorChanged;
 
 public:
     static ActionInfo Info;
@@ -41,8 +45,11 @@ public:
     virtual ActionEditorWidget* editorWidget();
     QVariantMap toJsonObject();
 
-    void setBackground(const QString&);
-    QString background();
+    void setBackgroundImage(const QString&);
+    QString backgroundPath();
+
+    void setBackgroundColor(const QColor&);
+    QColor backgroundColor();
 
     void focusIn();
     void focusOut();

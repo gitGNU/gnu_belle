@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 Carlos Pais 
+/* Copyright (C) 2012 Carlos Pais
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
 
 #include "change_background.h"
 #include "scene_manager.h"
+#include "resource_manager.h"
+#include "utils.h"
 
 #include <QFileInfo>
 #include <QtDebug>
@@ -33,9 +35,12 @@ ChangeBackground::ChangeBackground(const QVariantMap & data, QObject *parent):
     Action(data, parent)
 {
     init();
-    if (data.contains("background") && data.value("background").type() == QVariant::String) {
-        setBackground(data.value("background").toString());
-    }
+    if (data.contains("backgroundImage") && data.value("backgroundImage").type() == QVariant::String)
+        setBackgroundImage(data.value("backgroundImage").toString());
+
+    if (data.contains("backgroundColor") && data.value("backgroundColor").type() == QVariant::List)
+        setBackgroundColor(Utils::listToColor(data.value("backgroundColor").toList()));
+
 }
 
 void ChangeBackground::init()
@@ -44,8 +49,10 @@ void ChangeBackground::init()
     setName(Info.name);
     setType(Info.type);
 
-    mBackground  = "";
-    mCurrentSceneBackground = 0;
+    mCurrentSceneBackgroundImage = 0;
+    mBackgroundImage = 0;
+    mBackgroundImageChanged = false;
+    mBackgroundColorChanged = false;
 }
 
 void ChangeBackground::setChangeBackgroundEditorWidget(ChangeBackgroundEditorWidget * widget)
@@ -63,41 +70,79 @@ ActionEditorWidget* ChangeBackground::editorWidget()
     return mEditorWidget;
 }
 
-void ChangeBackground::setBackground(const QString & background)
+void ChangeBackground::setBackgroundImage(const QString & background)
 {
-    mBackground = background;
-    QFileInfo info(mBackground);
+    ResourceManager::decrementReference(mBackgroundImage);
+    mBackgroundImage = ResourceManager::newImage(background);
+    QFileInfo info(background);
     setDisplayText(info.fileName());
     emit dataChanged();
 }
 
-QString ChangeBackground::background()
+QString ChangeBackground::backgroundPath()
 {
-    return mBackground;
+    return ResourceManager::imagePath(mBackgroundImage);
+}
+
+void ChangeBackground::setBackgroundColor(const QColor& color)
+{
+    mBackgroundColor = color;
+    setDisplayText(color.name());
+    emit dataChanged();
+}
+
+QColor ChangeBackground::backgroundColor()
+{
+    return mBackgroundColor;
 }
 
 void ChangeBackground::focusIn()
 {
-    if (SceneManager::currentScene()) {
-        mCurrentSceneBackground = SceneManager::currentScene()->backgroundImage();
-        SceneManager::currentScene()->setBackground(mBackground);
+    Action::focusIn();
+    Scene *scene = this->scene();
+
+    if (scene) {
+        if (mBackgroundImage || mBackgroundColor.isValid()) {
+            mCurrentSceneBackgroundImage = scene->backgroundImage();
+            scene->setBackgroundImage(mBackgroundImage);
+            mBackgroundImageChanged = true;
+        }
+
+        if (mBackgroundColor.isValid()) {
+            mBackgroundColorChanged = true;
+            mCurrentSceneBackgroundColor = scene->backgroundColor();
+            scene->setBackgroundColor(mBackgroundColor);
+        }
     }
 }
 
 void ChangeBackground::focusOut()
 {
-    if (SceneManager::currentScene())
-        SceneManager::currentScene()->setBackgroundImage(mCurrentSceneBackground);
+    Action::focusOut();
+    Scene* scene = this->scene();
 
-    mCurrentSceneBackground = 0;
+    if (scene) {
+        if (mBackgroundImageChanged)
+            scene->setBackgroundImage(mCurrentSceneBackgroundImage);
+        if (mBackgroundColorChanged)
+            scene->setBackgroundColor(mCurrentSceneBackgroundColor);
+    }
+
+    mCurrentSceneBackgroundColor = QColor();
+    mCurrentSceneBackgroundImage = 0;
+    mBackgroundImageChanged = false;
+    mBackgroundColorChanged = false;
 }
 
 QVariantMap ChangeBackground::toJsonObject()
 {
     QVariantMap data = Action::toJsonObject();
+    QString path = ResourceManager::imagePath(mBackgroundImage);
 
-    if (! mBackground.isEmpty())
-        data.insert("background", mBackground);
+    if (! path.isEmpty())
+        data.insert("backgroundImage", QFileInfo(path).fileName());
+    if (mBackgroundColor.isValid())
+        data.insert("backgroundColor", Utils::colorToList(mBackgroundColor));
 
     return data;
 }

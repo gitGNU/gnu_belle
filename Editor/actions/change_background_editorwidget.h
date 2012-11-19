@@ -20,6 +20,7 @@
 #include "action_editor_widget.h"
 #include "choosefilebutton.h"
 #include "change_background.h"
+#include "color_pushbutton.h"
 
 class ChangeBackground;
 
@@ -29,16 +30,17 @@ class ChangeBackgroundEditorWidget : public ActionEditorWidget
 
     ChooseFileButton* mImageChooser;
     ChangeBackground* mCurrentAction;
+    ColorPushButton* mChooseBackgroundColorButton;
 
 public:
     explicit ChangeBackgroundEditorWidget(QWidget *parent = 0);
     void updateData(Action *);
-
     
 signals:
     
 private slots:
     void onFileSelected(const QString&);
+    void onBackgroundColorSelected(const QColor&);
     
 };
 

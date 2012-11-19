@@ -21,13 +21,17 @@
 ChangeBackgroundEditorWidget::ChangeBackgroundEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-   mImageChooser = new ChooseFileButton(ChooseFileButton::ImageFilter, this);
+    mImageChooser = new ChooseFileButton(ChooseFileButton::ImageFilter, this);
+    mChooseBackgroundColorButton = new ColorPushButton(this);
 
    beginGroup(tr("Change Background"));
-   appendRow(tr("New Image"),mImageChooser);
+   appendRow(tr("New Image"), mImageChooser);
+   appendRow(tr("Background Color"), mChooseBackgroundColorButton);
    endGroup();
 
    connect(mImageChooser, SIGNAL(fileSelected(const QString&)), this, SLOT(onFileSelected(const QString&)));
+   connect(mChooseBackgroundColorButton, SIGNAL(colorChosen(QColor)), this, SLOT(onBackgroundColorSelected(const QColor&)));
+   resizeColumnToContents(0);
 }
 
 void ChangeBackgroundEditorWidget::updateData(Action * action)
@@ -37,11 +41,18 @@ void ChangeBackgroundEditorWidget::updateData(Action * action)
     if (! mCurrentAction)
         return;
 
-    mImageChooser->setFilePath(mCurrentAction->background());
+    mImageChooser->setFilePath(mCurrentAction->backgroundPath());
+    mChooseBackgroundColorButton->setColor(mCurrentAction->backgroundColor());
 }
 
 void ChangeBackgroundEditorWidget::onFileSelected(const QString & filepath)
 {
     if (mCurrentAction)
-        mCurrentAction->setBackground(filepath);
+        mCurrentAction->setBackgroundImage(filepath);
+}
+
+void ChangeBackgroundEditorWidget::onBackgroundColorSelected(const QColor & color)
+{
+    if (mCurrentAction)
+        mCurrentAction->setBackgroundColor(color);
 }
