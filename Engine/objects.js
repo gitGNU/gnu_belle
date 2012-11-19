@@ -839,24 +839,23 @@ function Scene(data)
     this.redrawBackground = false;
     this.name = "";
     this.backgroundImage = null;
-    this.backgroundColor = '#000000';
+    this.backgroundColor = null;
     var backgroundImage = "";
+    var backgroundColor = null;
     
     if (data) {
-        if ("background" in data)
-            backgroundImage = data["background"];
+        if ("backgroundImage" in data)
+            backgroundImage = data["backgroundImage"];
         if ("backgroundColor" in data)
-            this.backgroundColor = data["backgroundColor"];
-        if ("width" in data)
-            var width = data["width"];
-        if ("height" in data)
-            var height = data["height"];
+            backgroundColor = new Color(data["backgroundColor"]);
         if ("name" in data)
             this.name = data["name"];
     }
     
     if (backgroundImage)
         this.setBackgroundImage(backgroundImage);
+    if (backgroundColor)
+        this.setBackgroundColor(backgroundColor);
 }
 
 Scene.prototype.addObject = function(object) {
@@ -868,10 +867,40 @@ Scene.prototype.setBackgroundImage = function(background)
     if (this.backgroundImage instanceof Image && background == this.backgroundImage.src)
         return;
     
-    if (background){
+    if (background instanceof Image) {
+        this.backgroundImage = background;
+    }
+    else if (typeof background == "string") {
         this.backgroundImage = new window.Image();
         this.backgroundImage.src = background;
+    }
+   
+    if (this.backgroundImage)
         this.redrawBackground = true;
+}
+
+Scene.prototype.setBackgroundColor = function(color)
+{
+    if (this.backgroundColor != color) {
+        
+        if (color instanceof Array)
+            color = new Color(color);
+        
+        this.backgroundColor = color;
+    
+        if (this.backgroundColor)
+            this.redrawBackground = true;
+    }
+
+}
+
+Scene.prototype.paint = function(context)
+{    
+    if (this.backgroundImage)
+        context.drawImage(this.backgroundImage, 0, 0, Novel.width, Novel.height);
+    else if (this.backgroundColor) {
+        context.fillStyle  = this.backgroundColor.toString();
+        context.fillRect(0, 0, Novel.width, Novel.height);
     }
 }
 
