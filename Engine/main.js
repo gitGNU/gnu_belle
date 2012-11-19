@@ -41,6 +41,7 @@ var Novel = {
     "drawing" : false,
     "variables" : {},
     "context" : null,
+    "bgContext": null,
     "drawTimeout" : 50,
     "end" : false,
     "forceRedraw": false,
@@ -244,7 +245,8 @@ function gameLoop ()
             }
             Novel.currentScene = Novel.scenes[Novel.nextScene];
             Novel.context.clearRect(0, 0, Novel.width, Novel.height);
-            drawBackground(Novel.currentScene.background);
+            if (Novel.currentScene)
+                Novel.currentScene.paint(Novel.bgContext);
             Novel.actions = Novel.currentScene.actions;
             Novel.nextScene++;
             Novel.nextAction = 0;
