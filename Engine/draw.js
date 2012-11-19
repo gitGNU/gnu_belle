@@ -32,6 +32,7 @@ function scaleAll(scaleWidth, scaleHeight, reset)
     var height = Novel.height;
     var myCanvas = document.getElementById('myCanvas');
     var bgCanvas = document.getElementById('backgroundCanvas');
+    var bgContext = bgCanvas.getContext('2d');
   
     if (reset) {
       scaleWidth = 10 / (scaleWidth * 10);
@@ -69,8 +70,8 @@ function scaleAll(scaleWidth, scaleHeight, reset)
     
     scaleFont(Novel.font, scaleWidth);
     
-    if (Novel.currentScene.backgroundImage)
-      bgCanvas.getContext('2d').drawImage(Novel.currentScene.backgroundImage, 0, 0, width*scaleWidth, height*scaleHeight);
+    if (Novel.currentScene)
+        Novel.currentScene.paint(bgContext);
 }
 
 function scaleFont(font, scale)
@@ -137,16 +138,7 @@ function initDisplay()
     
     myContext.font = Novel.font;    
     Novel.context = myContext;
-}
-
-function drawBackground(background)
-{    
-    var bgCanvas = document.getElementById('backgroundCanvas');
-    var bgContext = bgCanvas.getContext('2d');
-    
-    if (background) {
-        bgContext.drawImage(background, 0, 0, bgCanvas.width, bgCanvas.height);;
-    }
+    Novel.bgContext = bgContext;
 }
 
 function redraw()
@@ -161,7 +153,7 @@ function redraw()
     
     if (Novel.currentScene.redrawBackground) {
         Novel.currentScene.redrawBackground = false;
-        drawBackground(Novel.currentScene.backgroundImage);
+        Novel.currentScene.paint(Novel.bgContext);
     }
 
     for(i=objectsToDraw.length-1; i !== -1; --i) {
