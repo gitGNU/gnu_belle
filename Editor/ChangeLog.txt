@@ -1,3 +1,11 @@
+Belle 0.1.1a | 20/11/2012
+-----------------------
+-Fixed color support for scene's background.
+-Added color support in ChangeBackground action.
+-Added "backgroundColor" property for scene when exporting game file.
+-Replaced "background" property with "backgroundImage" when exporting game file.
+-Other minor tweaks.
+
 Belle 0.1a | 15/11/2012
 -----------------------
 -First release.
