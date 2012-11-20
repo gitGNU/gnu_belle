@@ -41,8 +41,12 @@ void ChangeBackgroundEditorWidget::updateData(Action * action)
     if (! mCurrentAction)
         return;
 
+    mImageChooser->blockSignals(true);
+    mChooseBackgroundColorButton->blockSignals(true);
     mImageChooser->setFilePath(mCurrentAction->backgroundPath());
     mChooseBackgroundColorButton->setColor(mCurrentAction->backgroundColor());
+    mChooseBackgroundColorButton->blockSignals(false);
+    mImageChooser->blockSignals(false);
 }
 
 void ChangeBackgroundEditorWidget::onFileSelected(const QString & filepath)

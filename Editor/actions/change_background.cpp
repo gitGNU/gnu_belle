@@ -51,8 +51,6 @@ void ChangeBackground::init()
 
     mCurrentSceneBackgroundImage = 0;
     mBackgroundImage = 0;
-    mBackgroundImageChanged = false;
-    mBackgroundColorChanged = false;
 }
 
 void ChangeBackground::setChangeBackgroundEditorWidget(ChangeBackgroundEditorWidget * widget)
@@ -72,11 +70,18 @@ ActionEditorWidget* ChangeBackground::editorWidget()
 
 void ChangeBackground::setBackgroundImage(const QString & background)
 {
-    ResourceManager::decrementReference(mBackgroundImage);
+    QPixmap* prevBackground = mBackgroundImage;
+
     mBackgroundImage = ResourceManager::newImage(background);
     QFileInfo info(background);
     setDisplayText(info.fileName());
     emit dataChanged();
+
+    Scene* scene = this->scene();
+    if (scene && scene->temporaryBackgroundImage() != mBackgroundImage)
+        focusIn();
+
+    ResourceManager::decrementReference(prevBackground);
 }
 
 QString ChangeBackground::backgroundPath()
@@ -87,8 +92,13 @@ QString ChangeBackground::backgroundPath()
 void ChangeBackground::setBackgroundColor(const QColor& color)
 {
     mBackgroundColor = color;
-    setDisplayText(color.name());
+    if (color.isValid())
+        setDisplayText(color.name());
     emit dataChanged();
+
+    Scene* scene = this->scene();
+    if (scene && scene->temporaryBackgroundColor() != color)
+        focusIn();
 }
 
 QColor ChangeBackground::backgroundColor()
@@ -102,17 +112,8 @@ void ChangeBackground::focusIn()
     Scene *scene = this->scene();
 
     if (scene) {
-        if (mBackgroundImage || mBackgroundColor.isValid()) {
-            mCurrentSceneBackgroundImage = scene->backgroundImage();
-            scene->setBackgroundImage(mBackgroundImage);
-            mBackgroundImageChanged = true;
-        }
-
-        if (mBackgroundColor.isValid()) {
-            mBackgroundColorChanged = true;
-            mCurrentSceneBackgroundColor = scene->backgroundColor();
-            scene->setBackgroundColor(mBackgroundColor);
-        }
+        scene->setTemporaryBackgroundColor(mBackgroundColor);
+        scene->setTemporaryBackgroundImage(mBackgroundImage);
     }
 }
 
@@ -122,16 +123,17 @@ void ChangeBackground::focusOut()
     Scene* scene = this->scene();
 
     if (scene) {
+        scene->setTemporaryBackgroundImage(0);
+        scene->setTemporaryBackgroundColor(QColor());
+        /*scene->setBackgroundImage(mCurrentSceneBackgroundImage);
         if (mBackgroundImageChanged)
             scene->setBackgroundImage(mCurrentSceneBackgroundImage);
         if (mBackgroundColorChanged)
-            scene->setBackgroundColor(mCurrentSceneBackgroundColor);
+            scene->setBackgroundColor(mCurrentSceneBackgroundColor);*/
     }
 
     mCurrentSceneBackgroundColor = QColor();
     mCurrentSceneBackgroundImage = 0;
-    mBackgroundImageChanged = false;
-    mBackgroundColorChanged = false;
 }
 
 QVariantMap ChangeBackground::toJsonObject()

@@ -30,8 +30,6 @@ class ChangeBackground : public Action
     QPixmap* mBackgroundImage;
     QColor mBackgroundColor;
     QColor mCurrentSceneBackgroundColor;
-    bool mBackgroundImageChanged;
-    bool mBackgroundColorChanged;
 
 public:
     static ActionInfo Info;
