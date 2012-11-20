@@ -42,6 +42,7 @@ void SceneEditorWidget::updateData(Scene * scene)
         return;
 
     mChooseBackgroundButton->setFilePath(scene->backgroundPath());
+    mChooseBackgroundColorButton->setColor(scene->backgroundColor());
 }
 
 void SceneEditorWidget::onBackgroundSelected(const QString & path)

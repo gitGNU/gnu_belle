@@ -90,6 +90,7 @@ void Scene::init(const QString& name)
     mSelectedObject = 0;
     mHighlightedObject = 0;
     mBackgroundImage = 0;
+    mTemporaryBackgroundImage = 0;
     mScenePixmap = new QPixmap(Scene::width(), Scene::height());
     mScenePixmap->fill(Qt::gray);
 
@@ -280,9 +281,10 @@ void Scene::setBackgroundImage(const QString & path)
 
     if (mBackgroundImage != image) {
         ResourceManager::decrementReference(mBackgroundImage);
-        if (mBackgroundImage)
-            *mBackgroundImage = mBackgroundImage->scaled(Scene::size());
+        if (image)
+            *image = image->scaled(Scene::size());
 
+        mBackgroundImage = image;
         emit dataChanged();
     }
 }
@@ -300,6 +302,19 @@ QPixmap* Scene::backgroundImage()
     return mBackgroundImage;
 }
 
+void Scene::setTemporaryBackgroundImage(QPixmap* image)
+{
+    if (mTemporaryBackgroundImage != image) {
+        mTemporaryBackgroundImage = image;
+        emit dataChanged();
+    }
+}
+
+QPixmap* Scene::temporaryBackgroundImage()
+{
+    return mTemporaryBackgroundImage;
+}
+
 void Scene::setBackgroundColor(const QColor& color)
 {
     if (mBackgroundColor != color) {
@@ -311,6 +326,19 @@ void Scene::setBackgroundColor(const QColor& color)
 QColor Scene::backgroundColor()
 {
     return mBackgroundColor;
+}
+
+void Scene::setTemporaryBackgroundColor(const QColor& color)
+{
+    if (mTemporaryBackgroundColor != color) {
+        mTemporaryBackgroundColor = color;
+        emit dataChanged();
+    }
+}
+
+QColor Scene::temporaryBackgroundColor()
+{
+    return mTemporaryBackgroundColor;
 }
 
 QString Scene::backgroundPath()
@@ -438,8 +466,12 @@ void Scene::appendAction(Action * action)
 
 QIcon Scene::icon()
 {
-    if (mScenePixmap)
+    if (mScenePixmap) {
+        //update pixmap
+        QPainter painter(mScenePixmap);
+        this->paint(painter);
         return QIcon(*mScenePixmap);
+    }
     else
         return QIcon();
 }
@@ -516,6 +548,80 @@ QString Scene::newObjectName(QString name)
     }
 
     return name;
+}
+
+void Scene::focusIn()
+{
+}
+
+void Scene::focusOut()
+{
+    removeTemporaryBackground();
+}
+
+void Scene::removeTemporaryBackground()
+{
+    if (mTemporaryBackgroundImage)
+        mTemporaryBackgroundImage = 0;
+    if (mTemporaryBackgroundColor.isValid())
+        mTemporaryBackgroundColor = QColor();
+}
+
+void Scene::paint(QPainter & painter)
+{
+    QColor bgColor = backgroundColor().isValid() ? backgroundColor() : Qt::gray;
+
+    if (mTemporaryBackgroundImage)
+        painter.drawPixmap(Scene::point(), *mTemporaryBackgroundImage);
+    else if (mTemporaryBackgroundColor.isValid())
+        painter.fillRect(QRect(Scene::point().x(), Scene::point().y(), width(), height()), mTemporaryBackgroundColor);
+    else if (backgroundImage())
+        painter.drawPixmap(Scene::point(), *mBackgroundImage);
+    else
+        painter.fillRect(QRect(Scene::point().x(), Scene::point().y(), width(), height()), bgColor);
+
+    QFont font;
+    QPen defaultPen;
+    painter.setPen(defaultPen);
+    //font.setFamily((QFontDatabase::applicationFontFamilies(0).at(0).toLocal8Bit().constData()));
+    font.setPointSize(20);
+    painter.setFont(font);
+
+    QList<Object*> objects = this->objects();
+    Object * object;
+
+    for (int i=0; i < objects.size(); i++) {
+        object = objects.at(i);
+        if (object && object->visible()){
+            object->paint(painter);
+        }
+    }
+
+    objects = this->temporaryObjects();
+    for (int i=0; i < objects.size(); i++) {
+        object = objects.at(i);
+        if (object && object->visible()){
+            object->paint(painter);
+        }
+    }
+
+    if(this->highlightedObject()) {
+        QRectF rectf = this->highlightedObject()->sceneRect();
+        painter.save();
+        /*QLinearGradient gradient(rectf.x()+ rectf.width()/2, rectf.y()+rectf.height()+2, rectf.x()+rectf.width()/2, rectf.y()+2);
+        gradient.setColorAt(0, QColor(0, 0, 255, 100));
+        gradient.setColorAt(1, QColor(255, 255, 255, 0));
+        QBrush brush(gradient);*/
+        QBrush brush(QColor(0,0, 255, 100));
+        //brush.setColor(Qt::blue);
+        QPen pen(brush, 6);
+        //pen.setColor(QColor(Qt::blue));
+        painter.setPen(pen);
+        painter.drawRect(rectf);
+
+        //painter.fillRect(rectf, brush);
+        painter.restore();
+    }
 }
 
 

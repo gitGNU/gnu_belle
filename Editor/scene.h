@@ -40,8 +40,10 @@ class Scene : public QObject
     Object * mSelectedObject;
     Object* mHighlightedObject;
     QPixmap *mBackgroundImage;
+    QPixmap* mTemporaryBackgroundImage;
     QPixmap *mScenePixmap;
     QColor mBackgroundColor;
+    QColor mTemporaryBackgroundColor;
     
     public:
         explicit Scene(QObject *parent = 0, const QString& name="");
@@ -65,6 +67,12 @@ class Scene : public QObject
         static void setEditorWidget(SceneEditorWidget*);
         static SceneEditorWidget* editorWidget();
 
+        void setTemporaryBackgroundImage(QPixmap*);
+        QPixmap* temporaryBackgroundImage();
+
+        void setTemporaryBackgroundColor(const QColor&);
+        QColor temporaryBackgroundColor();
+
         void selectObjectAt(int, int);
         void moveSelectedObject(int, int);
         void stopMoveSelectedObject();
@@ -85,7 +93,6 @@ class Scene : public QObject
         bool isValidObjectName(const QString&);
         QString newObjectName(QString);
 
-
         void insertAction(int, Action*);
         void setActions(const QList<Action*>&);
         void deleteActionAt(int);
@@ -97,6 +104,10 @@ class Scene : public QObject
         QIcon icon();
         QPixmap* pixmap();
 
+        void focusIn();
+        void focusOut();
+
+        void paint(QPainter&);
         
     private slots:
         void onResizeEvent(const QResizeEvent&);
@@ -114,6 +125,7 @@ class Scene : public QObject
 
 private:
        void init(const QString&);
+       void removeTemporaryBackground();
 };
 
 
