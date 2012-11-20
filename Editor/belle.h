@@ -53,7 +53,7 @@ class Belle : public QMainWindow
         void newAction(Action*);
 
     private slots:
-        void onScenesWidgetClicked(QTreeWidgetItem *, int);
+        void onSceneItemClicked(QTreeWidgetItem *, int);
         void onScenesWidgetItemChanged(QTreeWidgetItem*, int);
         void onTwObjectsDoubleClicked(QTreeWidgetItem *, int);
         void onTwObjectsClicked(QTreeWidgetItem *, int);
@@ -65,7 +65,6 @@ class Belle : public QMainWindow
         void onActionsViewClicked(const QModelIndex&);
         void onNewAction(Action*);
         void exportGameFile(const QString& fileName="game.json");
-        void updateSceneIcon();
         void onRunTriggered();
         void openFileOrProject();
         void updateActions();
@@ -98,6 +97,8 @@ private:
         void changeProjectTitle(const QString&);
         bool checkEnginePath();
         void setNovelProperties(const QVariantMap&);
+        void updateSceneIcon(Scene* scene=0);
+        void updateSceneEditorWidget(Scene* scene=0);
 
 };
 
