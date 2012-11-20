@@ -146,79 +146,8 @@ void DrawingSurfaceWidget::paintSceneTo(QPaintDevice * paintDevice)
         return;
 
     QPainter painter(paintDevice);
-    QColor bgColor = scene->backgroundColor().isValid() ? scene->backgroundColor() : Qt::gray;
-
-    if (scene->backgroundImage())
-        painter.drawPixmap(Scene::point(), *scene->backgroundImage());
-    else
-        painter.fillRect( QRect(Scene::point().x(), Scene::point().y(), width(), height()), bgColor);
-
-    QPen defaultPen;
-
-    painter.setPen(defaultPen);
-
-    QFont font;
-    //font.setFamily((QFontDatabase::applicationFontFamilies(0).at(0).toLocal8Bit().constData()));
-    font.setPointSize(20);
-    //font.setPixelSize(20); //alternative
-    painter.setFont(font);
-
-    QList<Object*> objects = scene->objects();
-    Object * object;
-
-    for (int i=0; i < objects.size(); i++) {
-        object = objects.at(i);
-        if (object && object->visible()){
-            object->paint(painter);
-        }
-    }
-
-    objects = scene->temporaryObjects();
-    for (int i=0; i < objects.size(); i++) {
-        object = objects.at(i);
-        if (object && object->visible()){
-            object->paint(painter);
-        }
-    }
-
+    scene->paint(painter);
     drawSelection(painter, scene->selectedObject());
-
-    /*if(scene->selectedObject()) {
-        QRectF rectf = scene->selectedObject()->sceneRect();
-        painter.drawRect(rectf);
-
-        QBrush brush(QColor(255,0,0));
-        QPen pen;
-        pen.setWidth(1);
-        painter.save();
-        painter.setPen(pen);
-
-        QList<QRect> rects = scene->selectedObject()->resizeRects();
-        foreach(const QRect& rect, rects) {
-            painter.fillRect(rect, brush);
-            painter.drawRect(rect);
-        }
-
-        painter.restore();
-    }*/
-
-    if(scene->highlightedObject()) {
-        QRectF rectf = scene->highlightedObject()->sceneRect();
-        painter.save();
-        /*QLinearGradient gradient(rectf.x()+ rectf.width()/2, rectf.y()+rectf.height()+2, rectf.x()+rectf.width()/2, rectf.y()+2);
-        gradient.setColorAt(0, QColor(0, 0, 255, 100));
-        gradient.setColorAt(1, QColor(255, 255, 255, 0));
-        QBrush brush(gradient);*/
-        QBrush brush(QColor(0,0, 255, 100));
-        //brush.setColor(Qt::blue);
-        QPen pen(brush, 6);
-        //pen.setColor(QColor(Qt::blue));
-        painter.setPen(pen);
-        painter.drawRect(rectf);
-
-        //painter.fillRect(rectf, brush);
-        painter.restore();
-    }
 }
 
 void DrawingSurfaceWidget::drawSelection(QPainter& painter, Object* object)
