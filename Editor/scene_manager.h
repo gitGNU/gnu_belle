@@ -44,7 +44,7 @@ class SceneManager : public QObject
 
 
         void onResizeEvent(QResizeEvent*);
-        int count();
+
         Scene* at(int);
 
         Scene* srcScene();
@@ -62,6 +62,7 @@ class SceneManager : public QObject
         void setSceneHeight(int);
         void setSceneSize(const QSize&);
 
+        static int count();
         static Scene* scene(int);
         static int size();
         static int indexOf(Scene*);
