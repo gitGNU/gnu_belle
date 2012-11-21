@@ -867,7 +867,7 @@ Scene.prototype.setBackgroundImage = function(background)
     if (this.backgroundImage instanceof Image && background == this.backgroundImage.src)
         return;
     
-    if (background instanceof Image) {
+    if (background instanceof window.Image) {
         this.backgroundImage = background;
     }
     else if (typeof background == "string") {

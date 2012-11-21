@@ -614,9 +614,11 @@ function ChangeBackground(data)
     this.backgroundImage = null;
     this.backgroundColor = null;
     
-    if ("backgroundImage" in data) {
-         this.backgroundImage = data["backgroundImage"];
+    if ("backgroundImage" in data){
+         this.backgroundImage = new window.Image();
+         this.backgroundImage.src = data["backgroundImage"];
     }
+    
     if ("backgroundColor" in data)
         this.backgroundColor = data["backgroundColor"];
 }
