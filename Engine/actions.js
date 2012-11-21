@@ -107,6 +107,10 @@ Action.prototype.isReady = function()
     return true;
 }
 
+Action.prototype.scale = function(widthFactor, heightFactor)
+{
+}
+
 /*********** FADE ACTION ***********/
 
 function Fade(data) 
@@ -294,6 +298,15 @@ Slide.prototype.reset = function () {
     this.setFinished(false);
 }
 
+Slide.prototype.scale = function(widthFactor, heightFactor)
+{
+    Action.prototype.scale.call(this, widthFactor, heightFactor);
+    
+    this.startPoint.x *= widthFactor;
+    this.startPoint.y *= heightFactor;
+    this.endPoint.x *= widthFactor;
+    this.endPoint.y *= heightFactor;
+}
 
 /*********** DIALOGUE ACTION ***********/
 
@@ -556,7 +569,14 @@ Show.prototype.reset = function ()
     
     for (var i=0; i !== this.transitions.length; i++)
         this.transitions[i].reset();
-    
+}
+
+Show.prototype.scale = function (widthFactor, heightFactor) 
+{
+    //Action.prototype.scale.call(this, widthFactor, heightFactor);
+        
+    for (var i=0; i < this.transitions.length; i++) 
+        this.transitions[i].scale(widthFactor, heightFactor);
 }
 
 /*********** HIDE CHARACTER ACTION ***********/
@@ -1137,7 +1157,8 @@ function ShowMenu(data)
     if ( "options" in data && typeof data["options"] == "number") 
         this.options = options; 
     
-    this.object.addReceiver(this);
+    if (this.object)
+        this.object.addReceiver(this);
 }
 
 extend(Action, ShowMenu);
@@ -1160,6 +1181,14 @@ ShowMenu.prototype.receive = function(event)
     this.setFinished(true);
   }
   
+}
+
+ShowMenu.prototype.scale = function(widthFactor, heightFactor)
+{
+    Action.prototype.scale.call(this, widthFactor, heightFactor);
+    
+    if (this.object)
+        this.object.scale(widthFactor, heightFactor);
 }
 
 /************* End Novel *****************/
