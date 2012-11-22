@@ -22,7 +22,6 @@
 
 #include "object_editor_widget.h"
 #include "character.h"
-#include "add_character_widget.h"
 
 class Object;
 class Character;

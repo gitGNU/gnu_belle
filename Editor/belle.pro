@@ -20,9 +20,7 @@ HEADERS      += belle.h\
                 scene_manager.h\
                 scene.h\
                 objects/object.h\
-                widget_group.h \
                 curtain_widget.h \
-                add_character_widget.h \
     boxlayout.h \
     add_object_dialog.h \
     extendedlineedit.h \
@@ -60,7 +58,6 @@ HEADERS      += belle.h\
     combobox.h \
     add_action_dialog.h \
     action_info_manager.h\
-    file_transactions.h\
     json.h \
     objects/image.h \
     utils.h \
@@ -111,9 +108,7 @@ SOURCES      += main.cpp\
                 belle.cpp\
                 scene_manager.cpp\
                 scene.cpp\
-                widget_group.cpp \
                 curtain_widget.cpp \
-                add_character_widget.cpp \
     boxlayout.cpp \
     add_object_dialog.cpp \
     extendedlineedit.cpp \
@@ -150,7 +145,6 @@ SOURCES      += main.cpp\
     combobox.cpp \
     add_action_dialog.cpp \
     action_info_manager.cpp\
-    file_transactions.cpp\
     json.cpp \
     objects/image.cpp \
     objects/character.cpp \

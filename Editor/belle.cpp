@@ -33,10 +33,8 @@
 #include "object.h"
 #include "add_object_dialog.h"
 #include "dialogue.h"
-#include "widget_group.h"
 #include "properties_widget.h"
 #include "textbox_editor_widget.h"
-#include "add_character_widget.h"
 #include "character.h"
 #include "action_catalog_widget.h"
 #include "actions_model.h"
@@ -45,7 +43,6 @@
 #include "image.h"
 
 #include "button.h"
-#include "file_transactions.h"
 #include "json.h"
 #include "resources_view.h"
 #include "condition_dialog.h"
@@ -528,11 +525,6 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
 
 void Belle::onTwObjectsClicked(QTreeWidgetItem *, int)
 {
-    QLayout *layout = mUi.dockWidgetContents_5->layout();
-    AddCharacterWidget * addCharWidget = new AddCharacterWidget(mUi.dockWidgetContents_5);
-
-    layout->addWidget(addCharWidget);
-
     /*QLayout *layout = mUi.dockWidgetContents_5->layout();
     WidgetGroup * gwidget = new WidgetGroup(Qt::Vertical, mUi.dockWidgetContents_5);
 

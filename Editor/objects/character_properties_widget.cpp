@@ -18,9 +18,6 @@
 
 #include <QDebug>
 
-#include "widget_group.h"
-
-
 CharacterPropertiesWidget::CharacterPropertiesWidget(QWidget *parent) :
     ObjectEditorWidget(parent)
 {

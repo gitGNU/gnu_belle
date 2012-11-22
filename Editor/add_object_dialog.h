@@ -21,8 +21,6 @@
 #include <QString>
 
 #include "ui_add_object.h"
-#include "add_character_widget.h"
-
 
 class AddObjectDialog : public QDialog {
 
