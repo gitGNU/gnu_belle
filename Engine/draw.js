@@ -45,6 +45,9 @@ function scaleAll(scaleWidth, scaleHeight, reset)
       Novel.scaleHeightFactor = scaleHeight;
     }
 
+    //scale font before all objects in case some of the objects use text
+    scaleFont(Novel.font, scaleWidth);
+    
     //scale all objects if necessary
     for(var i=0; i < Novel.scenes.length; i++) {
       scene = Novel.scenes[i];
@@ -56,8 +59,7 @@ function scaleAll(scaleWidth, scaleHeight, reset)
       //special case for ShowMenu action, which has an object that isn't added to the scene
       for (var j=0; j < scene.actions.length; j++) {
           action = scene.actions[j];
-          if (action instanceof ShowMenu && action.object)
-            action.object.scale(scaleWidth, scaleHeight);
+          action.scale(scaleWidth, scaleHeight);
       }
     }
 
@@ -67,8 +69,6 @@ function scaleAll(scaleWidth, scaleHeight, reset)
     bgCanvas.height *= scaleHeight;
     myCanvas.width *= scaleWidth;
     myCanvas.height *= scaleHeight;
-    
-    scaleFont(Novel.font, scaleWidth);
     
     if (Novel.currentScene)
         Novel.currentScene.paint(bgContext);

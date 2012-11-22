@@ -559,7 +559,7 @@ TextBox.prototype.paint = function(context)
     }*/
     
     var text = replaceVariables(this.text);
-    if (this.text != this.displayedText)
+    if (text != this.displayedText)
       this.textParts = splitText(context.font, text, this.rect.width-this.textLeftPadding);
     this.displayedText = text;
 
@@ -577,6 +577,8 @@ TextBox.prototype.alignText = function(size)
     
     var width = size[0];
     var height = size[1];
+    
+    this.heightOffset = height / 1.2;
     
     if (this.text && this.textAlignment) {
         if (width < this.rect.width) {
@@ -606,11 +608,6 @@ TextBox.prototype.needsRedraw = function()
     
     var text = this.text;
     var newText = replaceVariables(text);
-    
-    //if (this.text.length <= newText.length)
-    //    newText = newText.slice(0, this.text.length);
-    //console.log(this.displayedText);
-    //console.log(newText);
     
     if (newText != this.displayedText) {
         this.redraw = true;
@@ -868,7 +865,7 @@ Scene.prototype.setBackgroundImage = function(background)
         return;
     
     if (background instanceof window.Image) {
-        this.backgroundImage = background;
+        this.backgroundImage = background;   
     }
     else if (typeof background == "string") {
         this.backgroundImage = new window.Image();
