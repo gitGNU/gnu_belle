@@ -12,9 +12,9 @@ TARGET.path = $$PREFIX/
 CONFIG+=debug
 
 FORMS += mainwindow.ui\
-         add_object.ui \
     novel_properties_dialog.ui \
-    about.ui
+    about.ui \
+    add_character.ui
 
 HEADERS      += belle.h\
                 scene_manager.h\
@@ -22,7 +22,6 @@ HEADERS      += belle.h\
                 objects/object.h\
                 curtain_widget.h \
     boxlayout.h \
-    add_object_dialog.h \
     extendedlineedit.h \
     objects/textbox.h \
     objects/textbox_editor_widget.h\
@@ -101,7 +100,8 @@ HEADERS      += belle.h\
     novel_properties_dialog.h \
     scene_editor_widget.h \
     engine.h \
-    drawing_surface_widget.h
+    drawing_surface_widget.h \
+    add_character_dialog.h
                 
 
 SOURCES      += main.cpp\
@@ -110,7 +110,6 @@ SOURCES      += main.cpp\
                 scene.cpp\
                 curtain_widget.cpp \
     boxlayout.cpp \
-    add_object_dialog.cpp \
     extendedlineedit.cpp \
     properties_widget.cpp \
     object_editor_widget.cpp \
@@ -188,6 +187,7 @@ SOURCES      += main.cpp\
     novel_properties_dialog.cpp \
     scene_editor_widget.cpp \
     engine.cpp \
-    drawing_surface_widget.cpp
+    drawing_surface_widget.cpp \
+    add_character_dialog.cpp
 
 RESOURCES += media.qrc

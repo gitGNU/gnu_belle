@@ -31,7 +31,7 @@
 #include <QMessageBox>
 
 #include "object.h"
-#include "add_object_dialog.h"
+#include "add_character_dialog.h"
 #include "dialogue.h"
 #include "properties_widget.h"
 #include "textbox_editor_widget.h"
@@ -452,13 +452,13 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
     int accepted = 0;
     QString filter = tr("Images(*.png *.xpm *.jpg *.jpeg *.gif)");
     QString path;
-    AddObjectDialog *dialog = 0;
+    AddCharacterDialog *dialog = 0;
 
     switch (item->treeWidget()->indexOfTopLevelItem(item))
     {
     //character
     case 0:
-        dialog = new AddObjectDialog();
+        dialog = new AddCharacterDialog();
         accepted = dialog->exec();
         if (accepted) {
             resource = new Character(dialog->name(), dialog->statesAndImagePaths(), ResourceManager::instance());

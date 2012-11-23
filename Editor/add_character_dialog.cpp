@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "add_object_dialog.h"
+#include "add_character_dialog.h"
 
 #include <QFileDialog>
 #include <QDir>
@@ -24,7 +24,7 @@
 #include "combobox.h"
 #include "choosefilebutton.h"
 
-AddObjectDialog::AddObjectDialog(QWidget *parent) :
+AddCharacterDialog::AddCharacterDialog(QWidget *parent) :
     QDialog(parent)
 {
     mUi.setupUi( this );
@@ -42,7 +42,7 @@ AddObjectDialog::AddObjectDialog(QWidget *parent) :
 }
 
 
-void AddObjectDialog::accept()
+void AddCharacterDialog::accept()
 {
     if (mUi.nameEdit->text().isEmpty()) {
         mUi.errorLabel->setText("Name is empty.");
@@ -64,7 +64,7 @@ void AddObjectDialog::accept()
     QDialog::accept();
 }
 
-void AddObjectDialog::onItemChanged(QTreeWidgetItem * item, int column)
+void AddCharacterDialog::onItemChanged(QTreeWidgetItem * item, int column)
 {
     QTreeWidgetItem *_item = 0;
 
@@ -85,7 +85,7 @@ void AddObjectDialog::onItemChanged(QTreeWidgetItem * item, int column)
     mUi.statusTreeWidget->resizeColumnToContents(0);
 }
 
-void AddObjectDialog::onItemClicked(QTreeWidgetItem * item, int column)
+void AddCharacterDialog::onItemClicked(QTreeWidgetItem * item, int column)
 {
     if (mPrevName == item->text(0))
         return;
@@ -97,7 +97,7 @@ void AddObjectDialog::onItemClicked(QTreeWidgetItem * item, int column)
         onImageSelected(path);
 }
 
-QString AddObjectDialog::imagePath(QTreeWidgetItem * item)
+QString AddCharacterDialog::imagePath(QTreeWidgetItem * item)
 {
     ChooseFileButton* chooseFileButton = static_cast<ChooseFileButton*>(mUi.statusTreeWidget->itemWidget(item, 1));
     if (! chooseFileButton)
@@ -106,7 +106,7 @@ QString AddObjectDialog::imagePath(QTreeWidgetItem * item)
     return chooseFileButton->filePath();
 }
 
-QIcon AddObjectDialog::icon(QTreeWidgetItem * item)
+QIcon AddCharacterDialog::icon(QTreeWidgetItem * item)
 {
     ChooseFileButton* chooseFileButton = static_cast<ChooseFileButton*>(mUi.statusTreeWidget->itemWidget(item, 1));
     if (! chooseFileButton)
@@ -115,12 +115,12 @@ QIcon AddObjectDialog::icon(QTreeWidgetItem * item)
     return chooseFileButton->icon();
 }
 
-QString AddObjectDialog::path()
+QString AddCharacterDialog::path()
 {
     return mPath;
 }
 
-void AddObjectDialog::onImageSelected(const QString& path)
+void AddCharacterDialog::onImageSelected(const QString& path)
 {
     QPixmap pixmap(path);
     if (pixmap.height() > mUi.lImage->height())
@@ -128,18 +128,18 @@ void AddObjectDialog::onImageSelected(const QString& path)
     mUi.lImage->setPixmap(pixmap);
 }
 
-void AddObjectDialog::onWidgetStateChanged(bool valid)
+void AddCharacterDialog::onWidgetStateChanged(bool valid)
 {
     mUi.buttonBox->button(QDialogButtonBox::Ok)->setEnabled(valid);
 }
 
 
-QString AddObjectDialog::name()
+QString AddCharacterDialog::name()
 {
     return mUi.nameEdit->text();
 }
 
-QHash<QString, QString> AddObjectDialog::statesAndImagePaths()
+QHash<QString, QString> AddCharacterDialog::statesAndImagePaths()
 {
     QTreeWidgetItem* item = 0;
     QHash<QString, QString> statesToPaths;
@@ -152,7 +152,7 @@ QHash<QString, QString> AddObjectDialog::statesAndImagePaths()
     return statesToPaths;
 }
 
-bool AddObjectDialog::eventFilter(QObject * obj, QEvent *ev)
+bool AddCharacterDialog::eventFilter(QObject * obj, QEvent *ev)
 {
     if (obj == mUi.statusTreeWidget->viewport() && ev->type() == QEvent::MouseButtonDblClick) {
         addNewStatus();
@@ -161,7 +161,7 @@ bool AddObjectDialog::eventFilter(QObject * obj, QEvent *ev)
     return false;
 }
 
-void AddObjectDialog::addNewStatus()
+void AddCharacterDialog::addNewStatus()
 {
     QTreeWidgetItem *item = 0;
     QString defaultStatus = "default";
@@ -202,7 +202,7 @@ void AddObjectDialog::addNewStatus()
         mUi.statusTreeWidget->resizeColumnToContents(i);
 }
 
-void AddObjectDialog::removeStatus()
+void AddCharacterDialog::removeStatus()
 {
     int index = -1;
     QTreeWidgetItem *item = 0;

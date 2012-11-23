@@ -20,18 +20,18 @@
 #include <QObject>
 #include <QString>
 
-#include "ui_add_object.h"
+#include "ui_add_character.h"
 
-class AddObjectDialog : public QDialog {
+class AddCharacterDialog : public QDialog {
 
     Q_OBJECT
 
     QString mPath;
     QString mPrevName;
-    Ui::AddObjectDialog mUi;
+    Ui::AddCharacterDialog mUi;
 
 public:
-    AddObjectDialog(QWidget *parent = 0);
+    AddCharacterDialog(QWidget *parent = 0);
     QString path();
     QString name();
     QHash<QString, QString> statesAndImagePaths();
