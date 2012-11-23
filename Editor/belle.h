@@ -30,6 +30,7 @@
 
 #define WIDTH 640
 #define HEIGHT 480
+#define GAME_FILENAME "game.json"
 
 class Belle : public QMainWindow
 {
@@ -64,7 +65,7 @@ class Belle : public QMainWindow
         void onActionCatalogClicked(const QModelIndex&);
         void onActionsViewClicked(const QModelIndex&);
         void onNewAction(Action*);
-        void exportGameFile(const QString& fileName="game.json");
+        void exportGameFile(const QString& fileName="");
         void onRunTriggered();
         void openFileOrProject();
         void updateActions();

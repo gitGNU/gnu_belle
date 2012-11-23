@@ -688,7 +688,7 @@ QString Belle::exportProject(const QString& _path)
     if (path.isEmpty())
         return "";
 
-    QString fileName("game.json");
+    QString fileName(GAME_FILENAME);
     QDir engineDir (Engine::path());
     QStringList imagePaths = ResourceManager::imagePaths();
     QString title = mNovelData.value("title").toString();
@@ -789,17 +789,29 @@ void Belle::openFileOrProject()
     }
 }
 
-void Belle::exportGameFile(const QString& fileName)
+void Belle::exportGameFile(const QString& path)
 {
-    QFile file(fileName);
+    QString filepath(path);
+
+    if (filepath.isNull() || filepath.isEmpty()) {
+        QString dirpath = QFileDialog::getExistingDirectory(this, tr("Choose the directory to export the game file to"),
+                                                        "",
+                                                        QFileDialog::ShowDirsOnly
+                                                        | QFileDialog::DontResolveSymlinks);
+
+        if (dirpath.isEmpty())
+            return;
+
+        filepath = QDir(dirpath).absoluteFilePath(GAME_FILENAME);
+    }
+
+    QFile file(filepath);
 
     if (! file.open(QFile::WriteOnly))
         return;
 
     QVariantMap jsonFile;
-
     QString font = QString("%1px %2").arg(mNovelData.value("fontSize").toInt()).arg(mNovelData.value("fontFamily").toString());
-
     QMapIterator<QString, QVariant> it(mNovelData);
 
     while(it.hasNext()){
@@ -826,6 +838,7 @@ void Belle::exportGameFile(const QString& fileName)
     jsonFile.insert("scenes", scenes);
 
     file.write(QtJson::Json::serialize(jsonFile));
+    file.close();
 }
 
 void Belle::showAboutDialog()
