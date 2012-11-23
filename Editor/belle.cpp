@@ -637,53 +637,23 @@ void Belle::onRunTriggered()
     if (! checkEnginePath())
         return;
 
-    QString exportedTo = exportProject(QDir::tempPath());
+    QString exportedTo = exportProject(QDir::tempPath(), true);
 
-    /*QString fileName("game.json");
-    QStringList imagePaths = ResourceManager::imagePaths();
-    QString title = mNovelData.value("title").toString();
-    QDir tempDir = QDir::temp();
-    QFileInfo projectDir(tempDir.absoluteFilePath(title));
-    QDir engineDir (Engine::path());
-
-    //if directory already exists, delete it
-    if (projectDir.exists() && projectDir.isDir())
-        Utils::removeDir(projectDir.absolutePath());
-    tempDir.mkdir(title);
-    tempDir.cd(title);
-
-    //copy images in use
-    foreach(const QString& path, imagePaths) {
-        QFileInfo info(path);
-        if (info.exists())
-            QFile::copy(path, tempDir.absoluteFilePath(info.fileName()));
-    }
-
-    //copy all engine files
-    QStringList fileNames = engineDir.entryList(QStringList() << "*.js" << "*.html" << "*.css", QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
-    foreach(const QString&fileName, fileNames) {
-        QFile::copy(engineDir.absoluteFilePath(fileName), tempDir.absoluteFilePath(fileName));
-    }
-
-    //export gameFile
-    exportGameFile(fileName);
-    Utils::safeCopy(QDir::current().absoluteFilePath(fileName), tempDir.absoluteFilePath(fileName));*/
     //open file (html) with default application
     if (! exportedTo.isEmpty())
         QDesktopServices::openUrl(QUrl::fromLocalFile(QDir(exportedTo).absoluteFilePath("index.html")));
 }
 
-QString Belle::exportProject(const QString& _path)
+QString Belle::exportProject(const QString& _path, bool toRun)
 {
-   if (! Engine::isValid()) {
+    if (! Engine::isValid()) {
         QMessageBox::critical(this, tr("Invalid engine directory"), tr("Please, first set a valid engine directory through the menu Novel>Properties"));
         return "";
     }
 
     QString path(_path);
-    if (path.isEmpty()) {
+    if (path.isEmpty())
          path = QFileDialog::getExistingDirectory(this, tr("Select Output Directory"));
-    }
 
     if (path.isEmpty())
         return "";
@@ -693,15 +663,19 @@ QString Belle::exportProject(const QString& _path)
     QStringList imagePaths = ResourceManager::imagePaths();
     QString title = mNovelData.value("title").toString();
     QDir projectDir(path);
-    title = Utils::newFileName(projectDir.absoluteFilePath(title));
-    projectDir.mkdir(title);
-    projectDir.cd(title);
 
-    //if directory already exists, delete it
-    //if (projectDir.exists() && projectDir.isDir())
-    //    Utils::removeDir(projectDir.absolutePath());
-    //projectDir.mkdir(title);
-    //projectDir.cd(title);
+    title = title.isEmpty() ? tr("Untitled") : title;
+
+    if (! toRun || mCurrentRunDirectory.isEmpty()) {
+        title = Utils::newFileName(projectDir.absoluteFilePath(title));
+        projectDir.mkdir(title);
+        projectDir.cd(title);
+        if (toRun)
+            mCurrentRunDirectory = projectDir.absolutePath();
+    }
+    else {
+        projectDir = QDir(mCurrentRunDirectory);
+    }
 
     //copy images in use
     foreach(const QString& path, imagePaths) {

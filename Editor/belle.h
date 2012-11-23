@@ -42,6 +42,7 @@ class Belle : public QMainWindow
     ResourcesView * mResourcesView;
     bool mDisableClick;
     QVariantMap mNovelData;
+    QString mCurrentRunDirectory;
 
     QList <QIcon> mIcons;
     
@@ -80,7 +81,7 @@ class Belle : public QMainWindow
         void onSceneDowned();
         void onPropertiesTriggered();
         void onCurrentSceneChanged();
-        QString exportProject(const QString& path="");
+        QString exportProject(const QString& path="", bool toRun=false);
 
 private:
         Ui::MainWindow mUi;
