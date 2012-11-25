@@ -357,7 +357,7 @@ Dialogue.prototype.execute = function () {
     
     this.object.visible = true;
     this.object.redraw = true;
-    this.interval = setInterval(function() { t.updateText(); }, Novel.textSpeed);
+    this.interval = setInterval(function() { t.updateText(); }, Novel.textDelay);
 }
 
 Dialogue.prototype.updateText = function() {

@@ -46,7 +46,9 @@ var Novel = {
     "end" : false,
     "forceRedraw": false,
     "scaleWidthFactor" : 1,
-    "scaleHeightFactor": 1
+    "scaleHeightFactor": 1,
+    "textSpeed" : 10,
+    "textDelay" : 100
 }
 
 Novel.containsVariable = function (variable) {
@@ -90,6 +92,13 @@ function initializeData(data)
         
         Novel[member] = data[member];
     }
+    
+    if (Novel.textSpeed < 0)
+        Novel.textSpeed = 0;
+    else if (Novel.textSpeed > 100)
+        Novel.textSpeed = 100;
+    
+    Novel.textDelay = 1000 / Novel.textSpeed;
     
     document.title = "Belle - " + Novel.title;
 
