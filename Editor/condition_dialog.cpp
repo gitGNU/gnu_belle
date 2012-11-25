@@ -119,6 +119,9 @@ ConditionDialog::ConditionDialog(const QString& condition, QWidget *parent) :
     mainLayout->addLayout(hlayout);
     mainLayout->addWidget(mConditionWidget);
     mainLayout->addWidget(buttonBox);
+
+    if (mConditionWidget->model()->rowCount())
+        mLogicalOperators->setVisible(true);
 }
 
 void ConditionDialog::onAddClicked()
