@@ -35,6 +35,8 @@ NovelPropertiesDialog::NovelPropertiesDialog(QVariantMap& data, QWidget *parent)
     mUi.fontFamilyChooser->setEditText(data.value("fontFamily").toString());
     mUi.fontSizeSpinner->setValue(data.value("fontSize").toInt());
     mUi.engineDirectoryEdit->setText(Engine::path());
+    mUi.textSpeedSlider->setValue(data.value("textSpeed").toInt());
+    mUi.textSpeedValueLabel->setText(data.value("textSpeed").toString());
 
     connect(mUi.widthCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(onWidthChanged(int)));
     connect(mUi.widthCombo, SIGNAL(editTextChanged(const QString&)), this, SLOT(onSizeEdited(const QString&)));
@@ -44,6 +46,7 @@ NovelPropertiesDialog::NovelPropertiesDialog(QVariantMap& data, QWidget *parent)
     connect(mUi.fontFamilyChooser, SIGNAL(editTextChanged(const QString&)), this, SLOT(onFontFamilyChosen(const QString&)));
     connect(mUi.fontFamilyChooser, SIGNAL(activated(const QString&)), this, SLOT(onFontFamilyChosen(const QString&)));
     connect(mUi.fontSizeSpinner, SIGNAL(valueChanged(int)), this, SLOT(onFontSizeChanged(int)));
+    connect(mUi.textSpeedSlider, SIGNAL(valueChanged(int)), this, SLOT(updateTextSpeedSliderTooltip(int)));
     connect(mUi.engineDirectoryButton, SIGNAL(clicked()), this, SLOT(onEnginePathChangeRequest()));
 }
 
@@ -102,4 +105,9 @@ void NovelPropertiesDialog::onEnginePathChangeRequest()
         mUi.engineDirectoryEdit->setText(path);
         Engine::setPath(path);
     }
+}
+
+void NovelPropertiesDialog::updateTextSpeedSliderTooltip(int val)
+{
+    mUi.textSpeedValueLabel->setText(QString::number(val));
 }

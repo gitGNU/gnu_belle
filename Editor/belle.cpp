@@ -65,7 +65,7 @@ Belle::Belle(QWidget *widget)
     mNovelData.insert("title", tr("Untitled"));
     mNovelData.insert("width", WIDTH);
     mNovelData.insert("height", HEIGHT);
-    mNovelData.insert("textSpeed", 100);
+    mNovelData.insert("textSpeed", 50);
     mNovelData.insert("fontSize", 18);
     mNovelData.insert("fontFamily", "Arial");
     setNovelProperties(mNovelData);

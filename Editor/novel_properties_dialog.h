@@ -42,6 +42,7 @@ public slots:
     void onFontFamilyChosen(const QString&);
     void onFontSizeChanged(int);
     void onEnginePathChangeRequest();
+    void updateTextSpeedSliderTooltip(int);
 
 private:
     Ui::NovelPropertiesDialog mUi;
