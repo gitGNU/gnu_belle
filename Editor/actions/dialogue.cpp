@@ -132,6 +132,9 @@ QVariantMap Dialogue::toJsonObject()
 
     if (mCharacter)
         object.insert("character", mCharacter->objectName());
+    else if (! mCharacterName.isEmpty())
+        object.insert("character", mCharacterName);
+
     object.insert("text", mText);
     return object;
 }
