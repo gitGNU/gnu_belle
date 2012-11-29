@@ -315,16 +315,18 @@ function Dialogue(data)
     Action.call(this, data);
     
     this.character = null;
+    this.speakerName = "";
     this.text = "";
     this.index = 0;
     this.lines = [];
-    this.speakerName = "";
     this.rawText = "";
     
     if (data) {
-        if ("character" in data && data["character"] in Novel.resources) {
-            this.character = Novel.resources[data["character"]];
-            this.speakerName = this.character.name;
+        if ("character" in data) {
+            this.speakerName = data["character"];
+            this.character = getResource(data["character"]);
+            if (this.character) 
+                this.speakerName = this.character.name;
         }
         
         if ("text" in data) {
@@ -346,8 +348,12 @@ Dialogue.prototype.execute = function () {
         return;
     }
     
-    if (this.object.speakerName !== undefined)
-        this.object.speakerName = this.speakerName;
+    if (this.object.speakerName !== undefined) {
+        if (this.character) //in case character's name changed since the beginning
+            this.object.speakerName = this.character.name;
+        else
+            this.object.speakerName = this.speakerName;
+    }
    
     this.text = replaceVariables(this.text);
     
