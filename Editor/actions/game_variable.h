@@ -14,15 +14,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SET_GAME_VARIABLE_H
-#define SET_GAME_VARIABLE_H
+#ifndef GAME_VARIABLE_H
+#define GAME_VARIABLE_H
 
 #include "action.h"
-#include "set_game_variable_editor_widget.h"
+#include "game_variable_editor_widget.h"
 
-class SetGameVariableEditorWidget;
+class GameVariableEditorWidget;
 
-class SetGameVariable : public Action
+class GameVariable : public Action
 {
     Q_OBJECT
 
@@ -35,11 +35,11 @@ public:
     static ActionInfo Info;
 
 public:
-    explicit SetGameVariable(QObject *parent = 0);
-    SetGameVariable(const QVariantMap& data, QObject *parent = 0);
+    explicit GameVariable(QObject *parent = 0);
+    GameVariable(const QVariantMap& data, QObject *parent = 0);
 
-    static SetGameVariableEditorWidget* setGameVariableEditorWidget();
-    static void setSetGameVariableEditorWidget(SetGameVariableEditorWidget*);
+    static GameVariableEditorWidget* gameVariableEditorWidget();
+    static void setGameVariableEditorWidget(GameVariableEditorWidget*);
     virtual ActionEditorWidget* editorWidget();
 
     int operatorIndex();

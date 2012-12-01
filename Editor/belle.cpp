@@ -51,7 +51,6 @@
 #include "slide.h"
 #include "novel_properties_dialog.h"
 #include "utils.h"
-#include "set_game_variable.h"
 #include "engine.h"
 
 Belle::Belle(QWidget *widget)

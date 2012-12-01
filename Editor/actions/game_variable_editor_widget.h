@@ -14,25 +14,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SET_GAME_VARIABLE_EDITOR_WIDGET_H
-#define SET_GAME_VARIABLE_EDITOR_WIDGET_H
+#ifndef GAME_VARIABLE_EDITOR_WIDGET_H
+#define GAME_VARIABLE_EDITOR_WIDGET_H
 
 #include "action_editor_widget.h"
-#include "set_game_variable.h"
+#include "game_variable.h"
 
-class SetGameVariable;
+class GameVariable;
 
-class SetGameVariableEditorWidget : public ActionEditorWidget
+class GameVariableEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
     QLineEdit* mVariableEdit;
     QComboBox* mOperatorChooser;
     QLineEdit* mValueEdit;
-    SetGameVariable* mCurrentAction;
+    GameVariable* mCurrentAction;
 
 public:
-    explicit SetGameVariableEditorWidget(ActionEditorWidget *parent = 0);
+    explicit GameVariableEditorWidget(ActionEditorWidget *parent = 0);
     QStringList operatorsText();
     void updateData(Action *);
     

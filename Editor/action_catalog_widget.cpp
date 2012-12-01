@@ -34,7 +34,7 @@
 #include "stopsound.h"
 #include "show_menu.h"
 #include "end_novel.h"
-#include "set_game_variable.h"
+#include "game_variable.h"
 #include "change_background.h"
 
 ActionCatalogWidget::ActionCatalogWidget(QWidget *parent) :
@@ -69,7 +69,7 @@ ActionCatalogWidget::ActionCatalogWidget(QWidget *parent) :
 
     beginGroup(tr("Scripting"));
     appendRow(GetUserInput::Info.icon, GetUserInput::Info.name);
-    appendRow(SetGameVariable::Info.icon, SetGameVariable::Info.name);
+    appendRow(GameVariable::Info.icon, GameVariable::Info.name);
     endGroup();
 
     setIconSize(QSize(22, 22));
@@ -115,7 +115,7 @@ void ActionCatalogWidget::onDoubleClick(const QModelIndex & index)
     case Actions::StopSound: action = new StopSound(); break;
     case Actions::EndNovel: action = new EndNovel(); break;
     case Actions::GetUserInput: action = new GetUserInput(); break;
-    case Actions::SetGameVariable: action = new SetGameVariable(); break;
+    case Actions::GameVariable: action = new GameVariable(); break;
     }
 
     if (action)

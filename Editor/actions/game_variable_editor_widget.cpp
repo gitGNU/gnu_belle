@@ -14,11 +14,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "set_game_variable_editor_widget.h"
+#include "game_variable_editor_widget.h"
 
 #include <QDebug>
 
-SetGameVariableEditorWidget::SetGameVariableEditorWidget(ActionEditorWidget *parent) :
+GameVariableEditorWidget::GameVariableEditorWidget(ActionEditorWidget *parent) :
     ActionEditorWidget(parent)
 {
     mVariableEdit = new QLineEdit(this);
@@ -39,7 +39,7 @@ SetGameVariableEditorWidget::SetGameVariableEditorWidget(ActionEditorWidget *par
     connect(mOperatorChooser, SIGNAL(currentIndexChanged(int)), this, SLOT(onOperatorChanged(int)));
     connect(mValueEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onValueEdited(const QString&)));
 
-    beginGroup(tr("Set Game Variable"));
+    beginGroup(tr("Game Variable"));
     appendRow(tr("Variable"), mVariableEdit);
     appendRow(tr("Operator"), mOperatorChooser);
     appendRow(tr("Value"), mValueEdit);
@@ -50,9 +50,9 @@ SetGameVariableEditorWidget::SetGameVariableEditorWidget(ActionEditorWidget *par
     mCurrentAction = 0;
 }
 
-void  SetGameVariableEditorWidget::updateData(Action * action)
+void  GameVariableEditorWidget::updateData(Action * action)
 {
-    mCurrentAction = qobject_cast<SetGameVariable*>(action);
+    mCurrentAction = qobject_cast<GameVariable*>(action);
     if (! mCurrentAction)
         return;
 
@@ -61,25 +61,25 @@ void  SetGameVariableEditorWidget::updateData(Action * action)
     mValueEdit->setText(mCurrentAction->value());
 }
 
-void SetGameVariableEditorWidget::onVariableEdited(const QString & text)
+void GameVariableEditorWidget::onVariableEdited(const QString & text)
 {
     if (mCurrentAction)
         mCurrentAction->setVariable(text);
 }
 
-void SetGameVariableEditorWidget::onOperatorChanged(int index)
+void GameVariableEditorWidget::onOperatorChanged(int index)
 {
     if (mCurrentAction)
         mCurrentAction->setOperatorIndex(index);
 }
 
-void SetGameVariableEditorWidget::onValueEdited(const QString & text)
+void GameVariableEditorWidget::onValueEdited(const QString & text)
 {
     if (mCurrentAction)
         mCurrentAction->setValue(text);
 }
 
-QStringList SetGameVariableEditorWidget::operatorsText()
+QStringList GameVariableEditorWidget::operatorsText()
 {
     QStringList operators;
     for(int i=0; i < mOperatorChooser->count(); i++)
