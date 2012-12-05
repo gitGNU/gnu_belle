@@ -138,6 +138,7 @@ function Object(info)
     this.mouseMoveActions = [];
     this.mouseLeaveActions = [];
     this.backgroundImage = null;
+    this.backgroundImageLoaded = false;
     this.name = "";
     this.visible = false;
     this.context = null;
@@ -194,6 +195,10 @@ function Object(info)
     
     if( "backgroundImage" in info) {
         this.backgroundImage = new window.Image();
+        var that = this;
+        this.backgroundImage.onload = function() {
+            that.backgroundImageLoaded = true;
+        };
         this.backgroundImage.src = info["backgroundImage"]; 
     }
     
@@ -274,7 +279,7 @@ Object.prototype.paint = function(context)
         context.clearRect(this.rect.paintX, this.rect.paintY, this.rect.width, this.rect.height);
     }
     
-    if (this.backgroundImage) {
+    if (this.backgroundImageLoaded) {
         context.drawImage(this.backgroundImage, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
     }
     else if (this.rect.roundedRect) {
@@ -433,15 +438,14 @@ Object.prototype.scale = function(widthFactor, heightFactor)
 /*********** IMAGE OBJECT ***********/
 function Image (data)
 {
-    Object.call(this, data);
+    Object.call(this, data);  
+    this.imageLoaded = false;
     var that = this;
-    this.loaded = false;
     
     this.image = new window.Image();
-    /*this.image.onload = function() {
-        updateSize(that); 
-        that.loaded = true;
-    };*/
+    this.image.onload = function() { 
+        that.imageLoaded = true;
+    };
     if ("image" in data && data["image"].length > 0)
         this.image.src = data["image"];
   
@@ -457,7 +461,8 @@ Image.prototype.paint = function(context)
     if (context.globalAlpha != this.color.alphaF())
         context.globalAlpha = this.color.alphaF();
     
-    context.drawImage(this.image, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+    if (this.imageLoaded)
+        context.drawImage(this.image, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
     
     context.restore();
     
@@ -837,6 +842,7 @@ function Scene(data)
     this.name = "";
     this.backgroundImage = null;
     this.backgroundColor = null;
+    this.backgroundImageLoaded = false;
     var backgroundImage = "";
     var backgroundColor = null;
     
@@ -861,14 +867,19 @@ Scene.prototype.addObject = function(object) {
 
 Scene.prototype.setBackgroundImage = function(background)
 {
-    if (this.backgroundImage instanceof Image && background == this.backgroundImage.src)
+    if (this.backgroundImage && background == this.backgroundImage.src)
         return;
+    var that = this;
     
     if (background instanceof window.Image) {
-        this.backgroundImage = background;   
+        this.backgroundImage = background;
+        that.backgroundImageLoaded = true; //assume for now
     }
     else if (typeof background == "string") {
         this.backgroundImage = new window.Image();
+        this.backgroundImage.onload = function() {
+            that.backgroundImageLoaded = true;
+        };
         this.backgroundImage.src = background;
     }
    
@@ -893,7 +904,7 @@ Scene.prototype.setBackgroundColor = function(color)
 
 Scene.prototype.paint = function(context)
 {    
-    if (this.backgroundImage)
+    if (this.backgroundImageLoaded)
         context.drawImage(this.backgroundImage, 0, 0, Novel.width, Novel.height);
     else if (this.backgroundColor) {
         context.fillStyle  = this.backgroundColor.toString();
