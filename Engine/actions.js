@@ -1261,9 +1261,9 @@ GetUserInput.prototype.reset = function()
     //if (Novel.containsVariable())
 }
 
-/************* Set Game Variable *****************/
+/************* Game Variable *****************/
 
-function SetGameVariable(data)
+function GameVariable(data)
 {
     Action.call(this, data);
     
@@ -1287,9 +1287,9 @@ function SetGameVariable(data)
 
 }
 
-extend(Action, SetGameVariable);
+extend(Action, GameVariable);
 
-SetGameVariable.prototype.execute = function()
+GameVariable.prototype.execute = function()
 {   
     var currValue = "";
     var newValue = this.value;
