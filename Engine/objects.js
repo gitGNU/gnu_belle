@@ -895,7 +895,12 @@ Scene.prototype.setBackgroundColor = function(color)
             color = new Color(color);
         
         this.backgroundColor = color;
-    
+        
+        if (this.backgroundImage) {
+            this.backgroundImage.src = null;
+            this.backgroundImage = null;
+        }
+        
         if (this.backgroundColor)
             this.redrawBackground = true;
     }
