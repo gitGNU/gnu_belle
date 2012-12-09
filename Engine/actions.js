@@ -1217,12 +1217,12 @@ EndNovel.prototype.execute = function()
 function GetUserInput(data)
 {
     Action.call(this, data);
-    this.variableName = null;
+    this.variable = null;
     this.defaultValue = "";
     this.message = "Insert value here:";
     
-    if ( "variableName" in data) {
-        this.variableName = data["variableName"];
+    if ( "variable" in data) {
+        this.variable = data["variable"];
     }
     
     if ( "message" in data ) {
@@ -1241,7 +1241,7 @@ GetUserInput.prototype.execute = function()
 {
     this.reset();
    
-    if (! this.variableName) {
+    if (! this.variable) {
         this.setFinished(true);
         return;
     }
@@ -1249,7 +1249,7 @@ GetUserInput.prototype.execute = function()
     var value = prompt(this.message, this.defaultValue);
     if (! value)
         value = this.defaultValue;
-    Novel.variables[this.variableName] = value;
+    Novel.variables[this.variable] = value;
     
     this.setFinished(true);
 }
