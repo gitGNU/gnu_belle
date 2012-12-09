@@ -23,8 +23,6 @@
 GetUserInputEditorWidget::GetUserInputEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-    QLineEdit* lineEdit = 0;
-
     mMessageEdit = new QLineEdit(this);
     connect(mMessageEdit, SIGNAL(textEdited(const QString &)), this, SLOT(onMessageChanged(const QString &)));
 
@@ -54,7 +52,7 @@ void GetUserInputEditorWidget::updateData(Action * action)
         return;
 
     mMessageEdit->setText(mCurrentAction->message());
-    mVariableEdit->setText(mCurrentAction->variableName());
+    mVariableEdit->setText(mCurrentAction->variable());
     mDefaultValueEdit->setText(mCurrentAction->defaultValue());
 }
 
@@ -67,7 +65,7 @@ void GetUserInputEditorWidget::onMessageChanged(const QString & value)
 void GetUserInputEditorWidget::onVariableChanged(const QString & value)
 {
     if (mCurrentAction)
-        mCurrentAction->setVariableName(value);
+        mCurrentAction->setVariable(value);
 }
 
 void GetUserInputEditorWidget::onDefaultValueChanged(const QString & value)

@@ -39,8 +39,8 @@ GetUserInput::GetUserInput(const QVariantMap& data, QObject *parent):
     if (data.contains("message") && data.value("message").type() == QVariant::String)
         mMessage = codec->toUnicode( data.value("message").toByteArray());
 
-    if (data.contains("variableName") && data.value("variableName").type() == QVariant::String)
-        mVariableName = data.value("variableName").toByteArray();
+    if (data.contains("variable") && data.value("variable").type() == QVariant::String)
+        mVariable = data.value("variable").toString();
 
     if (data.contains("defaultValue") && data.value("defaultValue").type() == QVariant::String)
         mDefaultValue = codec->toUnicode(data.value("defaultValue").toByteArray());
@@ -69,14 +69,14 @@ ActionEditorWidget* GetUserInput::editorWidget()
     return mEditorWidget;
 }
 
-QString GetUserInput::variableName()
+QString GetUserInput::variable()
 {
-    return mVariableName;
+    return mVariable;
 }
 
-void GetUserInput::setVariableName(const QString & name)
+void GetUserInput::setVariable(const QString & var)
 {
-    mVariableName = name;
+    mVariable = var;
 }
 
 QString GetUserInput::message()
@@ -108,7 +108,7 @@ QVariantMap GetUserInput::toJsonObject()
         codec = QTextCodec::codecForTr();
 
     object.insert("message", mMessage);
-    object.insert("variableName", mVariableName);
+    object.insert("variable", mVariable);
     object.insert("defaultValue", mDefaultValue);
 
     return object;

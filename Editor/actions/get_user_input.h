@@ -35,8 +35,8 @@ public:
     static void setGetUserInputEditorWidget(GetUserInputEditorWidget*);
     virtual ActionEditorWidget* editorWidget();
 
-    QString variableName();
-    void setVariableName(const QString&);
+    QString variable();
+    void setVariable(const QString&);
 
     QString message();
     void setMessage(const QString&);
@@ -51,7 +51,7 @@ signals:
 public slots:
 
 private:
-    QString mVariableName;
+    QString mVariable;
     QString mMessage;
     QString mDefaultValue;
 
