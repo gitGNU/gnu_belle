@@ -50,8 +50,10 @@ DialogueBox::DialogueBox(const QVariantMap& data, QObject* parent):
 void DialogueBox::init()
 {
     setType("DialogueBox");
-    QString name = ResourceManager::instance()->newName(type());
-    setObjectName(name);
+    if (objectName().isEmpty()) {
+        QString name = ResourceManager::instance()->newName(type());
+        setObjectName(name);
+    }
 }
 
 DialogueBox::~DialogueBox()
