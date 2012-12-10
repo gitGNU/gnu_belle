@@ -95,7 +95,7 @@ void DialogueEditorWidget::updateData(Action * action)
             continue;
         }
 
-        if (isValidOutputBox(objects[i])){
+        if (mCurrentAction->sceneObject() != objects[i] && isValidOutputBox(objects[i])){
             mChooseTextBoxWidget->addItem(objects[i]->objectName());
             mOutputBoxes.append(objects[i]);
         }
