@@ -60,6 +60,7 @@ void DialogueEditorWidget::updateData(Action * action)
     DialogueBox * dialogueBox = 0;
 
     mChooseCharacterWidget->clear();
+    mChooseCharacterWidget->clearEditText();
     mChooseTextBoxWidget->clear();
     mOutputBoxes.clear();
     mCharacters.clear();
@@ -109,9 +110,11 @@ void DialogueEditorWidget::updateData(Action * action)
         mTextEdit->setText(mCurrentAction->text());
     }
 
-    if (mChooseCharacterWidget->count() && ! mCurrentAction->character()) {
+    if (mChooseCharacterWidget->count() && mCurrentAction->characterName().isEmpty()) {
         mCurrentAction->setCharacter(mCharacters[0]);
     }
+    else if (! mCurrentAction->characterName().isEmpty())
+        mChooseCharacterWidget->setEditText(mCurrentAction->characterName());
 
     onCharacterChanged(mChooseCharacterWidget->currentIndex());
 }

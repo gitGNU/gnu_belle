@@ -35,6 +35,11 @@ Dialogue::Dialogue(const QVariantMap & data, QObject *parent):
 
     if (data.contains("character") && data.value("character").type() == QVariant::String) {
         mCharacter = qobject_cast<Character*>(ResourceManager::resource(data.value("character").toString()));
+
+        if (mCharacter)
+            mCharacterName = mCharacter->objectName();
+        else
+            mCharacterName = data.value("character").toString();
     }
 
     if (data.contains("text") && data.value("text").type() == QVariant::String) {
