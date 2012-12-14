@@ -43,16 +43,8 @@ Dialogue::Dialogue(const QVariantMap & data, QObject *parent):
     }
 
     if (data.contains("text") && data.value("text").type() == QVariant::String) {
-        QTextCodec *codec = QTextCodec::codecForUtfText(data.value("text").toByteArray());
-        if (! codec)
-            codec = QTextCodec::codecForName("UTF-8");
-
-        if (codec)
-            setText(codec->toUnicode(data.value("text").toByteArray()));
-        else
             setText(data.value("text").toString());
     }
-
 }
 
 void Dialogue::init()

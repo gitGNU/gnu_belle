@@ -29,6 +29,7 @@
 #include <QFile>
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <QTextCodec>
 
 #include "object.h"
 #include "add_character_dialog.h"
@@ -59,6 +60,7 @@ Belle::Belle(QWidget *widget)
     mUi.setupUi( this );
 
     mDisableClick = false;
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
     //setup default data
     mNovelData.insert("title", tr("Untitled"));
@@ -950,9 +952,7 @@ void Belle::onPropertiesTriggered()
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted) {
-
         QVariantMap data = dialog.novelData();
-
         setNovelProperties(data);
     }
 }
