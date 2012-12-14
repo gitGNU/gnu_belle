@@ -19,6 +19,7 @@
 
 #include <QMainWindow>
 #include <QVariant>
+#include <QSettings>
 
 #include "scene_manager.h"
 #include "ui_mainwindow.h"
@@ -43,8 +44,8 @@ class Belle : public QMainWindow
     bool mDisableClick;
     QVariantMap mNovelData;
     QString mCurrentRunDirectory;
-
     QList <QIcon> mIcons;
+    QSettings *mSettings;
     
     public:
         explicit Belle(QWidget *widget=0);

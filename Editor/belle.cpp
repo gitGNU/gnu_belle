@@ -70,6 +70,13 @@ Belle::Belle(QWidget *widget)
     setNovelProperties(mNovelData);
     Engine::guessPath();
 
+    //load settings
+    mSettings = new QSettings("Belle", "Belle", this);
+    if (mSettings->contains("Window/Geometry"))
+        this->restoreGeometry(mSettings->value("Window/Geometry").toByteArray());
+    if (mSettings->contains("Window/State"))
+        this->restoreState(mSettings->value("Window/State").toByteArray());
+
     //setup scenes
     Scene::setEditorWidget(new SceneEditorWidget);
     //init scene manager instance
@@ -252,7 +259,10 @@ Belle::~Belle()
     ActionInfoManager::destroy();
     ResourceManager::destroy();
 
-
+    mSettings->beginGroup("Window");
+    mSettings->setValue("Geometry", this->saveGeometry());
+    mSettings->setValue("State", this->saveState());
+    mSettings->endGroup();
 }
 
 void Belle::onEditResource(Object* object)
