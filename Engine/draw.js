@@ -35,8 +35,8 @@ function scaleAll(scaleWidth, scaleHeight, reset)
 {
     var width = Novel.width;
     var height = Novel.height;
-    var myCanvas = document.getElementById('myCanvas');
-    var bgCanvas = document.getElementById('backgroundCanvas');
+    var gameCanvas = document.getElementById('gameCanvas');
+    var bgCanvas = document.getElementById('gameBackgroundCanvas');
     var bgContext = bgCanvas.getContext('2d');
   
     if (reset) {
@@ -72,8 +72,8 @@ function scaleAll(scaleWidth, scaleHeight, reset)
     Novel.height = height * scaleHeight;
     bgCanvas.width *= scaleWidth; 
     bgCanvas.height *= scaleHeight;
-    myCanvas.width *= scaleWidth;
-    myCanvas.height *= scaleHeight;
+    gameCanvas.width *= scaleWidth;
+    gameCanvas.height *= scaleHeight;
     
     if (Novel.currentScene)
         Novel.currentScene.paint(bgContext);
@@ -101,13 +101,13 @@ function initDisplay()
     var paddingTop = 0;
     var paddingLeft = 0;
     var container = document.getElementById('container');
-    var myCanvas = document.getElementById('myCanvas');
-    var myContext = myCanvas.getContext('2d');
-    var bgCanvas = document.getElementById('backgroundCanvas');
+    var gameCanvas = document.getElementById('gameCanvas');
+    var myContext = gameCanvas.getContext('2d');
+    var bgCanvas = document.getElementById('gameBackgroundCanvas');
     var bgContext = bgCanvas.getContext('2d');
 
-    myCanvas.width = width;
-    myCanvas.height = height;
+    gameCanvas.width = width;
+    gameCanvas.height = height;
     bgCanvas.width = width;
     bgCanvas.height = height;
 
@@ -117,11 +117,11 @@ function initDisplay()
     }
         
     //if canvas size is bigger than screen, scale it
-    if (myCanvas.width > window.innerWidth)
-        scaleWidth = window.innerWidth / myCanvas.width;
+    if (gameCanvas.width > window.innerWidth)
+        scaleWidth = window.innerWidth / gameCanvas.width;
     
-    if (myCanvas.height > window.innerHeight)
-        scaleHeight = window.innerHeight / myCanvas.height;
+    if (gameCanvas.height > window.innerHeight)
+        scaleHeight = window.innerHeight / gameCanvas.height;
     
     if (scaleHeight < scaleWidth)
         scaleWidth = scaleHeight;
@@ -132,11 +132,11 @@ function initDisplay()
     scaleAll(scaleWidth, scaleHeight);
     
     //if canvas size is smaller than screen, center it, otherwise no padding is added
-    if (myCanvas.width < window.innerWidth )
-        paddingLeft = (window.innerWidth - myCanvas.width) / 2;
+    if (gameCanvas.width < window.innerWidth )
+        paddingLeft = (window.innerWidth - gameCanvas.width) / 2;
     
-    if (myCanvas.height < window.innerHeight)
-        paddingTop = (window.innerHeight - myCanvas.height) / 2;
+    if (gameCanvas.height < window.innerHeight)
+        paddingTop = (window.innerHeight - gameCanvas.height) / 2;
     
     container.style.marginTop = paddingTop + "px";
     container.style.marginLeft = paddingLeft + "px";

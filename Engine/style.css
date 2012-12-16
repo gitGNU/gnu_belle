@@ -31,14 +31,14 @@ body, html
   color: #FFFFFF;
 }
 
-#container #backgroundCanvas 
+#container #gameBackgroundCanvas 
 {
     position: absolute; 
     margin: 0 auto;
     z-index: 0;
 }
 
-#container #myCanvas 
+#container #gameCanvas 
 {
     position: absolute; 
     margin: 0 auto;
