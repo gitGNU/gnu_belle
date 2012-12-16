@@ -15,6 +15,11 @@
  */
 
 var view = 'portrait';
+var _drawFPS = false;
+var fps = 0;
+var elapsed = 0;
+var before = 0;
+
 var requestAnimationFrame = (function(){
   return  window.requestAnimationFrame       || 
           window.webkitRequestAnimationFrame || 
@@ -194,14 +199,10 @@ function draw()
 {   
     Novel.drawing = true;
     redraw();
-    fps++;
-    elapsed += Novel.drawTimeout;
-    if (elapsed >= 1000) {
-      drawFPS();
-      fps = 0;
-      elapsed = Novel.drawTimeout;
-    }
-      
+   
+    if (_drawFPS) 
+        drawFPS();
+    
     Novel.drawing = false;
 }
 
@@ -226,7 +227,26 @@ function needsRedraw()
 
 function drawFPS()
 {
-    document.getElementById("fps").innerHTML = "FPS: " + fps; 
+    if (! _drawFPS)
+        return;
+    
+    if (elapsed >= 1000) {
+        if (document.getElementById("fps")) {
+            if (document.getElementById("fps").style.display != "block")
+                document.getElementById("fps").style.display = "block";
+            document.getElementById("fps").innerHTML = "FPS: " + fps;
+        }
+        fps = 0;
+        elapsed = 0;
+        before = new Date().getTime();
+    }
+    else {  
+        if (! before)
+            before = new Date().getTime();
+        elapsed = new Date().getTime() - before;
+        //elapsed += Novel.drawTimeout;
+        fps++;
+    }
 }
 
 console.log("Draw module loaded!");
