@@ -34,7 +34,7 @@
 #include "stopsound.h"
 #include "show_menu.h"
 #include "end_novel.h"
-#include "game_variable.h"
+#include "change_game_variable.h"
 #include "change_background.h"
 
 ActionCatalogWidget::ActionCatalogWidget(QWidget *parent) :

@@ -18,7 +18,7 @@
 #define GAME_VARIABLE_H
 
 #include "action.h"
-#include "game_variable_editor_widget.h"
+#include "change_game_variable_editor_widget.h"
 
 class ChangeGameVariableEditorWidget;
 

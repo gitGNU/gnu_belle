@@ -33,7 +33,7 @@
 #include "changecolor.h"
 #include "playsound.h"
 #include "stopsound.h"
-#include "game_variable.h"
+#include "change_game_variable.h"
 #include "change_background.h"
 #include "end_novel.h"
 

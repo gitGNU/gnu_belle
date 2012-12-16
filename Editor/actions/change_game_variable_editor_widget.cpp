@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game_variable_editor_widget.h"
+#include "change_game_variable_editor_widget.h"
 
 #include <QDebug>
 

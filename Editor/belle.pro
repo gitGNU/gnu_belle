@@ -91,8 +91,8 @@ HEADERS      += belle.h\
     actions/show_editor_widget.h \
     actions/hide_editor_widget.h \
     actions/end_novel.h \
-    actions/game_variable.h \
-    actions/game_variable_editor_widget.h \
+    actions/change_game_variable.h \
+    actions/change_game_variable_editor_widget.h \
     actions/change_background.h \
     actions/change_background_editorwidget.h \
     action_info.h \
@@ -178,8 +178,8 @@ SOURCES      += main.cpp\
     actions/show_editor_widget.cpp \
     actions/hide_editor_widget.cpp \
     actions/end_novel.cpp \
-    actions/game_variable.cpp \
-    actions/game_variable_editor_widget.cpp \
+    actions/change_game_variable.cpp \
+    actions/change_game_variable_editor_widget.cpp \
     actions/change_background.cpp \
     actions/change_background_editorwidget.cpp \
     action_info.cpp \
