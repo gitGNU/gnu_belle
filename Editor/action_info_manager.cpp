@@ -63,7 +63,7 @@ void ActionInfoManager::initEditorWidgets()
     ChangeColor::setChangeColorEditorWidget(new ChangeColorEditorWidget);
     PlaySound::setPlaySoundEditorWidget(new PlaySoundEditorWidget());
     StopSound::setStopSoundEditorWidget(new StopSoundEditorWidget());
-    GameVariable::setGameVariableEditorWidget(new GameVariableEditorWidget);
+    ChangeGameVariable::setChangeGameVariableEditorWidget(new ChangeGameVariableEditorWidget);
     ChangeBackground::setChangeBackgroundEditorWidget(new ChangeBackgroundEditorWidget);
 
 }
@@ -96,7 +96,7 @@ void ActionInfoManager::init()
     ChangeColor::Info = ActionInfo(QIcon(":/media/color.png"), "ChangeColor", tr("Change Color"));
     PlaySound::Info = ActionInfo(QIcon(":/media/sound.png"), "PlaySound", tr("Play Sound"));
     StopSound::Info = ActionInfo(QIcon(":/media/no-sound.png"), "StopSound", tr("Stop Sound"));
-    GameVariable::Info = ActionInfo(QIcon(":/media/script.png"), "GameVariable", tr("Game Variable"));
+    ChangeGameVariable::Info = ActionInfo(QIcon(":/media/script.png"), "ChangeGameVariable", tr("Change Game Variable"));
     ChangeBackground::Info = ActionInfo(QIcon(":/media/image.png"), "ChangeBackground", tr("Change Background"));
     EndNovel::Info = ActionInfo(QIcon(":/media/end-novel.png"), "EndNovel", tr("End Novel"));
 
@@ -194,8 +194,8 @@ Action* ActionInfoManager::typeToAction(const QVariant& data, QObject* parent)
         return new PlaySound(actionMap, parent);
     else if (type == "StopSound")
         return new StopSound(actionMap, parent);
-    else if (type == "GameVariable")
-        return new GameVariable(actionMap, parent);
+    else if (type == "ChangeGameVariable")
+        return new ChangeGameVariable(actionMap, parent);
 
     return 0;
 }
@@ -250,8 +250,8 @@ void ActionInfoManager::destroy()
     if (StopSound::stopSoundEditorWidget())
         StopSound::stopSoundEditorWidget()->deleteLater();
 
-    if (GameVariable::gameVariableEditorWidget())
-        GameVariable::gameVariableEditorWidget()->deleteLater();
+    if (ChangeGameVariable::changeGameVariableEditorWidget())
+        ChangeGameVariable::changeGameVariableEditorWidget()->deleteLater();
 
     if (ChangeBackground::changeBackgroundEditorWidget())
         ChangeBackground::changeBackgroundEditorWidget()->deleteLater();

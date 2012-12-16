@@ -18,7 +18,7 @@
 
 #include <QDebug>
 
-GameVariableEditorWidget::GameVariableEditorWidget(ActionEditorWidget *parent) :
+ChangeGameVariableEditorWidget::ChangeGameVariableEditorWidget(ActionEditorWidget *parent) :
     ActionEditorWidget(parent)
 {
     mVariableEdit = new QLineEdit(this);
@@ -50,9 +50,9 @@ GameVariableEditorWidget::GameVariableEditorWidget(ActionEditorWidget *parent) :
     mCurrentAction = 0;
 }
 
-void  GameVariableEditorWidget::updateData(Action * action)
+void  ChangeGameVariableEditorWidget::updateData(Action * action)
 {
-    mCurrentAction = qobject_cast<GameVariable*>(action);
+    mCurrentAction = qobject_cast<ChangeGameVariable*>(action);
     if (! mCurrentAction)
         return;
 
@@ -61,25 +61,25 @@ void  GameVariableEditorWidget::updateData(Action * action)
     mValueEdit->setText(mCurrentAction->value());
 }
 
-void GameVariableEditorWidget::onVariableEdited(const QString & text)
+void ChangeGameVariableEditorWidget::onVariableEdited(const QString & text)
 {
     if (mCurrentAction)
         mCurrentAction->setVariable(text);
 }
 
-void GameVariableEditorWidget::onOperatorChanged(int index)
+void ChangeGameVariableEditorWidget::onOperatorChanged(int index)
 {
     if (mCurrentAction)
         mCurrentAction->setOperatorIndex(index);
 }
 
-void GameVariableEditorWidget::onValueEdited(const QString & text)
+void ChangeGameVariableEditorWidget::onValueEdited(const QString & text)
 {
     if (mCurrentAction)
         mCurrentAction->setValue(text);
 }
 
-QStringList GameVariableEditorWidget::operatorsText()
+QStringList ChangeGameVariableEditorWidget::operatorsText()
 {
     QStringList operators;
     for(int i=0; i < mOperatorChooser->count(); i++)

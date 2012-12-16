@@ -69,7 +69,7 @@ ActionCatalogWidget::ActionCatalogWidget(QWidget *parent) :
 
     beginGroup(tr("Scripting"));
     appendRow(GetUserInput::Info.icon, GetUserInput::Info.name);
-    appendRow(GameVariable::Info.icon, GameVariable::Info.name);
+    appendRow(ChangeGameVariable::Info.icon, ChangeGameVariable::Info.name);
     endGroup();
 
     setIconSize(QSize(22, 22));
@@ -115,7 +115,7 @@ void ActionCatalogWidget::onDoubleClick(const QModelIndex & index)
     case Actions::StopSound: action = new StopSound(); break;
     case Actions::EndNovel: action = new EndNovel(); break;
     case Actions::GetUserInput: action = new GetUserInput(); break;
-    case Actions::GameVariable: action = new GameVariable(); break;
+    case Actions::ChangeGameVariable: action = new ChangeGameVariable(); break;
     }
 
     if (action)

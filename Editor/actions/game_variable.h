@@ -20,9 +20,9 @@
 #include "action.h"
 #include "game_variable_editor_widget.h"
 
-class GameVariableEditorWidget;
+class ChangeGameVariableEditorWidget;
 
-class GameVariable : public Action
+class ChangeGameVariable : public Action
 {
     Q_OBJECT
 
@@ -35,11 +35,11 @@ public:
     static ActionInfo Info;
 
 public:
-    explicit GameVariable(QObject *parent = 0);
-    GameVariable(const QVariantMap& data, QObject *parent = 0);
+    explicit ChangeGameVariable(QObject *parent = 0);
+    ChangeGameVariable(const QVariantMap& data, QObject *parent = 0);
 
-    static GameVariableEditorWidget* gameVariableEditorWidget();
-    static void setGameVariableEditorWidget(GameVariableEditorWidget*);
+    static ChangeGameVariableEditorWidget* changeGameVariableEditorWidget();
+    static void setChangeGameVariableEditorWidget(ChangeGameVariableEditorWidget*);
     virtual ActionEditorWidget* editorWidget();
 
     int operatorIndex();

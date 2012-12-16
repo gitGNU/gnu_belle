@@ -20,19 +20,19 @@
 #include "action_editor_widget.h"
 #include "game_variable.h"
 
-class GameVariable;
+class ChangeGameVariable;
 
-class GameVariableEditorWidget : public ActionEditorWidget
+class ChangeGameVariableEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
     QLineEdit* mVariableEdit;
     QComboBox* mOperatorChooser;
     QLineEdit* mValueEdit;
-    GameVariable* mCurrentAction;
+    ChangeGameVariable* mCurrentAction;
 
 public:
-    explicit GameVariableEditorWidget(ActionEditorWidget *parent = 0);
+    explicit ChangeGameVariableEditorWidget(ActionEditorWidget *parent = 0);
     QStringList operatorsText();
     void updateData(Action *);
     
