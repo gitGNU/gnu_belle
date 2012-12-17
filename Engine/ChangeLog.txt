@@ -1,4 +1,17 @@
-Belle 0.1.1a | 20/11/2012
+Belle's Engine 0.2a | 17/12/2012
+-----------------------
+-Renamed canvas's ids.
+-Fixed bug(s) in change background action.
+-Fixed crash when an image is missing.
+-Fixed character's name not showing in dialogue.
+-Improved text speed option.
+-Improved scalability.
+-Fixed textbox's text alignment when scaling.
+-Fixed FPS label.
+-Renamed SetGameVariable to ChangeGameVariable.
+-Other minor fixes.
+
+Belle's Engine 0.1.1a | 20/11/2012
 -----------------------
 -Fixed display in Firefox.
 -Added support to use colors as scene's background.
@@ -6,6 +19,6 @@ Belle 0.1.1a | 20/11/2012
 -Updated to read new properties from game file.
 -Other minor tweaks.
 
-Belle 0.1a | 15/11/2012
+Belle's Engine 0.1a | 15/11/2012
 -----------------------
 -First release.

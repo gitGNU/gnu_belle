@@ -1,4 +1,4 @@
-Belle Engine
+Belle's Engine
 This project is part of Belle. 
 Belle is a cross-platform Visual Novel maker focused on being user friendly. It uses C++ with Qt4 for the editor and HTML5, CSS and Javascript for the engine.
 
