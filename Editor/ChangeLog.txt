@@ -1,4 +1,19 @@
-Belle 0.1.1a | 20/11/2012
+Belle's Editor 0.2a | 17/12/2012
+-----------------------
+-Improved text decoding.
+-Added capability for loading and saving window geometry and state.
+-Fixed duplicate object in dialogue's editor.
+-Fixed bug when importing name from game file.
+-Fixed character's name bug.
+-Renamed SetGameVariable to ChangeGameVariable.
+-Fixed exporting character's name in dialog action.
+-Added option to control text speed.
+-Minor fix in condition dialog.
+-Renamed AddObjectDialog class to AddCharacterDialog.
+-Fixed export game file.
+-Improved project export.
+
+Belle's Editor 0.1.1a | 20/11/2012
 -----------------------
 -Fixed color support for scene's background.
 -Added color support in ChangeBackground action.
@@ -6,6 +21,6 @@ Belle 0.1.1a | 20/11/2012
 -Replaced "background" property with "backgroundImage" when exporting game file.
 -Other minor tweaks.
 
-Belle 0.1a | 15/11/2012
+Belle's Editor 0.1a | 15/11/2012
 -----------------------
 -First release.
