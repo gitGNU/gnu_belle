@@ -665,7 +665,6 @@ QString Belle::exportProject(const QString& _path, bool toRun)
     QString path(_path);
     if (path.isEmpty())
          path = QFileDialog::getExistingDirectory(this, tr("Select Output Directory"));
-
     if (path.isEmpty())
         return "";
 
@@ -677,14 +676,15 @@ QString Belle::exportProject(const QString& _path, bool toRun)
 
     title = title.isEmpty() ? tr("Untitled") : title;
 
-    if (! toRun || mCurrentRunDirectory.isEmpty()) {
+    if (! toRun || (toRun && mCurrentRunDirectory.isEmpty())) {
         title = Utils::newFileName(projectDir.absoluteFilePath(title));
         projectDir.mkdir(title);
         projectDir.cd(title);
-        if (toRun)
-            mCurrentRunDirectory = projectDir.absolutePath();
     }
-    else {
+
+    if (toRun) {
+        if (mCurrentRunDirectory.isEmpty())
+            mCurrentRunDirectory = projectDir.absolutePath();
         projectDir = QDir(mCurrentRunDirectory);
     }
 
@@ -738,6 +738,7 @@ void Belle::openFileOrProject()
     SceneManager::instance()->removeScenes(true);
     ResourceManager::instance()->removeResources(true);
     ResourceManager::setRelativePath(QFileInfo(fileName).absolutePath());
+    mCurrentRunDirectory = "";
 
     QVariantMap object = data.toMap();
 
