@@ -30,6 +30,7 @@ class DialogueBox : public ObjectGroup
         ~DialogueBox();
         void setTextColor(const QColor &) {}
         void setText(const QString &, const QString &);
+        void setText(const QString &);
         void setSpeakerName(const QString&);
 
         virtual void paint(QPainter &);

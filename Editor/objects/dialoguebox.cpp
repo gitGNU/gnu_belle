@@ -62,22 +62,21 @@ DialogueBox::~DialogueBox()
 
 void DialogueBox::setText(const QString & speaker, const QString & text)
 {
-    TextBox *textBox = this->textBox("speakerTextBox");
-    bool emitDatachanged = false;
+    blockSignals(true); //avoid calling dataChanged() multiple times
+    setSpeakerName(speaker);
+    setText(text);
+    blockSignals(false);
 
-    if (textBox) {
-        textBox->setText(speaker);
-        emitDatachanged = true;
-    }
+    emit dataChanged();
+}
 
-    textBox = this->textBox("dialogueTextBox");
+void DialogueBox::setText(const QString & text)
+{
+    TextBox *textBox = this->textBox("dialogueTextBox");
     if (textBox) {
         textBox->setText(text);
-        emitDatachanged = true;
-    }
-
-    if (emitDatachanged)
         emit dataChanged();
+    }
 }
 
 void DialogueBox::setSpeakerName(const QString & speaker)
@@ -128,13 +127,12 @@ QVariantMap DialogueBox::toJsonObject()
     return ObjectGroup::toJsonObject();
 }
 
-TextBox* DialogueBox::textBox(const QString&name)
+TextBox* DialogueBox::textBox(const QString& name)
 {
-    Object * obj = this->object("dialogueTextBox");
-    if (! obj)
-        return 0;
-
-    return qobject_cast<TextBox*>(obj);
+    Object * obj = this->object(name);
+    if (obj)
+        return qobject_cast<TextBox*>(obj);
+    return 0;
 }
 
 /*DialogueEditorWidget* DialogueBox::dialogueEditorWidget()
