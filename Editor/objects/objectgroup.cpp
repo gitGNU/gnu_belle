@@ -82,6 +82,7 @@ void ObjectGroup::append(Object* obj)
     obj->setY(y() + starty);
     obj->setX(x());
     resize();
+    connect(obj, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()));
     //connect(this, SIGNAL(resized(int,int)), obj, SLOT(onParentResized(int, int)));
 }
 
@@ -224,6 +225,7 @@ Object* ObjectGroup::removeObjectAt(int index)
 {
     if (index >= 0 && index < mObjects.size()) {
         Object* obj = mObjects.takeAt(index);
+        obj->disconnect(this);
         setHeight(height() - obj->height());
         return obj;
     }
