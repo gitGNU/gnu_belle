@@ -75,8 +75,27 @@ ActionEditorWidget* Dialogue::editorWidget()
 void Dialogue::setCharacter(Character *character)
 {
     mCharacter = character;
-    if (mCharacter)
-        mCharacterName = mCharacter->objectName();
+    if (character) {
+        this->blockSignals(true); //avoid calling dataChanged() twice
+        setCharacterName(character->objectName());
+        this->blockSignals(false);
+    }
+
+    //update dialoguebox or textbox
+    if (sceneObject() && character) {
+        DialogueBox* obj = qobject_cast<DialogueBox*>(sceneObject());
+        if (obj) {
+            //dialogueBox->setSpeakerName(name); // has been called in setCharacterName(..)
+            obj->setSpeakerColor(character->nameColor());
+            obj->setTextColor(character->textColor());
+        }
+        else {
+            TextBox* textObj = qobject_cast<TextBox*>(sceneObject());
+            if (textObj)
+                textObj->setTextColor(character->textColor());
+        }
+    }
+
     emit dataChanged();
 }
 
@@ -90,16 +109,40 @@ void Dialogue::setCharacterName(const QString & name)
     if (mCharacter && mCharacter->objectName() != name)
         mCharacter = 0;
     mCharacterName = name;
+
+    //update dialoguebox if any
+    if (sceneObject()) {
+        DialogueBox* dialogueBox = qobject_cast<DialogueBox*>(sceneObject());
+        if (dialogueBox)
+            dialogueBox->setSpeakerName(name);
+    }
+
+    emit dataChanged();
 }
 
-QString Dialogue::characterName()
+QString Dialogue::characterName() const
 {
+    //the character's name can change after being assigned to this action
+    //so mCharacterName could be outdated.
+    if (mCharacter)
+        return mCharacter->objectName();
     return mCharacterName;
 }
 
 void Dialogue::setText(const QString & text)
 {
     mText = text;
+
+    TextBox* textObj = qobject_cast<TextBox*>(sceneObject());
+    if (textObj) {
+        textObj->setPlaceholderText(text);
+    }
+    else { //if dialogueBox
+        DialogueBox* dialogueBox = qobject_cast<DialogueBox*>(sceneObject());
+        if (dialogueBox)
+            dialogueBox->setText(text);
+    }
+
     emit dataChanged();
 }
 
@@ -115,8 +158,9 @@ void Dialogue::paint(const QPainter & painter)
 QString Dialogue::displayText() const
 {
     QString text("");
-    if (mCharacter)
-        text += mCharacter->objectName() + ": ";
+    if (! characterName().isEmpty())
+        text += characterName() + ": ";
+
 
     text += '"' + mText + '"';
 

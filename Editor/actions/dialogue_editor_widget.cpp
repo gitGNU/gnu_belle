@@ -50,14 +50,16 @@ DialogueEditorWidget::DialogueEditorWidget(QWidget *parent) :
         mChooseTextBoxWidget->view()->installEventFilter(this);
     if (mChooseCharacterWidget->view())
         mChooseCharacterWidget->view()->installEventFilter(this);
+
+    this->resizeColumnToContents(0);
 }
 
 
 void DialogueEditorWidget::updateData(Action * action)
-{
+{   
+    mCurrentAction = 0;
     Character* character = 0;
-    TextBox* textBox = 0;
-    DialogueBox * dialogueBox = 0;
+    Object* object = 0;
 
     mChooseCharacterWidget->clear();
     mChooseCharacterWidget->clearEditText();
@@ -65,37 +67,41 @@ void DialogueEditorWidget::updateData(Action * action)
     mOutputBoxes.clear();
     mCharacters.clear();
 
-    mCurrentAction = qobject_cast<Dialogue*> (action);
-    if (! mCurrentAction)
+    Dialogue* dialogueAction = qobject_cast<Dialogue*> (action);
+    if (! dialogueAction)
         return;
+
+    if (! dialogueAction->characterName().isEmpty()) {
+        if (dialogueAction->character()) {
+            mChooseCharacterWidget->addItem(dialogueAction->characterName());
+            mCharacters.append(dialogueAction->character());
+        }
+        else {
+            mChooseCharacterWidget->setEditText(dialogueAction->characterName());
+        }
+    }
+
+    if (dialogueAction->sceneObject()) {
+        object = dialogueAction->sceneObject();
+        if (isValidOutputBox(object)) {
+            mChooseTextBoxWidget->addItem(object->objectName());
+            mOutputBoxes.append(object);
+        }
+    }
 
     Scene * scene = SceneManager::currentScene();
     if (! scene)
         return;
-
-    if (mCurrentAction->character()) {
-        mChooseCharacterWidget->addItem(mCurrentAction->character()->objectName());
-        mCharacters.append(mCurrentAction->character());
-    }
-
-    if (mCurrentAction->sceneObject()) {
-        textBox = qobject_cast<TextBox*>(mCurrentAction->sceneObject());
-        if (textBox) {
-            mChooseTextBoxWidget->addItem(textBox->objectName());
-            mOutputBoxes.append(textBox);
-        }
-    }
-
     QList<Object*> objects = scene->objects();
     for (int i=0; i < objects.size(); i++) {
         character = qobject_cast<Character*>(objects[i]);
-        if (character && character != mCurrentAction->character()) {
+        if (character && character != dialogueAction->character()) {
             mChooseCharacterWidget->addItem(character->objectName());
             mCharacters.append(character);
             continue;
         }
 
-        if (mCurrentAction->sceneObject() != objects[i] && isValidOutputBox(objects[i])){
+        if (dialogueAction->sceneObject() != objects[i] && isValidOutputBox(objects[i])){
             mChooseTextBoxWidget->addItem(objects[i]->objectName());
             mOutputBoxes.append(objects[i]);
         }
@@ -105,18 +111,19 @@ void DialogueEditorWidget::updateData(Action * action)
         mTextEdit->setEnabled(false);
     else {
         mTextEdit->setEnabled(true);
-
-        mCurrentAction->setSceneObject(mOutputBoxes[mChooseTextBoxWidget->currentIndex()]);
-        mTextEdit->setText(mCurrentAction->text());
+        dialogueAction->setSceneObject(mOutputBoxes[mChooseTextBoxWidget->currentIndex()]);
+        mTextEdit->setText(dialogueAction->text());
     }
 
-    if (mChooseCharacterWidget->count() && mCurrentAction->characterName().isEmpty()) {
-        mCurrentAction->setCharacter(mCharacters[0]);
+    if (mChooseCharacterWidget->count()) {
+        if (dialogueAction->characterName().isEmpty())
+            dialogueAction->setCharacter(mCharacters[0]);
+        mChooseCharacterWidget->setCurrentIndex(0);
     }
-    else if (! mCurrentAction->characterName().isEmpty())
-        mChooseCharacterWidget->setEditText(mCurrentAction->characterName());
 
-    onCharacterChanged(mChooseCharacterWidget->currentIndex());
+    //only set currentAction after updating all the widgets
+    //otherwise updating the widgets would mess up the currentAction's data.
+    mCurrentAction = dialogueAction;
 }
 
 void DialogueEditorWidget::onTextEdited()
@@ -124,21 +131,8 @@ void DialogueEditorWidget::onTextEdited()
     if (! mTextEdit || ! mCurrentAction)
         return;
 
-    mCurrentAction->setText(mTextEdit->toPlainText());
-    TextBox* textObj = qobject_cast<TextBox*>(mCurrentAction->sceneObject());
-    if (textObj) {
-        textObj->setPlaceholderText(mTextEdit->toPlainText());
-    }
-    /*DialogueBox* obj = qobject_cast<DialogueBox*>(mCurrentAction->sceneObject());
-    if (obj) {
-         obj->setText(mCurrentAction->value());
-    }
-    else {
-        TextBox* textObj = qobject_cast<TextBox*>(mCurrentAction->sceneObject());
-        if (textObj) {
-            textObj->setText(mCurrentAction->value());
-        }
-    }*/
+    QString dialogue = mTextEdit->toPlainText();
+    mCurrentAction->setText(dialogue);
 }
 
 void DialogueEditorWidget::onTextBoxChanged(int index)
@@ -151,23 +145,8 @@ void DialogueEditorWidget::onTextBoxChanged(int index)
 
 void DialogueEditorWidget::onCharacterChanged(int index)
 {
-
     if (mCurrentAction && index >= 0 && index < mCharacters.size() && mCharacters[index]) {
         mCurrentAction->setCharacter(mCharacters[index]);
-
-        /*if (mCurrentAction->sceneObject()) {
-            DialogueBox* obj = qobject_cast<DialogueBox*>(mCurrentAction->sceneObject());
-            if (obj) {
-                obj->setSpeakerName(mChooseCharacterWidget->currentText());
-                obj->setSpeakerColor(mCurrentAction->character()->nameColor());
-                obj->setTextColor(mCurrentAction->character()->textColor());
-            }
-            else {
-                TextBox* textObj = qobject_cast<TextBox*>(mCurrentAction->sceneObject());
-                if (textObj)
-                    textObj->setTextColor(mCurrentAction->character()->textColor());
-            }
-        }*/
     }
 }
 
@@ -175,11 +154,12 @@ void DialogueEditorWidget::onCharacterNameChanged(const QString & name)
 {
     if (mCurrentAction) {
         int i;
-        for (i=0; i < mCharacters.size(); i++)
+        for (i=0; i < mCharacters.size(); i++) {
             if (mCharacters[i]->objectName() == name) {
                 mCurrentAction->setCharacter(mCharacters[i]);
                 break;
             }
+        }
 
         //if no character with name <name> found, set just the name
         if (i == mCharacters.size())
@@ -204,7 +184,6 @@ void DialogueEditorWidget::onCharacterHighlighted(int index)
 
 bool DialogueEditorWidget::eventFilter(QObject *obj, QEvent *event)
 {
-
     if ((obj == mChooseTextBoxWidget->view() || obj == mChooseCharacterWidget->view()) && event->type() == QEvent::Hide) {
        if ( SceneManager::currentScene())
            SceneManager::currentScene()->highlightObject(0);

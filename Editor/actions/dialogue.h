@@ -53,7 +53,7 @@ public:
     Character* character();
 
     void setCharacterName(const QString&);
-    QString characterName();
+    QString characterName() const;
 
     virtual void paint(const QPainter &);
     virtual QString displayText() const;
