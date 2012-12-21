@@ -46,8 +46,6 @@ class Belle : public QMainWindow
     QString mCurrentRunDirectory;
     QList <QIcon> mIcons;
     QSettings *mSettings;
-    QGraphicsView* mGraphicsView;
-    QList<QGraphicsScene*> mGraphicsScenes;
     
     public:
         explicit Belle(QWidget *widget=0);
