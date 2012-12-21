@@ -91,8 +91,7 @@ void Character::removeState(const QString& state)
 
     if ((! path.isEmpty()) && mStateToImage.contains(path)) {
         QPixmap * image = mStateToImage.take(path);
-        if (image)
-            delete image;
+        ResourceManager::decrementReference(image);
     }
 }
 
@@ -174,7 +173,7 @@ void Character::setCurrentState(const QString & state)
     mCurrentState = state;
 
     if (mStateToImage.contains(state))
-        setImage(mStateToImage.value(state), false);
+        setImage(mStateToImage.value(state));
     else {
         setImage(path, false);
         mStateToImage.insert(state, image());
