@@ -1028,6 +1028,14 @@ void Object::onResourceChanged(const QVariantMap & data)
     setProperties(_data);
 }
 
+void Object::show()
+{
+}
+
+void Object::hide()
+{
+}
+
 /*void Object::setEditorWidgetFilters(const QStringList& filters)
 {
     if (! mEditorWidget)

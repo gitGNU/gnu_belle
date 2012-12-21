@@ -70,6 +70,9 @@ class Object : public QObject
         void setEditableName(bool);
         bool editableName();
 
+        virtual void show();
+        virtual void hide();
+
         /*int backgroundColorOpacity() const;
         void setBackgroundColorOpacity(int);
 
