@@ -17,6 +17,7 @@
 #include "resource_manager.h"
 
 #include <QDebug>
+#include <QMovie>
 
 #include "utils.h"
 #include "image.h"
@@ -25,11 +26,12 @@
 #include "textbox.h"
 #include "button.h"
 #include "menu.h"
+#include "animationimage.h"
 
 static QList<Object*> mResources;
 static ResourceManager* mInstance = new ResourceManager();
-static QHash<QString, QPixmap*> mPixmapCache;
-static QHash<QPixmap*, int> mPixmapReferences;
+static QHash<QString, AnimationImage*> mImageCache;
+static QHash<AnimationImage*, int> mImageReferences;
 static QString mRelativePath = "";
 
 ResourceManager::ResourceManager(QObject *parent) :
@@ -201,17 +203,17 @@ void  ResourceManager::removeResources(bool del)
 
     mResources.clear();
 
-    QHashIterator <QString, QPixmap*>it(mPixmapCache);
-    QPixmap* pixmap = 0;
+    QHashIterator <QString, AnimationImage*>it(mImageCache);
+    AnimationImage* image = 0;
     while(it.hasNext()) {
         it.next();
-        pixmap = static_cast<QPixmap*>(it.value());
-        if (pixmap)
-            delete pixmap;
+        image = static_cast<AnimationImage*>(it.value());
+        if (image)
+            delete image;
     }
 
-    mPixmapCache.clear();
-    mPixmapReferences.clear();
+    mImageCache.clear();
+    mImageReferences.clear();
 }
 
 void  ResourceManager::destroy()
@@ -225,81 +227,105 @@ ResourceManager* ResourceManager::instance()
     return mInstance;
 }
 
-QPixmap* ResourceManager::newImage(const QString& _path)
+AnimationImage* ResourceManager::newImage(const QString& _path)
 {
     QString path(_path);
 
-     if (! mRelativePath.isEmpty()) {
+    if (! mRelativePath.isEmpty()) {
          QDir dir(mRelativePath);
          if (dir.exists(path))
              path = dir.absoluteFilePath(path);
      }
 
-    if (mPixmapCache.contains(path)) {
-        incrementReference(mPixmapCache.value(path));
-        return mPixmapCache.value(path);
+    if (mImageCache.contains(path)) {
+        incrementReference(mImageCache.value(path));
+        return mImageCache.value(path);
     }
 
     if (! QFile::exists(path))
         return 0;
 
-    QPixmap* pixmap = new QPixmap(path);
-    mPixmapCache.insert(path, pixmap);
-    mPixmapReferences.insert(pixmap, 1);
-    return pixmap;
+    AnimationImage* image = new AnimationImage(path);
+    mImageCache.insert(path, image);
+    mImageReferences.insert(image, 1);
+
+    return image;
 }
 
-QString ResourceManager::imagePath(QPixmap* pixmap)
+QString ResourceManager::imagePath(QPixmap* pixmap, QMovie* movie)
 {
-    if (! pixmap)
+    if (! pixmap && ! movie)
         return "";
 
-    QHashIterator<QString, QPixmap*> it(mPixmapCache);
+    QHashIterator<QString, AnimationImage*> it(mImageCache);
 
     while(it.hasNext()) {
         it.next();
-        if (it.value() == pixmap)
+        if (it.value()->contains(pixmap) || it.value()->contains(movie))
             return it.key();
     }
 
     return "";
 }
 
-void ResourceManager::incrementReference(QPixmap* pixmap)
+QString ResourceManager::imagePath(AnimationImage* image)
 {
-    if (! mPixmapReferences.contains(pixmap))
-        return;
+    if (! image)
+        return "";
 
-    int refs = mPixmapReferences.value(pixmap);
-    refs++;
-    mPixmapReferences.insert(pixmap, refs);
+    return imagePath(image->pixmap(), image->movie());
 }
 
-void ResourceManager::decrementReference(QPixmap* pixmap)
+void ResourceManager::incrementReference(AnimationImage* image)
 {
-    if(! pixmap || ! mPixmapReferences.contains(pixmap))
+    int refs = mImageReferences.value(image, -1);
+    if (refs == -1)
+        return;
+    refs++;
+    mImageReferences.insert(image, refs);
+}
+
+
+void ResourceManager::decrementReference(QPixmap* _pixmap)
+{
+    QHashIterator<QString, AnimationImage*> it(mImageCache);
+    AnimationImage* image = 0;
+    while(it.hasNext()) {
+        it.next();
+        if (it.value()->pixmap() == _pixmap) {
+            image = it.value();
+            break;
+        }
+    }
+
+    decrementReference(image);
+}
+
+void ResourceManager::decrementReference(AnimationImage* image)
+{
+    if(! image || ! mImageReferences.contains(image))
         return;
 
-    int refs = mPixmapReferences.value(pixmap);
+    int refs = mImageReferences.value(image);
     if (refs <= 1)
     {
-        mPixmapReferences.remove(pixmap);
+        mImageReferences.remove(image);
 
-        QString keyPath = ResourceManager::imagePath(pixmap);
+        QString keyPath = ResourceManager::imagePath(image);
         if (! keyPath.isEmpty())
-            mPixmapCache.remove(keyPath);
+            mImageCache.remove(keyPath);
 
-        delete pixmap;
+        delete image;
     }
     else {
         refs--;
-        mPixmapReferences.insert(pixmap, refs);
+        mImageReferences.insert(image, refs);
     }
 }
 
 QStringList ResourceManager::imagePaths()
 {
-    return mPixmapCache.keys();
+    return mImageCache.keys();
 }
 
 void ResourceManager::setRelativePath(const QString & path)

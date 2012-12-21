@@ -21,6 +21,7 @@
 #include <QList>
 
 #include "objects/object.h"
+#include "animationimage.h"
 
 class Object;
 
@@ -50,12 +51,15 @@ public:
     static ResourceManager* instance();
     static QList<Object*> resources();
 
-    static QPixmap* newImage(const QString&);
-    static QString imagePath(QPixmap*);
+    static AnimationImage* newImage(const QString&);
+    static QString imagePath(QPixmap*, QMovie* movie=0);
+    static QString imagePath(AnimationImage*);
+    static QMovie* movie(const QString&);
     static QStringList imagePaths();
 
-    static void incrementReference(QPixmap* pixmap);
-    static void decrementReference(QPixmap* pixmap);
+    static void incrementReference(AnimationImage*);
+    static void decrementReference(AnimationImage*);
+    static void decrementReference(QPixmap*);
 
     static void destroy();
     void removeResources(bool del);
