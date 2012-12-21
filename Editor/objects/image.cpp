@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 Carlos Pais 
+/* Copyright (C) 2012 Carlos Pais
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,12 +18,13 @@
 
 #include <QDebug>
 #include <QFileInfo>
+#include <QMovie>
 
 Image::Image(QPixmap *image, QObject *parent) :
     Object(parent)
 {
     init();
-    setImage(image);
+    setImage(new AnimationImage(image));
 }
 
 Image::Image(const QString& path, QObject *parent) :
@@ -38,7 +39,6 @@ Image::Image(const QVariantMap& data, QObject* parent):
 {
     init();
 
-
     if (data.contains("image") && data.value("image").type() == QVariant::String)
         setImage(data.value("image").toString());
 }
@@ -52,6 +52,8 @@ void Image::init()
 {
     mImage = 0;
     setType("Image");
+    mMovie = 0;
+    mCurrentFrame = 0;
 
     if (objectName().isEmpty())
         setObjectName(ResourceManager::instance()->newName("image"));
@@ -59,18 +61,32 @@ void Image::init()
 
 void Image::setImage(const QString& path, bool deletePrevious)
 {
-    setImage(ResourceManager::newImage(path), deletePrevious);
+    setImage(ResourceManager::newImage(path));
 }
 
-void Image::setImage(QPixmap * image, bool deletePrevious)
+void Image::setImage(QPixmap* image)
 {
     if (image == mImage)
         return;
 
-    //if (mImage && deletePrevious)
-     //   delete mImage;
+    QString currPath = ResourceManager::imagePath(mImage);
+    QString newPath = ResourceManager::imagePath(image);
+    if (currPath == newPath)
+        return;
 
+    ResourceManager::decrementReference(mImage);
     mImage = image;
+
+    mAnimationImage = dynamic_cast<AnimationImage*>(mImage);
+    mMovie = 0;
+
+    if (mAnimationImage && mAnimationImage->movie()) {
+        mMovie = mAnimationImage->movie();
+        connect(mMovie, SIGNAL(frameChanged(int)), this, SLOT(onFrameChanged(int)));
+
+        if (mMovie->state() != QMovie::Running)
+            mMovie->start();
+    }
 
     if (mImage && !mImage->isNull() && (width() == 0 || height() == 0)) {
         mSceneRect.setWidth(mImage->width());
@@ -88,12 +104,30 @@ QPixmap* Image::image(const QString &) const
     return 0;
 }
 
+void Image::onFrameChanged(int frame)
+{
+    emit dataChanged();
+}
+
 void Image::paint(QPainter & painter)
 {
     Object::paint(painter);
+    if (mMovie)
+        painter.drawPixmap(mSceneRect, mMovie->currentPixmap());
+    else if (mImage)
+        painter.drawPixmap(mSceneRect, *mImage);
+}
 
-    if (mImage)
-        painter.drawPixmap(mSceneRect, *mImage, mImage->rect());
+void Image::show()
+{
+    if (mMovie)
+        mMovie->start();
+}
+
+void Image::hide()
+{
+    if (mMovie)
+        mMovie->stop();
 }
 
 QVariantMap Image::toJsonObject()
