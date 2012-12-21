@@ -99,20 +99,18 @@ Belle::Belle(QWidget *widget)
 
     mActionsView = new ActionsView(this);
     ActionsModel * actionsModel = qobject_cast<ActionsModel*> (mActionsView->model());
-
     QLayout* layout = mUi.actionsViewWidget->layout();
 
     if (layout)
         layout->addWidget(mActionsView);
 
     QLayout *vLayout = centralWidget()->layout();
-
     QScrollArea * scrollArea = new QScrollArea(mUi.centralwidget);
     mDrawingSurfaceWidget = new DrawingSurfaceWidget(SceneManager::instance());
     scrollArea->setWidget(mDrawingSurfaceWidget);
     scrollArea->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-
     vLayout->addWidget(scrollArea);
+
     //connect(mDrawingSurfaceWidget, SIGNAL(paintFinished()), this, SLOT(updateSceneIcon()));
     connect(mActionsView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(onActionsViewClicked(const QModelIndex&)));
 
@@ -162,24 +160,7 @@ Belle::Belle(QWidget *widget)
 
     mUi.resourcesTabWidget->setCurrentIndex(0);
 
-    //******** temporary characters to test *********//
     addScene();
-    /*QHash<QString, QString> statesAndImages = QHash<QString, QString>();
-    statesAndImages.insert("shy", "21454048.gif");
-    statesAndImages.insert("happy", "31847476.gif");
-    Character* character = new Character("Sheila", statesAndImages, ResourceManager::instance());
-    ResourceManager::instance()->addResource(character);
-    character = new Character("Sheila", statesAndImages, character);
-    mSceneManager->currentScene()->addObject(character);
-    //ResourceManager::instance()->addResource(obj);
-    statesAndImages.clear();
-    statesAndImages.insert("mimada", "mimosa.gif");
-    character = new Character("Mimosa", statesAndImages, ResourceManager::instance());
-    ResourceManager::instance()->addResource(character);
-    character = new Character("Mimosa", statesAndImages, character);
-    mSceneManager->currentScene()->addObject(character);*/
-
-    //**********************************************//
 
     int width = mUi.actionCatalogDockWidget->width()/2;
     width += mUi.resourcesDockWidget->width() / 2;
@@ -372,7 +353,6 @@ void Belle::addScene(Scene* scene)
     //update previous scene icon
     if (SceneManager::currentScene())
         updateSceneIcon();
-
     if (! scene)
         scene = SceneManager::instance()->createNewScene();
     else
@@ -423,7 +403,7 @@ void Belle::onSceneItemClicked(QTreeWidgetItem *item, int column)
     updateSceneIcon(); //update current scene icon
     SceneManager::instance()->setCurrentSceneIndex(mUi.scenesWidget->indexOfTopLevelItem(item));
     if (SceneManager::currentScene())
-        SceneManager::currentScene()->focusIn();
+        SceneManager::currentScene()->show();
     updateSceneEditorWidget();
     mDrawingSurfaceWidget->update();
 }
@@ -433,7 +413,7 @@ void Belle::updateSceneIcon(Scene* scene)
     scene =  scene ? scene : SceneManager::currentScene();
     //update previous icon
     if (scene) {
-        scene->focusOut(); //focus out first to update pixmap
+        scene->hide(); //focus out first to update pixmap
         QTreeWidgetItem *prevItem = mUi.scenesWidget->topLevelItem(SceneManager::indexOf(scene));
         if (prevItem)
             prevItem->setIcon(0, scene->icon());
