@@ -104,8 +104,8 @@ class Scene : public QObject
         QIcon icon();
         QPixmap* pixmap();
 
-        void focusIn();
-        void focusOut();
+        void show();
+        void hide();
 
         void paint(QPainter&);
         

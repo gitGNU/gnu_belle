@@ -155,7 +155,7 @@ void Scene::appendObject(Object* object, bool select, bool temporarily)
     if (! object)
         return;
 
-    connect(object, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()));
+    //connect(object, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()));
     if (object->parent() != this)
         object->setParent(this);
 
@@ -277,14 +277,15 @@ void Scene::fillWidth()
 
 void Scene::setBackgroundImage(const QString & path)
 {
-    QPixmap* image = ResourceManager::newImage(path);
+    AnimationImage* image = ResourceManager::newImage(path);
+    QPixmap* pixmap = image->pixmap();
 
-    if (mBackgroundImage != image) {
+    if (mBackgroundImage != pixmap) {
         ResourceManager::decrementReference(mBackgroundImage);
-        if (image)
-            *image = image->scaled(Scene::size());
+        if (pixmap)
+            *pixmap = pixmap->scaled(Scene::size());
 
-        mBackgroundImage = image;
+        mBackgroundImage = pixmap;
         emit dataChanged();
     }
 }
@@ -550,13 +551,17 @@ QString Scene::newObjectName(QString name)
     return name;
 }
 
-void Scene::focusIn()
+void Scene::show()
 {
+    for(int i=0; i < mObjects.size(); i++)
+        mObjects[i]->show();
 }
 
-void Scene::focusOut()
+void Scene::hide()
 {
     removeTemporaryBackground();
+    for(int i=0; i < mObjects.size(); i++)
+        mObjects[i]->hide();
 }
 
 void Scene::removeTemporaryBackground()
@@ -570,6 +575,7 @@ void Scene::removeTemporaryBackground()
 void Scene::paint(QPainter & painter)
 {
     QColor bgColor = backgroundColor().isValid() ? backgroundColor() : Qt::gray;
+    //QRect rect =
 
     if (mTemporaryBackgroundImage)
         painter.drawPixmap(Scene::point(), *mTemporaryBackgroundImage);
