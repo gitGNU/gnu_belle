@@ -140,8 +140,10 @@ QVariantMap Image::toJsonObject()
 
     //if animated
     AnimationImage* image = dynamic_cast<AnimationImage*>(mImage);
-    if (mMovie && image)
+    if (mMovie && image) {
         object.insert("frames", image->framesNames());
+        object.insert("frameDelay", mMovie->nextFrameDelay());
+    }
 
     filterResourceData(object);
     return object;
