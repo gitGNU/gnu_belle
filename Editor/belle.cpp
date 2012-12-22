@@ -650,7 +650,6 @@ QString Belle::exportProject(const QString& _path, bool toRun)
 
     QString fileName(GAME_FILENAME);
     QDir engineDir (Engine::path());
-    QStringList imagePaths = ResourceManager::imagePaths();
     QString title = mNovelData.value("title").toString();
     QDir projectDir(path);
 
@@ -669,11 +668,7 @@ QString Belle::exportProject(const QString& _path, bool toRun)
     }
 
     //copy images in use
-    foreach(const QString& path, imagePaths) {
-        QFileInfo info(path);
-        if (info.exists())
-            QFile::copy(path, projectDir.absoluteFilePath(info.fileName()));
-    }
+    ResourceManager::exportResources(projectDir);
 
     //copy all engine files
     QStringList fileNames = engineDir.entryList(QStringList() << "*.js" << "*.html" << "*.css", QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
