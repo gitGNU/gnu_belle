@@ -440,15 +440,42 @@ function Image (data)
 {
     Object.call(this, data);  
     this.imageLoaded = false;
+    this.frames = [];
+    this.currentFrame = 0;
+    this.frameDelay = 100; // 100ms by default
+    this.framesLoaded = 0;
+    this.image = null;
+    this.interval = null;
     var that = this;
     
-    this.image = new window.Image();
-    this.image.onload = function() { 
-        that.imageLoaded = true;
-    };
-    if ("image" in data && data["image"].length > 0)
-        this.image.src = data["image"];
-  
+    //is it animated
+    if ("frames" in data) {
+        var frames = data["frames"];
+        var image = null;
+        for (var i=0; i < frames.length; i++) {
+            image = new window.Image();
+            image.onload = function() { 
+                that.framesLoaded++;
+            };
+            image.src = frames[i];
+            console.log(frames[i]);
+            this.frames.push(image);
+        }
+        
+        if ("frameDelay" in data && isNumber(data["frameDelay"]))
+            this.frameDelay = Integer.parseInt(data["frameDelay"]);
+        
+        this.interval = setInterval(function() { that.frameChanged(); }, this.frameDelay);
+    }
+    else {
+        this.image = new window.Image();
+        this.image.onload = function() { 
+            that.imageLoaded = true;
+        };
+        
+        if ("image" in data && data["image"].length > 0)
+            this.image.src = data["image"];
+    }
 }
 
 extend(Object, Image);
@@ -461,8 +488,14 @@ Image.prototype.paint = function(context)
     if (context.globalAlpha != this.color.alphaF())
         context.globalAlpha = this.color.alphaF();
     
-    if (this.imageLoaded)
+    if (this.image)
         context.drawImage(this.image, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+    else if (this.frames) {
+        context.drawImage(this.frames[this.currentFrame], this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+        this.currentFrame++;
+        if (this.currentFrame >= this.frames.length)
+            this.currentFrame = 0;
+    }
     
     context.restore();
     
@@ -480,10 +513,22 @@ Image.prototype.isReady = function()
     if (! ready)
         return ready;
     
+    if (this.frames) {
+        if (this.frames.length == this.framesLoaded)
+            return true;
+        else
+            return false;
+    }
+    
     if (this.image)
         return this.image.complete;
 
     return true;
+}
+
+Image.prototype.frameChanged = function()
+{
+    this.redraw = true;
 }
 
 /*********** CHARACTER ***********/
