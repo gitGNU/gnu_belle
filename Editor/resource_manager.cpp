@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 Carlos Pais 
+/* Copyright (C) 2012 Carlos Pais
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -331,4 +331,13 @@ QStringList ResourceManager::imagePaths()
 void ResourceManager::setRelativePath(const QString & path)
 {
     mRelativePath = path;
+}
+
+void ResourceManager::exportResources(const QDir& dir)
+{
+    foreach(const QString& path, mImageCache.keys()) {
+        AnimationImage* image = mImageCache[path];
+        if (image)
+            image->save(dir);
+    }
 }

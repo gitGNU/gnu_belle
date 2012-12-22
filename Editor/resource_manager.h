@@ -19,6 +19,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QDir>
 
 #include "objects/object.h"
 #include "animationimage.h"
@@ -56,6 +57,7 @@ public:
     static QString imagePath(AnimationImage*);
     static QMovie* movie(const QString&);
     static QStringList imagePaths();
+    static void exportResources(const QDir&);
 
     static void incrementReference(AnimationImage*);
     static void decrementReference(AnimationImage*);
