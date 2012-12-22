@@ -334,6 +334,9 @@ function parseSize(value)
     return 0;
 }
 
+function isNumber(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
 
 /*********** POINT **********/
 function Point (x, y)
