@@ -137,6 +137,12 @@ QVariantMap Image::toJsonObject()
     QFileInfo info(imagePath);
     if (mImage)
         object.insert("image", info.fileName());
+
+    //if animated
+    AnimationImage* image = dynamic_cast<AnimationImage*>(mImage);
+    if (mMovie && image)
+        object.insert("frames", image->framesNames());
+
     filterResourceData(object);
     return object;
 }
