@@ -1,16 +1,37 @@
 #include "animationimage.h"
 
+#include "utils.h"
+
+#include <QFileInfo>
+
 AnimationImage::AnimationImage(const QString& path, QObject *parent) :
     QPixmap(path)
 {
     mPixmap = this;
     mMovie = 0;
+    mFilePath = path;
 
     //support for animated images
     mMovie = new QMovie(path);
     if (mMovie->frameCount() <= 1) {
         mMovie->deleteLater(); //movie isn't need afterall, so delete it
         mMovie = 0;
+    }
+    else {
+        mMovie->jumpToFrame(0);
+        QString movieName = mMovie->fileName();
+        QString frameName = "";
+
+        if (movieName.isEmpty())
+            movieName = "image"; //shouldn't happen but just for precaution
+        else //remove suffix
+            movieName = QFileInfo(movieName).baseName();
+
+        for(int i=0; i < mMovie->frameCount(); i++) {
+            frameName = movieName + QString::number(i) + ".png"; //always save to PNG.
+            mFramesNames.append(frameName);
+            mMovie->jumpToNextFrame();
+        }
     }
 }
 
@@ -19,6 +40,7 @@ AnimationImage::AnimationImage(QPixmap* pixmap, QObject *parent) :
 {
     mPixmap = pixmap;
     mMovie = 0;
+    mFilePath = "";
 }
 
 void AnimationImage::init()
@@ -76,3 +98,27 @@ bool AnimationImage::isNull()
     return true;
 }
 
+QStringList AnimationImage::framesNames() const
+{
+    return mFramesNames;
+}
+
+void AnimationImage::save(const QDir & dir)
+{
+    if (mMovie) {
+        QMovie::MovieState prevState = mMovie->state();
+        mMovie->stop();
+        mMovie->jumpToFrame(0);
+        for(int i=0; i < mMovie->frameCount(); i++) {
+            mMovie->currentPixmap().save(Utils::newFileName(dir.absoluteFilePath(mFramesNames[i])));
+            mMovie->jumpToNextFrame();
+        }
+        if (prevState == QMovie::Running)
+            mMovie->start();
+    }
+    else {
+        QFileInfo info(mFilePath);
+        if (info.exists())
+            this->save(Utils::newFileName(dir.absoluteFilePath(info.fileName())));
+    }
+}

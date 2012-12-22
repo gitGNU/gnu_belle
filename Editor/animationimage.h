@@ -4,11 +4,14 @@
 #include <QObject>
 #include <QMovie>
 #include <QPixmap>
+#include <QDir>
 
 class AnimationImage : public QPixmap
 {
     QPixmap* mPixmap;
     QMovie* mMovie;
+    QStringList mFramesNames;
+    QString mFilePath;
 
 public:
     explicit AnimationImage(const QString& path="", QObject *parent = 0);
@@ -22,6 +25,8 @@ public:
     int width();
     int height();
     bool isNull();
+    QStringList framesNames() const;
+    void save(const QDir&);
     
 signals:
     
