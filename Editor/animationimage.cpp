@@ -119,6 +119,6 @@ void AnimationImage::save(const QDir & dir)
     else {
         QFileInfo info(mFilePath);
         if (info.exists())
-            this->save(Utils::newFileName(dir.absoluteFilePath(info.fileName())));
+            QPixmap::save(Utils::newFileName(dir.absoluteFilePath(info.fileName())));
     }
 }
