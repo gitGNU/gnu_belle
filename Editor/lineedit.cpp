@@ -16,16 +16,23 @@
 
 #include "lineedit.h"
 
-#include <QDebug>
-
 LineEdit::LineEdit(const QString& inactiveText, QWidget *parent) :
     QLineEdit(parent)
 {
     mInactiveTextInPlace = true;
-    setInactiveText(inactiveText);
+    setPlaceholderText(inactiveText);
     connect(this, SIGNAL(textEdited(const QString&)), this, SLOT(onTextEdited(const QString&)));
     connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(onTextChanged(const QString&)));
 }
+
+LineEdit::LineEdit(QWidget *parent) :
+    QLineEdit(parent)
+{
+    mInactiveTextInPlace = true;
+    connect(this, SIGNAL(textEdited(const QString&)), this, SLOT(onTextEdited(const QString&)));
+    connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(onTextChanged(const QString&)));
+}
+
 
 void LineEdit::keyPressEvent(QKeyEvent * event)
 {
@@ -51,7 +58,7 @@ void LineEdit::focusInEvent(QFocusEvent * event)
 
 void LineEdit::focusOutEvent(QFocusEvent * event)
 {
-    setInactiveText(mInactiveText);
+    setPlaceholderText(mInactiveText);
 
     QLineEdit::focusOutEvent(event);
 }
@@ -76,12 +83,12 @@ void LineEdit::onTextChanged(const QString & text)
 }
 
 
-QString LineEdit::inactiveText() const
+QString LineEdit::placeholderText() const
 {
     return mInactiveText;
 }
 
-void LineEdit::setInactiveText(const QString &text)
+void LineEdit::setPlaceholderText(const QString &text)
 {
    mInactiveText = text;
    if (mInactiveTextInPlace) {

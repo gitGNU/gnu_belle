@@ -26,9 +26,11 @@ class LineEdit : public QLineEdit
     Q_OBJECT
 public:
     explicit LineEdit(const QString& inactiveText="", QWidget *parent = 0);
-    QString inactiveText() const;
-    void setInactiveText(const QString &);
+    explicit LineEdit(QWidget *parent = 0);
+    QString placeholderText() const;
+    void setPlaceholderText(const QString &);
     QString text() const;
+
     
 signals:
     
