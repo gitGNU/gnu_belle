@@ -22,10 +22,11 @@
 #include <QMessageBox>
 
 static QString mPath = "";
+static QString mBrowserPath = "";
 
 bool Engine::isValidPath(const QString & path)
 {
-    if (path.isEmpty())
+    if (path.isEmpty() || path.isNull())
         return false;
 
     QDir dir(path);
@@ -70,3 +71,12 @@ void Engine::guessPath()
         mPath = currDir.absolutePath();
 }
 
+QString Engine::browserPath()
+{
+    return mBrowserPath;
+}
+
+void Engine::setBrowserPath(const QString& path)
+{
+    mBrowserPath = path;
+}

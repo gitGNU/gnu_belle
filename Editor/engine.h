@@ -28,6 +28,8 @@ public:
     static QString path();
     static void setPath(const QString&);
     static void guessPath();
+    static QString browserPath();
+    static void setBrowserPath(const QString&);
 };
 
 #endif // ENGINE_H
