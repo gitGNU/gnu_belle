@@ -218,7 +218,7 @@ void ConditionDialog::onTypeChanged(int index)
     else
         lineEdit = mEditValue;
 
-    lineEdit->setInactiveText(senderComboBox->itemText(index));
+    lineEdit->setPlaceholderText(senderComboBox->itemText(index));
 
     if (type == "auto") {
         type = determineType(lineEdit->text());
