@@ -17,11 +17,11 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string>General</string>
+       <string>Game</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
@@ -248,7 +248,7 @@
      </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
-       <string>Export</string>
+       <string>Project</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
@@ -261,10 +261,35 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="engineDirectoryEdit"/>
+          <widget class="LineEdit" name="engineDirectoryEdit"/>
          </item>
          <item>
           <widget class="QPushButton" name="engineDirectoryButton">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="media.qrc">
+             <normaloff>:/media/document_open.png</normaloff>:/media/document_open.png</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <widget class="QLabel" name="browserLabel">
+           <property name="text">
+            <string>Browser</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="LineEdit" name="browserEdit"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="browserButton">
            <property name="text">
             <string/>
            </property>
@@ -305,6 +330,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>lineedit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="media.qrc"/>
  </resources>

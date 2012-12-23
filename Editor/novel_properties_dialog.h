@@ -26,12 +26,14 @@ class NovelPropertiesDialog : public QDialog
     Q_OBJECT
 
     QVariantMap mNovelData;
-    QString mEnginePath;
 
 public:
     explicit NovelPropertiesDialog(QVariantMap& data, QWidget *parent = 0);
     QVariantMap novelData();
-    
+    QString enginePath();
+    QString browserPath();
+    void setEnginePath(const QString&);
+
 signals:
     
 public slots:
@@ -43,6 +45,7 @@ public slots:
     void onFontSizeChanged(int);
     void onEnginePathChangeRequest();
     void updateTextSpeedSliderTooltip(int);
+    void onBrowserSelect();
 
 private:
     Ui::NovelPropertiesDialog mUi;
