@@ -30,6 +30,7 @@
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QTextCodec>
+#include <QProcess>
 
 #include "object.h"
 #include "add_character_dialog.h"
@@ -71,13 +72,6 @@ Belle::Belle(QWidget *widget)
     mNovelData.insert("fontFamily", "Arial");
     setNovelProperties(mNovelData);
     Engine::guessPath();
-
-    //load settings
-    mSettings = new QSettings("Belle", "Belle", this);
-    if (mSettings->contains("Window/Geometry"))
-        this->restoreGeometry(mSettings->value("Window/Geometry").toByteArray());
-    if (mSettings->contains("Window/State"))
-        this->restoreState(mSettings->value("Window/State").toByteArray());
 
     //setup scenes
     Scene::setEditorWidget(new SceneEditorWidget);
@@ -214,6 +208,13 @@ Belle::Belle(QWidget *widget)
     mDeleteScene->setShortcutContext(Qt::WidgetShortcut);
     mUi.scenesWidget->addAction(mDeleteScene);
     connect(mDeleteScene, SIGNAL(triggered()), this, SLOT(deleteScene()));
+
+    //load settings
+    mSettings = new QSettings("Belle", "Belle", this);
+    if (mSettings->contains("Window/Geometry"))
+        this->restoreGeometry(mSettings->value("Window/Geometry").toByteArray());
+    if (mSettings->contains("Window/State"))
+        this->restoreState(mSettings->value("Window/State").toByteArray());
 }
 
 bool Belle::eventFilter(QObject *obj, QEvent *ev)
@@ -242,9 +243,16 @@ Belle::~Belle()
     ActionInfoManager::destroy();
     ResourceManager::destroy();
 
+    //save settings
     mSettings->beginGroup("Window");
     mSettings->setValue("Geometry", this->saveGeometry());
     mSettings->setValue("State", this->saveState());
+    mSettings->endGroup();
+    mSettings->beginGroup("Project");
+    if (Engine::isValid())
+        mSettings->setValue("enginePath", Engine::path());
+    if (! Engine::browserPath().isEmpty())
+        mSettings->setValue("browser", Engine::browserPath());
     mSettings->endGroup();
 }
 
@@ -630,9 +638,14 @@ void Belle::onRunTriggered()
 
     QString exportedTo = exportProject(QDir::tempPath(), true);
 
-    //open file (html) with default application
-    if (! exportedTo.isEmpty())
-        QDesktopServices::openUrl(QUrl::fromLocalFile(QDir(exportedTo).absoluteFilePath("index.html")));
+    if (! exportedTo.isEmpty()) {
+        //Get browser specified by the user
+        QString browserPath = Engine::browserPath();
+        if (! browserPath.isEmpty())
+            QProcess::startDetached(browserPath, QStringList() << QDir(exportedTo).absoluteFilePath("index.html"));
+        else //open file (html) with default application
+            QDesktopServices::openUrl(QUrl::fromLocalFile(QDir(exportedTo).absoluteFilePath("index.html")));
+    }
 }
 
 QString Belle::exportProject(const QString& _path, bool toRun)
@@ -930,6 +943,9 @@ void Belle::onPropertiesTriggered()
     if (dialog.result() == QDialog::Accepted) {
         QVariantMap data = dialog.novelData();
         setNovelProperties(data);
+
+        Engine::setPath(dialog.enginePath());
+        Engine::setBrowserPath(dialog.browserPath());
     }
 }
 
