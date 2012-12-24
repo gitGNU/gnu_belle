@@ -26,6 +26,7 @@
 static QSize mSize;
 static QPoint mPoint;
 static SceneEditorWidget* mEditorWidget = 0;
+static QPixmap* mScenePixmap = 0;
 
 Scene::Scene(QObject *parent, const QString& name):
     QObject(parent)
@@ -91,8 +92,8 @@ void Scene::init(const QString& name)
     mHighlightedObject = 0;
     mBackgroundImage = 0;
     mTemporaryBackgroundImage = 0;
-    mScenePixmap = new QPixmap(Scene::width(), Scene::height());
-    mScenePixmap->fill(Qt::gray);
+    //mScenePixmap = new QPixmap(Scene::width(), Scene::height());
+    //mScenePixmap->fill(Qt::gray);
 
     this->setObjectName(SceneManager::validSceneName(name));
 }
@@ -476,14 +477,19 @@ void Scene::appendAction(Action * action)
 
 QIcon Scene::icon()
 {
+    if (! mScenePixmap)
+        mScenePixmap = new QPixmap(Scene::width(), Scene::height());
+
     if (mScenePixmap) {
         //update pixmap
         QPainter painter(mScenePixmap);
         this->paint(painter);
-        return QIcon(*mScenePixmap);
+        painter.end();
+        QPixmap pixmap = mScenePixmap->scaled(64, 48, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        return QIcon(pixmap);
     }
-    else
-        return QIcon();
+
+    return QIcon();
 }
 
 QPixmap* Scene::pixmap()
@@ -642,18 +648,10 @@ void Scene::paint(QPainter & painter)
     if(this->highlightedObject()) {
         QRectF rectf = this->highlightedObject()->sceneRect();
         painter.save();
-        /*QLinearGradient gradient(rectf.x()+ rectf.width()/2, rectf.y()+rectf.height()+2, rectf.x()+rectf.width()/2, rectf.y()+2);
-        gradient.setColorAt(0, QColor(0, 0, 255, 100));
-        gradient.setColorAt(1, QColor(255, 255, 255, 0));
-        QBrush brush(gradient);*/
         QBrush brush(QColor(0,0, 255, 100));
-        //brush.setColor(Qt::blue);
         QPen pen(brush, 6);
-        //pen.setColor(QColor(Qt::blue));
         painter.setPen(pen);
         painter.drawRect(rectf);
-
-        //painter.fillRect(rectf, brush);
         painter.restore();
     }
 }

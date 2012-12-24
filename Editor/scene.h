@@ -42,7 +42,6 @@ class Scene : public QObject
     Object* mHighlightedObject;
     AnimationImage *mBackgroundImage;
     AnimationImage *mTemporaryBackgroundImage;
-    QPixmap *mScenePixmap;
     QColor mBackgroundColor;
     QColor mTemporaryBackgroundColor;
     

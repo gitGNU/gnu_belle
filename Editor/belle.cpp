@@ -82,7 +82,7 @@ Belle::Belle(QWidget *widget)
     connect(SceneManager::instance(), SIGNAL(currentSceneChanged()), this, SLOT(onCurrentSceneChanged()));
     SceneManager::setClipboard(new Clipboard(SceneManager::instance()));
 
-    mUi.scenesWidget->setIconSize(QSize(64, 64));
+    mUi.scenesWidget->setIconSize(QSize(64, 48));
 
     //create editors
     Object::setObjectEditorWidget(new ObjectEditorWidget());
