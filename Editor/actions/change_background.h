@@ -26,10 +26,8 @@ class ChangeBackground : public Action
 {
     Q_OBJECT
 
-    QPixmap *mCurrentSceneBackgroundImage;
-    QPixmap* mBackgroundImage;
+    AnimationImage* mBackgroundImage;
     QColor mBackgroundColor;
-    QColor mCurrentSceneBackgroundColor;
 
 public:
     static ActionInfo Info;

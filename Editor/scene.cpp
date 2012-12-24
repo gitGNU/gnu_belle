@@ -278,21 +278,20 @@ void Scene::fillWidth()
 void Scene::setBackgroundImage(const QString & path)
 {
     AnimationImage* image = ResourceManager::newImage(path);
-    QPixmap* pixmap = image->pixmap();
+    QPixmap* pixmap = image;
 
-    if (mBackgroundImage != pixmap) {
-        ResourceManager::decrementReference(mBackgroundImage);
-        if (pixmap)
-            *pixmap = pixmap->scaled(Scene::size());
-
-        mBackgroundImage = pixmap;
-        emit dataChanged();
-    }
-}
-
-void Scene::setBackgroundImage(QPixmap* image)
-{
     if (mBackgroundImage != image) {
+        if (mBackgroundImage && mBackgroundImage->movie())
+            mBackgroundImage->movie()->disconnect(this);
+        ResourceManager::decrementReference(mBackgroundImage);
+
+        if (pixmap)
+            *pixmap = pixmap->scaled(Scene::size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        if (image->movie()) {
+            connect(image->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
+            image->movie()->start();
+        }
+
         mBackgroundImage = image;
         emit dataChanged();
     }
@@ -303,9 +302,19 @@ QPixmap* Scene::backgroundImage()
     return mBackgroundImage;
 }
 
-void Scene::setTemporaryBackgroundImage(QPixmap* image)
+void Scene::setTemporaryBackgroundImage(AnimationImage* image)
 {
     if (mTemporaryBackgroundImage != image) {
+        if (mTemporaryBackgroundImage && mTemporaryBackgroundImage->movie()) { //disconnect previous background
+            mTemporaryBackgroundImage->movie()->stop();
+            mTemporaryBackgroundImage->movie()->disconnect(this);
+        }
+
+        if (image && image->movie()) {
+            connect(image->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
+            mTemporaryBackgroundImage->movie()->start();
+        }
+
         mTemporaryBackgroundImage = image;
         emit dataChanged();
     }
@@ -553,6 +562,9 @@ QString Scene::newObjectName(QString name)
 
 void Scene::show()
 {
+    if (mBackgroundImage && mBackgroundImage->movie())
+        mBackgroundImage->movie()->start();
+
     for(int i=0; i < mObjects.size(); i++)
         mObjects[i]->show();
 }
@@ -560,14 +572,22 @@ void Scene::show()
 void Scene::hide()
 {
     removeTemporaryBackground();
+    if (mBackgroundImage && mBackgroundImage->movie())
+        mBackgroundImage->movie()->stop();
     for(int i=0; i < mObjects.size(); i++)
         mObjects[i]->hide();
 }
 
 void Scene::removeTemporaryBackground()
 {
-    if (mTemporaryBackgroundImage)
+    if (mTemporaryBackgroundImage) {
+        if (mTemporaryBackgroundImage->movie()) {
+            mTemporaryBackgroundImage->movie()->stop();
+            mTemporaryBackgroundImage->movie()->disconnect(this);
+        }
         mTemporaryBackgroundImage = 0;
+    }
+
     if (mTemporaryBackgroundColor.isValid())
         mTemporaryBackgroundColor = QColor();
 }
@@ -575,14 +595,22 @@ void Scene::removeTemporaryBackground()
 void Scene::paint(QPainter & painter)
 {
     QColor bgColor = backgroundColor().isValid() ? backgroundColor() : Qt::gray;
-    //QRect rect =
 
-    if (mTemporaryBackgroundImage)
+    if (mTemporaryBackgroundImage) {
         painter.drawPixmap(Scene::point(), *mTemporaryBackgroundImage);
+        if (mTemporaryBackgroundImage->movie())
+            painter.drawPixmap(0, 0, Scene::width(), Scene::height(), mTemporaryBackgroundImage->movie()->currentPixmap());
+        else
+            painter.drawPixmap(0, 0, *mBackgroundImage);
+    }
     else if (mTemporaryBackgroundColor.isValid())
         painter.fillRect(QRect(Scene::point().x(), Scene::point().y(), width(), height()), mTemporaryBackgroundColor);
-    else if (backgroundImage())
-        painter.drawPixmap(Scene::point(), *mBackgroundImage);
+    else if (mBackgroundImage) {
+        if (mBackgroundImage->movie())
+            painter.drawPixmap(0, 0, Scene::width(), Scene::height(), mBackgroundImage->movie()->currentPixmap());
+        else
+            painter.drawPixmap(0, 0, *mBackgroundImage);
+    }
     else
         painter.fillRect(QRect(Scene::point().x(), Scene::point().y(), width(), height()), bgColor);
 
@@ -629,6 +657,4 @@ void Scene::paint(QPainter & painter)
         painter.restore();
     }
 }
-
-
 

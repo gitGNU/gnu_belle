@@ -49,7 +49,6 @@ void ChangeBackground::init()
     setName(Info.name);
     setType(Info.type);
 
-    mCurrentSceneBackgroundImage = 0;
     mBackgroundImage = 0;
 }
 
@@ -69,10 +68,14 @@ ActionEditorWidget* ChangeBackground::editorWidget()
 }
 
 void ChangeBackground::setBackgroundImage(const QString & background)
-{
-    QPixmap* prevBackground = mBackgroundImage;
+{ 
+    AnimationImage* image = ResourceManager::newImage(background);
+    if (mBackgroundImage == image)
+        return;
 
-    mBackgroundImage = ResourceManager::newImage(background);
+    ResourceManager::decrementReference(mBackgroundImage);
+    mBackgroundImage = image;
+
     QFileInfo info(background);
     setDisplayText(info.fileName());
     emit dataChanged();
@@ -81,7 +84,7 @@ void ChangeBackground::setBackgroundImage(const QString & background)
     if (scene && scene->temporaryBackgroundImage() != mBackgroundImage)
         focusIn();
 
-    ResourceManager::decrementReference(prevBackground);
+
 }
 
 QString ChangeBackground::backgroundPath()
@@ -125,15 +128,7 @@ void ChangeBackground::focusOut()
     if (scene) {
         scene->setTemporaryBackgroundImage(0);
         scene->setTemporaryBackgroundColor(QColor());
-        /*scene->setBackgroundImage(mCurrentSceneBackgroundImage);
-        if (mBackgroundImageChanged)
-            scene->setBackgroundImage(mCurrentSceneBackgroundImage);
-        if (mBackgroundColorChanged)
-            scene->setBackgroundColor(mCurrentSceneBackgroundColor);*/
     }
-
-    mCurrentSceneBackgroundColor = QColor();
-    mCurrentSceneBackgroundImage = 0;
 }
 
 QVariantMap ChangeBackground::toJsonObject()
