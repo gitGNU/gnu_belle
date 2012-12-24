@@ -218,11 +218,11 @@ bool SceneManager::isValidSceneName(const QString& name)
 
 QString SceneManager::validSceneName(QString name)
 {
-    if (name.isEmpty())
+    if (name.isEmpty() || name.isNull())
         name = tr("scene");
 
     while(! isValidSceneName(name))
-        name = Utils::incrementLastDigit(name);
+        name = Utils::incrementLastNumber(name);
 
     return name;
 }

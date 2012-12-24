@@ -72,7 +72,7 @@ QString ResourceManager::newName(QString name)
         name = "object";
 
     while(! isValidName(name)) {
-        name = Utils::incrementLastDigit(name);
+        name = Utils::incrementLastNumber(name);
     }
 
     return name;

@@ -554,7 +554,7 @@ QString Scene::newObjectName(QString name)
         name = "object";
 
     while(! isValidObjectName(name)) {
-        name = Utils::incrementLastDigit(name);
+        name = Utils::incrementLastNumber(name);
     }
 
     return name;

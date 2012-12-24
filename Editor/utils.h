@@ -68,27 +68,24 @@ inline QString colorToString(const QColor& color)
                                         .arg(color.alpha());
 }
 
-inline int lastDigitPosition(const QString& text)
+inline int lastNumberPosition(const QString& text)
 {
     int j;
-
-    for(j=text.size()-1; j >= 0; --j)
-        if (text[j].isDigit())
-            break;
-
-    return j;
+    for(j=text.size()-1; j >= 0 && text[j].isDigit(); --j);
+    return j == text.size()-1 ? -1 : j+1;
 }
 
-inline QString incrementLastDigit(QString text)
+inline QString incrementLastNumber(QString text)
 {
-    int j = lastDigitPosition(text);
+    int j = lastNumberPosition(text);
 
-    if (j == -1)
+    if (j <= -1)
         text += "1";
     else {
-        int digit = text[j].digitValue();
-        digit++;
-        text.replace(j, 1, QString::number(digit));
+        int number = text.mid(j).toInt();
+        number++;
+        text.replace(j, text.mid(j).size(), "");
+        text += QString::number(number);
     }
 
     return text;
@@ -104,7 +101,7 @@ inline QString newFileName(const QString& path)
     QDir dir = info.absoluteDir();
 
     while(QFile::exists(dir.absoluteFilePath(name)))
-        name = Utils::incrementLastDigit(name);
+        name = Utils::incrementLastNumber(name);
 
     return name;
 }
