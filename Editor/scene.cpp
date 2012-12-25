@@ -506,11 +506,11 @@ QVariantMap Scene::toJsonObject()
         if (mActions[i]->isActive())
             mActions[i]->focusOut();
 
-    QFileInfo imageInfo(ResourceManager::imagePath(mBackgroundImage));
     scene.insert("name", objectName());
     scene.insert("type", "Scene");
-    if (imageInfo.exists())
-        scene.insert("backgroundImage", imageInfo.fileName());
+    if (mBackgroundImage)
+        scene.insert("backgroundImage", mBackgroundImage->toJsonObject());
+
     if (mBackgroundColor.isValid())
         scene.insert("backgroundColor", Utils::colorToList(mBackgroundColor));
 
