@@ -25,8 +25,10 @@ public:
     int width();
     int height();
     bool isNull();
+    QString path();
     QStringList framesNames() const;
     void save(const QDir&);
+    QVariant toJsonObject();
     
 signals:
     

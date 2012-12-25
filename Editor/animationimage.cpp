@@ -122,3 +122,24 @@ void AnimationImage::save(const QDir & dir)
             QPixmap::save(Utils::newFileName(dir.absoluteFilePath(info.fileName())));
     }
 }
+
+QVariant AnimationImage::toJsonObject()
+{
+    if (mMovie) {
+        QVariantMap object;
+        object.insert("frames", framesNames());
+        object.insert("frameDelay", mMovie->nextFrameDelay());
+        return object;
+    }
+    else {
+        QFileInfo info(mFilePath);
+        return info.fileName();
+    }
+
+    return "";
+}
+
+QString AnimationImage::path()
+{
+    return mFilePath;
+}
