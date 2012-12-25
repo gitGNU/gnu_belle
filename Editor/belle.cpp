@@ -462,8 +462,6 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
         if (accepted) {
             resource = new Character(dialog->name(), dialog->statesAndImagePaths(), ResourceManager::instance());
             ResourceManager::instance()->addResource(resource);
-            connect(resource, SIGNAL(dataChanged()), mDrawingSurfaceWidget, SLOT(update()));
-
             object = new Character(dialog->name(), dialog->statesAndImagePaths(), scene);
         }
         break;
@@ -472,8 +470,6 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
     case 1:
         resource = new TextBox(tr("Text goes here..."), ResourceManager::instance());
         ResourceManager::instance()->addResource(resource);
-        connect(resource, SIGNAL(dataChanged()), mDrawingSurfaceWidget, SLOT(update()));
-
         object = new TextBox(tr("Text goes here..."), scene);
         break;
 
@@ -484,8 +480,6 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
             break;
         resource = new Image(path, ResourceManager::instance());
         ResourceManager::instance()->addResource(resource);
-        connect(resource, SIGNAL(dataChanged()), mDrawingSurfaceWidget, SLOT(update()));
-
         object = new Image(path, scene);
         break;
 
@@ -493,8 +487,6 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
     case 3:
         resource = new DialogueBox(ResourceManager::instance());
         ResourceManager::instance()->addResource(resource);
-        connect(resource, SIGNAL(dataChanged()), mDrawingSurfaceWidget, SLOT(update()));
-
         object = new DialogueBox(scene);
 
         break;
@@ -503,13 +495,14 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
     case 4:
         resource = new Button(ResourceManager::instance());
         ResourceManager::instance()->addResource(resource);
-        connect(resource, SIGNAL(dataChanged()), mDrawingSurfaceWidget, SLOT(update()));
-
         object = new Button(scene);
-
         break;
-
     }
+
+    if (object)
+        connect(object, SIGNAL(dataChanged()), mDrawingSurfaceWidget, SLOT(update()));
+    if (resource)
+        connect(resource, SIGNAL(dataChanged()), mDrawingSurfaceWidget, SLOT(update()));
 
     if(object && resource) {
         object->setResource(resource);
