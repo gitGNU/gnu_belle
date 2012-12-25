@@ -64,24 +64,17 @@ void Image::setImage(const QString& path, bool deletePrevious)
     setImage(ResourceManager::newImage(path));
 }
 
-void Image::setImage(QPixmap* image)
+void Image::setImage(AnimationImage* image)
 {
     if (image == mImage)
         return;
 
-    QString currPath = ResourceManager::imagePath(mImage);
-    QString newPath = ResourceManager::imagePath(image);
-    if (currPath == newPath)
-        return;
-
     ResourceManager::decrementReference(mImage);
     mImage = image;
-
-    mAnimationImage = dynamic_cast<AnimationImage*>(mImage);
     mMovie = 0;
 
-    if (mAnimationImage && mAnimationImage->movie()) {
-        mMovie = mAnimationImage->movie();
+    if (mImage && mImage->movie()) {
+        mMovie = mImage->movie();
         connect(mMovie, SIGNAL(frameChanged(int)), this, SLOT(onFrameChanged(int)));
 
         if (mMovie->state() != QMovie::Running)
@@ -94,14 +87,9 @@ void Image::setImage(QPixmap* image)
     }
 }
 
-QPixmap* Image::image() const
+AnimationImage* Image::image() const
 {
     return mImage;
-}
-
-QPixmap* Image::image(const QString &) const
-{
-    return 0;
 }
 
 void Image::onFrameChanged(int frame)
@@ -133,17 +121,8 @@ void Image::hide()
 QVariantMap Image::toJsonObject()
 {
     QVariantMap object = Object::toJsonObject();
-    QString imagePath = ResourceManager::imagePath(mImage);
-    QFileInfo info(imagePath);
     if (mImage)
-        object.insert("image", info.fileName());
-
-    //if animated
-    AnimationImage* image = dynamic_cast<AnimationImage*>(mImage);
-    if (mMovie && image) {
-        object.insert("frames", image->framesNames());
-        object.insert("frameDelay", mMovie->nextFrameDelay());
-    }
+        object.insert("image", mImage->toJsonObject());
 
     filterResourceData(object);
     return object;

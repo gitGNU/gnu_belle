@@ -28,8 +28,7 @@ class Image : public Object
 {
     Q_OBJECT
 
-    QPixmap* mImage;
-    AnimationImage* mAnimationImage;
+    AnimationImage* mImage;
     QMovie *mMovie; //for animated images
     QList<QPixmap*> mMoviePixmaps;
     int mCurrentFrame;
@@ -41,9 +40,8 @@ public:
     virtual ~Image();
     virtual void paint(QPainter &);
     virtual void setImage(const QString&, bool deletePrevious=true);
-    virtual void setImage(QPixmap*);
-    QPixmap* image() const;
-    virtual QPixmap* image(const QString&) const;
+    virtual void setImage(AnimationImage*);
+    AnimationImage* image() const;
     virtual QVariantMap toJsonObject();
 
     virtual void show();
