@@ -178,8 +178,9 @@ int Object::backgroundOpacity() const
 
 void Object::setBackgroundOpacity(int alpha)
 {
-    notify("backgroundOpacity", alpha, mBackgroundColor.alpha());
+    int prevAlpha = mBackgroundColor.alpha();
     mBackgroundColor.setAlpha(alpha);
+    notify("backgroundOpacity", alpha, prevAlpha);
 }
 
 void Object::setWidth(int w, bool percent)
@@ -401,8 +402,12 @@ void Object::paint(QPainter & painter)
         //rect.setWidth(rect.width()+mPadding.left()+ mPadding.right());
         //rect.setHeight(rect.height()+mPadding.top()+ mPadding.bottom());
 
-        if (mBackgroundImage)
-            painter.drawPixmap(rect, *mBackgroundImage);
+        if (mBackgroundImage) {
+            if (mBackgroundImage->movie())
+                painter.drawPixmap(rect, mBackgroundImage->movie()->currentPixmap());
+            else
+                painter.drawPixmap(rect, *mBackgroundImage);
+        }
         else if (mRoundedRect)
             painter.drawRoundedRect(rect, mXRadius, mYRadius);
         else
@@ -450,8 +455,24 @@ void Object::removeEventActionAt(Interaction::InputEvent event, int index, bool 
 
 void Object::setBackgroundImage(const QString & path)
 {
-    notify("backgroundImage", path, ResourceManager::imagePath(mBackgroundImage));
-    mBackgroundImage = ResourceManager::newImage(path);
+    if (mBackgroundImage && mBackgroundImage->path() == path)
+        return;
+
+    if (mBackgroundImage && mBackgroundImage->movie()) {
+        mBackgroundImage->movie()->stop();
+        mBackgroundImage->movie()->disconnect(this);
+    }
+
+    AnimationImage* image = ResourceManager::newImage(path);
+    if (image && image->movie()) {
+        connect(image->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
+        image->movie()->start();
+    }
+
+    ResourceManager::decrementReference(mBackgroundImage);
+    QString prevPath = ResourceManager::imagePath(mBackgroundImage);
+    mBackgroundImage = image;
+    notify("backgroundImage", path, prevPath);
 }
 
 QPixmap* Object::backgroundImage() const
@@ -488,7 +509,7 @@ QVariantMap Object::toJsonObject()
     }
 
     if (mBackgroundImage) {
-        object.insert("backgroundImage", ResourceManager::imagePath(mBackgroundImage));
+        object.insert("backgroundImage", mBackgroundImage->toJsonObject());
     }
 
     QVariantList jsonActions;
@@ -1030,10 +1051,14 @@ void Object::onResourceChanged(const QVariantMap & data)
 
 void Object::show()
 {
+    if (mBackgroundImage && mBackgroundImage->movie())
+        mBackgroundImage->movie()->start();
 }
 
 void Object::hide()
 {
+    if (mBackgroundImage && mBackgroundImage->movie())
+        mBackgroundImage->movie()->stop();
 }
 
 /*void Object::setEditorWidgetFilters(const QStringList& filters)

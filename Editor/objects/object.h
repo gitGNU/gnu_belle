@@ -28,6 +28,7 @@
 #include "interaction.h"
 #include "object_editor_widget.h"
 #include "padding.h"
+#include "animationimage.h"
 
 #define RESIZE_RECT_WIDTH 7
 
@@ -175,7 +176,7 @@ class Object : public QObject
         bool mRoundedRect;
         int mXRadius;
         int mYRadius;
-        QPixmap * mBackgroundImage;
+        AnimationImage *mBackgroundImage;
         QHash<Interaction::InputEvent, QList<Action*> > mEventToActions;
         bool mEditableName;
         Object* mResource;
