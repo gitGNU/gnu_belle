@@ -25,24 +25,28 @@
     <meta name = "viewport" content = "user-scalable=no,
           initial-scale=1.0, maximum-scale=1.0, width=device-width" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-
+    <div id="leftPane"></div>
+    <div id="rightPane"></div>
+    <div id="topPane"></div>
+    <div id="bottomPane"></div>
+    <noscript><p id="noscript">Please, enable JavaScript on your browser.</p></noscript>
     <div id="container">
-        <canvas id="gameBackgroundCanvas" width="300" height="200">
-		I'm sorry, but your browser does not have support for HTML5's <a href="https://en.wikipedia.org/wiki/Canvas_element">canvas</a>.
-        </canvas>
+        <canvas id="gameBackgroundCanvas" width="300" height="200"></canvas>
         <canvas id="gameCanvas" width="300" height="200" ></canvas>
         <div id="fps">FPS: </div>
         <!--<img id="loading" src="loading.gif"/>-->
     </div>
     <div id="dummy">dummy</div>
+  
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="json-fallback.js"> </script>
+    <script type="text/javascript" src="buzz.js"> </script>
+    <script type="text/javascript" src="utils.js"> </script>
+    <script type="text/javascript" src="objects.js"> </script>
+    <script type="text/javascript" src="actions.js"> </script>
+    <script type="text/javascript" src="events.js"> </script>
+    <script type="text/javascript" src="draw.js"> </script>
+    <script type="text/javascript" src="main.js"> </script>
   </body>
-
-  <script type="text/javascript" src="buzz.js"> </script>
-  <script type="text/javascript" src="utils.js"> </script>
-  <script type="text/javascript" src="objects.js"> </script>
-  <script type="text/javascript" src="actions.js"> </script>
-  <script type="text/javascript" src="events.js"> </script>
-  <script type="text/javascript" src="draw.js"> </script>
-  <script type="text/javascript" src="main.js"> </script>
 
 </html>
