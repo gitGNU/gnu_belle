@@ -73,8 +73,11 @@ void Character::init(const QString& name)
 
 Character::~Character()
 {
-    QHashIterator<QString, QPixmap*> it(mStateToImage);
-    QPixmap* image = 0;
+    QHashIterator<QString, AnimationImage*> it(mStateToImage);
+    while(it.hasNext()) {
+        it.next();
+        ResourceManager::decrementReference(it.value());
+    }
     mStateToImage.clear();
 }
 

@@ -36,7 +36,7 @@ class Character : public Image
     QColor mNameColor;
     QColor mTextColor;
     QHash <QString, QString> mStateToPath;
-    QHash <QString, QPixmap*> mStateToImage;
+    QHash <QString, AnimationImage*> mStateToImage;
     QString mCurrentState;
     bool mAvailable;
 
