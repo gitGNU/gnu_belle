@@ -10,6 +10,8 @@ AnimationImage::AnimationImage(const QString& path, QObject *parent) :
     mPixmap = this;
     mMovie = 0;
     mFilePath = path;
+    QFileInfo info(path);
+    mSavedName = info.fileName();
 
     //support for animated images
     mMovie = new QMovie(path);
@@ -41,6 +43,7 @@ AnimationImage::AnimationImage(QPixmap* pixmap, QObject *parent) :
     mPixmap = pixmap;
     mMovie = 0;
     mFilePath = "";
+    mSavedName = "";
 }
 
 void AnimationImage::init()
@@ -105,7 +108,7 @@ QStringList AnimationImage::framesNames() const
 
 void AnimationImage::save(const QDir & dir)
 {
-    if (mMovie) {
+    /*if (mMovie) {
         QMovie::MovieState prevState = mMovie->state();
         mMovie->stop();
         mMovie->jumpToFrame(0);
@@ -115,28 +118,29 @@ void AnimationImage::save(const QDir & dir)
         }
         if (prevState == QMovie::Running)
             mMovie->start();
-    }
-    else {
-        QFileInfo info(mFilePath);
-        if (info.exists())
-            QPixmap::save(Utils::newFileName(dir.absoluteFilePath(info.fileName())));
-    }
+    }*/
+
+    //save the original image
+    QFileInfo info(mFilePath);
+    mSavedName = Utils::newFileName(dir.absoluteFilePath(info.fileName()));
+    bool saved = QPixmap::save(dir.absoluteFilePath(mSavedName));
+    if (! saved)
+        QFile::copy(mFilePath, dir.absoluteFilePath(mSavedName));
 }
 
 QVariant AnimationImage::toJsonObject()
 {
     if (mMovie) {
         QVariantMap object;
-        object.insert("frames", framesNames());
+        /*object.insert("frames", framesNames());
         object.insert("frameDelay", mMovie->nextFrameDelay());
+        object.insert("source", fileName);*/
+        object.insert("src", mSavedName);
+        object.insert("animated", true);
         return object;
     }
-    else {
-        QFileInfo info(mFilePath);
-        return info.fileName();
-    }
 
-    return "";
+    return mSavedName;
 }
 
 QString AnimationImage::path()

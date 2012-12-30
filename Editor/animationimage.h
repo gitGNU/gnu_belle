@@ -12,6 +12,7 @@ class AnimationImage : public QPixmap
     QMovie* mMovie;
     QStringList mFramesNames;
     QString mFilePath;
+    QString mSavedName;
 
 public:
     explicit AnimationImage(const QString& path="", QObject *parent = 0);
