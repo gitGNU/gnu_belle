@@ -91,7 +91,7 @@ inline QString incrementLastNumber(QString text)
     return text;
 }
 
-inline QString newFileName(const QString& path)
+inline QString newFilePath(const QString& path)
 {
     if (path.isEmpty() || path.isNull() || ! QFile::exists(path))
         return path;
@@ -103,7 +103,23 @@ inline QString newFileName(const QString& path)
     while(QFile::exists(dir.absoluteFilePath(name)))
         name = Utils::incrementLastNumber(name);
 
-    return name;
+    return dir.absoluteFilePath(name);
+}
+
+inline QString newFilePath(const QDir& dir, const QString& name)
+{
+    return newFilePath(dir.absoluteFilePath(name));
+}
+
+inline QString newFileName(const QString& path)
+{    
+    QString _path = newFilePath(path);
+    return QFileInfo(_path).fileName();
+}
+
+inline QString newFileName(const QDir& dir, const QString& name)
+{
+    return newFileName(dir.absoluteFilePath(name));
 }
 
 inline void safeCopy(const QString& src, const QString& dest)
