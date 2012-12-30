@@ -227,6 +227,20 @@ ResourceManager* ResourceManager::instance()
     return mInstance;
 }
 
+AnimationImage* ResourceManager::newImage(const QVariant& imageData)
+{
+    if (imageData.type() == QVariant::String) {
+        return newImage(imageData.toString());
+    }
+    else if (imageData.type() == QVariant::Map) {
+        QVariantMap imageMap = imageData.toMap();
+        if (imageMap.contains("src"))
+            return newImage(imageMap.value("src", ""));
+    }
+
+    return 0;
+}
+
 AnimationImage* ResourceManager::newImage(const QString& _path)
 {
     QString path(_path);

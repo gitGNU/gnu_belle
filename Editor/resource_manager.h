@@ -53,6 +53,7 @@ public:
     static QList<Object*> resources();
 
     static AnimationImage* newImage(const QString&);
+    static AnimationImage* newImage(const QVariant&);
     static QString imagePath(QPixmap*, QMovie* movie=0);
     static QString imagePath(AnimationImage*);
     static QMovie* movie(const QString&);
