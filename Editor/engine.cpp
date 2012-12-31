@@ -66,9 +66,14 @@ void Engine::guessPath()
     QString enginePath("Engine");
     QDir currDir = QDir::current();
 
-    currDir.cdUp();
     if (currDir.cd(enginePath) || currDir.cd(enginePath.toLower()))
         mPath = currDir.absolutePath();
+
+    if (! isValidPath(mPath)) {
+        currDir.cdUp();
+        if (currDir.cd(enginePath) || currDir.cd(enginePath.toLower()))
+            mPath = currDir.absolutePath();
+    }
 }
 
 QString Engine::browserPath()
