@@ -14,17 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var drawInterval = null;
-var imageToMove = null;
-var currentScene = null;
-var nextAction = 0;
-var currentDialogue = null;
-var context = null;
-var counter = 0;
-var countFpsInterval = null;
-var scaleWidth = 1;
-var scaleHeight = 1;
-var redrawing = false;
 var showFps = true;
 var Novel = {
     "resources" : {},
@@ -35,6 +24,8 @@ var Novel = {
     "nextAction" : 0,
     "width": 640,
     "height" : 480,
+    "currentWidth": 640,
+    "currentHeight": 480,
     "scale" : 0,
     "drawing" : false,
     "variables" : {},
@@ -46,7 +37,8 @@ var Novel = {
     "scaleWidthFactor" : 1,
     "scaleHeightFactor": 1,
     "textSpeed" : 10,
-    "textDelay" : 100
+    "textDelay" : 100,
+    "usingDOM": false
 }
 
 Novel.containsVariable = function (variable) {
@@ -66,15 +58,17 @@ Novel.value = function (variable) {
     return Novel.variables[variable];
 }
 
-//document.ready = function() {
-
 window.onload = function () {
   alert("start");
-  
+
   if (! window["Belle"]) {
     alert("Couldn't start the engine. There was a problem reading one of the files.");
     return;
   }
+  
+  //activate DOM mode if canvas is not supported
+  if (! isCanvasSupported())
+      Novel.usingDOM = true;
 
   importGameData("game.json");
 }
@@ -104,7 +98,8 @@ function initializeData(data)
     if (data["resources"]) {
         var resources = data["resources"];
         for (var name in resources) {
-             obj = createResource(resources[name]);
+            obj = createResource(resources[name]);
+ 
              if (obj)
                 Novel.resources[name] = obj;
         }
@@ -119,7 +114,7 @@ function initializeData(data)
             scene = scenes[i];
             
             if (! Belle[scene.type]) {
-                console.log("Invalid Scene type: " + scene.type);
+                _console.log("Invalid Scene type: " + scene.type);
                 continue;
             }
             
@@ -143,7 +138,7 @@ function initializeData(data)
                 var actions = scene.actions;
                 for (var j=0; j < actions.length; j++) {
                     if (! window[actions[j].type]) {
-                        console.error("Invalid Action type: " + actions[j].type);
+                        _console.error("Invalid Action type: " + actions[j].type);
                         continue;
                     }
                     
@@ -214,6 +209,45 @@ function isGameDataReady() {
     }
 }
 
+function removeObjects(scene)
+{
+    if (! Novel.usingDOM)
+        return;
+    
+    var container = document.getElementById("container"); 
+    var objects = scene.objects;
+    if (scene.element)
+        container.removeChild(scene.element);
+    
+    for(var j=0; j < objects.length; j++){
+        container.removeChild(objects[j].element);
+    }
+}
+
+function addObjects(scene)
+{
+    if (! Novel.usingDOM)
+        return;
+    var container = document.getElementById("container");
+    var objects = scene.objects;
+    addObject(scene);
+    for(var j=0; j < objects.length; j++){
+        addObject(objects[j], container);
+    }
+}
+
+function addObject(object, container)
+{
+    if (! Novel.usingDOM)
+        return;
+    
+    if (! container)
+        container = document.getElementById("container");
+    if (object.visible)
+        object.element.style.display = "block";
+    container.appendChild(object.element);
+}
+
 function importGameData(path) {
     var xobj = new XMLHttpRequest();
     if (xobj.overrideMimeType)
@@ -222,7 +256,7 @@ function importGameData(path) {
     xobj.onreadystatechange = function() {
         if(xobj.readyState == 4){
             var gameData = JSON.parse(xobj.responseText);
-            console.log("Game data loaded!");
+            _console.log("Game data loaded!");
             initializeData(gameData);
         }
     };
@@ -240,8 +274,6 @@ function gameLoop ()
             alert("The End");
             return;
         }else if (Novel.currentAction && Novel.currentAction.wait) {
-            console.log(Novel.currentAction);
-            console.log("setting wait...");
             Novel.currentAction = Novel.currentAction.wait;
             Novel.currentAction.execute();
         }
@@ -250,18 +282,20 @@ function gameLoop ()
                 alert("The End");
                 return;
             }
+            removeObjects(Novel.currentScene);
             Novel.currentScene = Novel.scenes[Novel.nextScene];
-            Novel.context.clearRect(0, 0, Novel.width, Novel.height);
-            if (Novel.currentScene)
-                Novel.currentScene.paint(Novel.bgContext);
+            //addObjects(Novel.currentScene);
+            if (! Novel.usingDOM) {
+                Novel.context.clearRect(0, 0, Novel.width, Novel.height);
+                if (Novel.currentScene)
+                    Novel.currentScene.paint(Novel.bgContext);
+            }
             Novel.actions = Novel.currentScene.actions;
             Novel.nextScene++;
             Novel.nextAction = 0;
             Novel.currentAction = null;
         }
         else {
-            console.log("Finished: ", Novel.currentAction);
-            console.log(Novel.nextAction, Novel.currentScene.actions.length);
             Novel.currentAction = Novel.currentScene.actions[Novel.nextAction];
             var object = Novel.currentAction.object;
             if (object)
@@ -272,9 +306,10 @@ function gameLoop ()
         }
     }
     
-    if (needsRedraw() || showFps) {
-        requestAnimationFrame(draw);
-    }
+    if (! Novel.usingDOM)
+        if (needsRedraw() || showFps) {
+            requestAnimationFrame(draw);
+        }
     
     setTimeout(gameLoop, Novel.drawTimeout);
 }

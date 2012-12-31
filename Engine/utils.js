@@ -14,13 +14,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function surrogateCtor() {}
-
 //New methods for Javascript's Array and String objects
 if (typeof String.prototype.startsWith != 'function') 
 {
   String.prototype.startsWith = function (str) {
     return this.slice(0, str.length) == str;
+  };
+}
+
+if (typeof Array.prototype.indexOf != 'function')
+{
+  Array.prototype.indexOf = function(value, start)
+  {
+    if (! start)
+        start = 0;
+    
+    for (var i=start; i < this.length; i++)
+        if (this[i] === value)
+            return i;
+   
+    return -1;
   };
 }
 
@@ -52,14 +65,16 @@ if (typeof Array.prototype.contains != 'function')
     };
 }
 
+function surrogateCtor() {}
+    
 function extend(base, sub) 
 {
-  // Copy the prototype from the base to setup inheritance
-  surrogateCtor.prototype = base.prototype;
-  // Tricky huh?
-  sub.prototype = new surrogateCtor();
-  // Remember the constructor property was set wrong, let's fix it
-  sub.prototype.constructor = sub;
+// Copy the prototype from the base to setup inheritance
+surrogateCtor.prototype = base.prototype;
+// Tricky huh?
+sub.prototype = new surrogateCtor();
+// Remember the constructor property was set wrong, let's fix it
+sub.prototype.constructor = sub;
 }
  
 function updateSize(object)
@@ -223,8 +238,8 @@ function replaceVariables(text)
     for(var i=0; i != variables.length; i++) {
         if (Novel.containsVariable(variables[i]))
           values.push(Novel.value(variables[i]));
-        else //if the variable is not found, still add the variable to the values so we have an equal number of elements in both lists
-          values.push(variables[i]);
+        else //if the variable is not found, still add an empty value to the values so we have an equal number of elements in both lists
+          values.push("");
     }
     
     //replace variables with the values previously extracted
@@ -277,7 +292,7 @@ function createResource(data)
     var obj = Belle[type];
     
     if (! obj) {
-        console.error("'" + type + "' is not a valid object type.");
+        _console.error("'" + type + "' is not a valid object type.");
         return null;
     }
 
@@ -335,7 +350,32 @@ function parseSize(value)
 }
 
 function isNumber(n) {
-  return !isNaN(parseFloat(n)) && isFinite(n);
+  return !isNaN(parseFloat(n)) && isFinite(parseFloat(n));
+}
+
+function initElement(element, info)
+{
+    element.style.position = "absolute";
+    if (typeof info.width == "string" && info.width.indexOf("%") != -1)
+        console.log(info.name, info.__parent, info.width);
+    element.style.width = info.width + "px";
+    element.style.height = info.height + "px";
+    element.style.display = "none";
+}
+
+function isCanvasSupported() {
+  var elem = document.createElement("canvas");
+  return !!(elem.getContext && elem.getContext('2d'));
+}
+
+function windowWidth() 
+{
+    return window.innerWidth || document.documentElement.clientWidth || document.documentElement.offsetWidth;
+}
+
+function windowHeight()
+{
+    return window.innerHeight || document.documentElement.clientHeight || document.documentElement.offsetHeight;
 }
 
 /*********** POINT **********/
@@ -355,20 +395,23 @@ Point.prototype.distance = function(point)
     return Math.sqrt(Math.pow(point.x-this.x, 2) + Math.pow(point.y-this.y, 2));
 }
 
-function _log (text, logTo) 
-{
-    if (! logTo)
-        logTo = "console";
+_console = (function() {
     
-    if (logTo === "console" && window.console)
-        console.log(text);
-}
-
-function error(text)
-{
-    if (window.console)
-        console.error(text);
-}
+    function log (text) {        
+        if (window.console)
+            console.log(text);
+    }
+    
+   function error(text) {
+        if (window.console)
+            console.error(text);
+    }
+    
+    return { 
+        "log": log,
+        "error": error
+    };
+})();
 
 function addJavascript(jsname,pos) 
 {
@@ -379,4 +422,4 @@ function addJavascript(jsname,pos)
     th.appendChild(s);
 } 
 
-console.log("Utils loaded!");
+_console.log("Utils loaded!");

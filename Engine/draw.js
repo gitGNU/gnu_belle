@@ -35,27 +35,24 @@ function scaleAll(scaleWidth, scaleHeight, reset)
 {
     var width = Novel.width;
     var height = Novel.height;
-    var gameCanvas = document.getElementById('gameCanvas');
-    var bgCanvas = document.getElementById('gameBackgroundCanvas');
-    var bgContext = bgCanvas.getContext('2d');
-  
-    if (reset) {
-      scaleWidth = 10 / (scaleWidth * 10);
-      scaleHeight = 10 / (scaleHeight * 10);
-      Novel.scaleWidthFactor = 1;
-      Novel.scaleHeightFactor = 1;
+    var container = document.getElementById('container');
+    if (! Novel.usingDOM) {
+        var gameCanvas = document.getElementById('gameCanvas');
+        var bgCanvas = document.getElementById('gameBackgroundCanvas');
+        var bgContext = bgCanvas.getContext('2d');
     }
-    else {
-      Novel.scaleWidthFactor = scaleWidth;
-      Novel.scaleHeightFactor = scaleHeight;
-    }
+
+    Novel.scaleWidthFactor = scaleWidth;
+    Novel.scaleHeightFactor = scaleHeight;
 
     //scale font before all objects in case some of the objects use text
     scaleFont(Novel.font, scaleWidth);
     
     //scale all objects if necessary
+    var scene = null;
     for(var i=0; i < Novel.scenes.length; i++) {
       scene = Novel.scenes[i];
+      //scene.scale(scaleWidth, scaleHeight);
       for (var j=0; j < scene.objects.length; j++) {
           object = scene.objects[j];
           object.scale(scaleWidth, scaleHeight);
@@ -68,15 +65,18 @@ function scaleAll(scaleWidth, scaleHeight, reset)
       }
     }
 
-    Novel.width = width * scaleWidth;
-    Novel.height = height * scaleHeight;
-    bgCanvas.width *= scaleWidth; 
-    bgCanvas.height *= scaleHeight;
-    gameCanvas.width *= scaleWidth;
-    gameCanvas.height *= scaleHeight;
-    
-    if (Novel.currentScene)
-        Novel.currentScene.paint(bgContext);
+    width *= scaleWidth;
+    height *= scaleHeight;
+    Novel.width = width;
+    Novel.height = height;
+    if (! Novel.usingDOM) {
+        bgCanvas.width = width; 
+        bgCanvas.height = height;
+        gameCanvas.width = width;
+        gameCanvas.height = height;
+    }
+    container.style.width = width + "px";
+    container.style.height = height + "px";
 }
 
 function scaleFont(font, scale)
@@ -101,27 +101,36 @@ function initDisplay()
     var paddingTop = 0;
     var paddingLeft = 0;
     var container = document.getElementById('container');
-    var gameCanvas = document.getElementById('gameCanvas');
-    var myContext = gameCanvas.getContext('2d');
-    var bgCanvas = document.getElementById('gameBackgroundCanvas');
-    var bgContext = bgCanvas.getContext('2d');
-
-    gameCanvas.width = width;
-    gameCanvas.height = height;
-    bgCanvas.width = width;
-    bgCanvas.height = height;
-
+    if (! Novel.usingDOM) {
+        var gameCanvas = document.getElementById('gameCanvas');
+        var myContext = gameCanvas.getContext('2d');
+        var bgCanvas = document.getElementById('gameBackgroundCanvas');
+        var bgContext = bgCanvas.getContext('2d');
+    }
+    var leftPane = document.getElementById('leftPane');
+    var rightPane = document.getElementById('rightPane');
+    var topPane = document.getElementById('topPane');
+    var bottomPane = document.getElementById('bottomPane');
+    var _windowWidth = windowWidth();
+    var _windowHeight = windowHeight();
+    var scaleWidth = Novel.scaleWidthFactor;
+    var scaleHeight = Novel.scaleHeightFactor;
+    
     //reset any previous scaling
     if (Novel.scaleWidthFactor != 1 && Novel.scaleHeightFactor != 1) {
-      scaleAll(Novel.scaleWidthFactor, Novel.scaleHeightFactor, true);
+      scaleWidth = 10 / (scaleWidth * 10);
+      scaleHeight = 10 / (scaleHeight * 10);
+      scaleAll(scaleWidth, scaleHeight);
+      Novel.scaleWidthFactor = 1;
+      Novel.scaleHeightFactor = 1;
     }
         
     //if canvas size is bigger than screen, scale it
-    if (gameCanvas.width > window.innerWidth)
-        scaleWidth = window.innerWidth / gameCanvas.width;
+    if (Novel.width > _windowWidth)
+        scaleWidth = _windowWidth / Novel.width;
     
-    if (gameCanvas.height > window.innerHeight)
-        scaleHeight = window.innerHeight / gameCanvas.height;
+    if (Novel.height > _windowHeight)
+        scaleHeight = _windowHeight / Novel.height;
     
     if (scaleHeight < scaleWidth)
         scaleWidth = scaleHeight;
@@ -132,18 +141,57 @@ function initDisplay()
     scaleAll(scaleWidth, scaleHeight);
     
     //if canvas size is smaller than screen, center it, otherwise no padding is added
-    if (gameCanvas.width < window.innerWidth )
-        paddingLeft = (window.innerWidth - gameCanvas.width) / 2;
+    if (Novel.width < _windowWidth )
+        paddingLeft = (_windowWidth - Novel.width) / 2;
     
-    if (gameCanvas.height < window.innerHeight)
-        paddingTop = (window.innerHeight - gameCanvas.height) / 2;
+    if (Novel.height < _windowHeight)
+        paddingTop = (_windowHeight - Novel.height) / 2;
     
-    container.style.marginTop = paddingTop + "px";
-    container.style.marginLeft = paddingLeft + "px";
+    container.style.top = paddingTop + "px";
+    container.style.left = paddingLeft + "px";
+
+    width = Novel.width;
+    height = Novel.height;
     
-    myContext.font = Novel.font;    
-    Novel.context = myContext;
-    Novel.bgContext = bgContext;
+    container.style.width = width + "px";
+    container.style.height = height + "px";
+    
+    if (! Novel.usingDOM) {
+        gameCanvas.width = width;
+        gameCanvas.height = height;
+        bgCanvas.width = width;
+        bgCanvas.height = height;
+        myContext.font = Novel.font;    
+        Novel.context = myContext;
+        Novel.bgContext = bgContext;
+    }
+      
+    _windowWidth += "px";
+    _windowHeight += "px";
+      
+    leftPane.style.display = 'block';
+    leftPane.style.width = paddingLeft + "px";
+    leftPane.style.height = _windowHeight;
+    
+    rightPane.style.display = 'block';
+    rightPane.style.left = paddingLeft + width + "px";
+    rightPane.style.width = paddingLeft + "px";
+    rightPane.style.height = _windowHeight;
+    
+    topPane.style.display = 'block';
+    topPane.style.height = paddingTop + "px";
+    topPane.style.top = 0;
+    topPane.style.width = _windowWidth;
+
+    bottomPane.style.display = 'block';
+    bottomPane.style.height = paddingTop + "px";
+    bottomPane.style.width = _windowWidth;
+    bottomPane.style.top = paddingTop + height + "px";
+    
+    if (Novel.currentScene) {
+        Novel.currentScene.redrawBackground = true;
+        addObjects(Novel.currentScene);
+    }
 }
 
 function redraw()
@@ -156,10 +204,8 @@ function redraw()
     var context = Novel.context;
     var length = 0;
     
-    if (Novel.currentScene.redrawBackground) {
-        Novel.currentScene.redrawBackground = false;
+    if (Novel.currentScene.redrawBackground)
         Novel.currentScene.paint(Novel.bgContext);
-    }
 
     for(i=objectsToDraw.length-1; i !== -1; --i) {
         if (! objectsToDraw[i].redraw || ! objectsToDraw[i].visible)
@@ -199,7 +245,7 @@ function draw()
 {   
     Novel.drawing = true;
     redraw();
-   
+    
     if (_drawFPS) 
         drawFPS();
     
@@ -212,14 +258,16 @@ function needsRedraw()
         Novel.forceRedraw = false;
         return true;
     }
-    
-    if (Novel.currentScene && Novel.currentScene.redrawBackground)
+
+    if (Novel.currentScene && Novel.currentScene.redrawBackground) {
         return true;
+    }
     
     var objects = Novel.currentScene.objects;
     for(var i=0; i !== objects.length; i++) {
-        if (objects[i].needsRedraw())
+        if (objects[i].needsRedraw()) {
             return true;
+        }
     }
     
     return false;
@@ -249,4 +297,4 @@ function drawFPS()
     }
 }
 
-console.log("Draw module loaded!");
+_console.log("Draw module loaded!");

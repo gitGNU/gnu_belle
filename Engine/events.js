@@ -22,8 +22,8 @@ function mapToCanvas(event)
 {
     var x = event.x || event.pageX;
     var y = event.y || event.pageY;
-    var marginLeft = parseInt(container.style.marginLeft, 10);
-    var marginTop = parseInt(container.style.marginTop, 10);
+    var marginLeft = parseInt(container.style.left, 10);
+    var marginTop = parseInt(container.style.top, 10);
     
     ev.canvasX = x - marginLeft;
     ev.canvasY = y - marginTop;
@@ -93,7 +93,7 @@ document.onkeyup = function(event)
 function resize() 
 {
     var _view = 'portrait';  
-    if (window.innerWidth > window.innerHeight)
+    if (windowWidth() > windowHeight())
         _view = 'landscape';
         
     if (window.view != _view) {
@@ -103,7 +103,7 @@ function resize()
 }
 
 if (window.addEventListener) 
-    window.addEventListener('resize', resize, false);
+  window.addEventListener('resize', resize, false);
 else if (window.attachEvent)
   window.attachEvent('resize', resize);
 

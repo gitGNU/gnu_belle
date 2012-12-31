@@ -132,7 +132,7 @@ function Fade(data)
     if (this.fadeType == "in") {
         if (this.object) {
             this.target = this.object.color.alpha;
-            this.bgTarget = this.object.rect.color.alpha;
+            this.bgTarget = this.object.backgroundColor.alpha;
         }
         else {
             this.target = 255;
@@ -157,15 +157,15 @@ Fade.prototype.execute = function () {
     
     //special case for fade in; fade out usually goes to zero
     if (this.fadeType == "in") {
-        this.target = this.object.color.alpha;
-        this.bgTarget = this.object.rect.color.alpha;
+        this.target = this.object.opacity();
+        this.bgTarget = this.object.backgroundOpacity();
     }
     
     //this.reset();
     
     if (this.fadeType == "in") {
-        this.object.rect.color.alpha  = 0;
-        this.object.color.alpha = 0;
+        this.object.setBackgroundOpacity(0);
+        this.object.setOpacity(0);
     }
      
     this.interval = setInterval(function() {t.fade();}, this.time);        
@@ -174,10 +174,12 @@ Fade.prototype.execute = function () {
 
 Fade.prototype.fade = function () {
     this.timePassed += this.time;
-  
+    var backgroundOpacity = this.object.backgroundOpacity();
+    var opacity = this.object.color.alpha;
+    
     if (this.timePassed >= this.duration ||
-       (this.fadeType == "in" && this.object.color.alpha >= this.target) ||
-       (this.fadeType == "out" && this.object.color.alpha <= this.target)) {
+       (this.fadeType == "in" && opacity >= this.target) ||
+       (this.fadeType == "out" && opacity <= this.target)) {
         clearInterval(this.interval);
         this.interval = null;
         this.finished = true;
@@ -186,16 +188,16 @@ Fade.prototype.fade = function () {
     }
     
     if (this.fadeType == "in") {
-      if (this.object.color.alpha < this.target)
-          this.object.color.alpha += this.increment;
-      if (this.object.rect.color.alpha < this.bgTarget)
-          this.object.rect.color.alpha += this.increment;
+      if (opacity < this.target)
+          this.object.setOpacity(opacity + this.increment);
+      if (backgroundOpacity < this.bgTarget)
+          this.object.setBackgroundOpacity(backgroundOpacity + this.increment);
     }
     else {
-      if (this.object.color.alpha > this.target)
-          this.object.color.alpha += this.increment;
-      if (this.object.rect.color.alpha > this.bgTarget)
-          this.object.rect.color.alpha += this.increment;
+      if (opacity > this.target)
+          this.object.setOpacity(opacity+this.increment);
+      if (backgroundOpacity > this.bgTarget)
+          this.object.setBackgroundOpacity(backgroundOpacity + this.increment);
     }
       
     this.object.redraw = true;
@@ -204,15 +206,15 @@ Fade.prototype.fade = function () {
 Fade.prototype.skip = function () {
     if (! this.skippable)
         return;
-    this.object.color.alpha = this.target;
-    this.object.rect.color.alpha = this.bgTarget;
+    this.object.setOpacity(this.target);
+    this.object.setBackgroundOpacity(this.bgTarget);
     Action.prototype.skip.call(this);
 }
 
 Fade.prototype.reset = function () {
     Action.prototype.reset.call(this);
-    this.object.color.alpha = this.target;
-    this.object.rect.color.alpha = this.bgTarget;
+    this.object.setOpacity(this.target);
+    this.object.setBackgroundOpacity(this.bgTarget);
 }
 
 /*********** SLIDE ACTION ***********/
@@ -248,28 +250,28 @@ Slide.prototype.execute = function ()
     this.reset();
     var duration = this.duration / this.startPoint.distance(this.endPoint);
     //duration *= 2;
-    this.object.rect.x = this.startPoint.x;
-    this.object.rect.y = this.startPoint.y;
+    this.object.setX(this.startPoint.x);
+    this.object.setY(this.startPoint.y);
     
     this.object.redraw = true;
-    
     
     this.interval = setInterval(function() { t.slide(); }, duration);
 }
 
 Slide.prototype.slide = function () 
 {   
-    var x = this.object.rect.x, y = this.object.rect.y;
-    if ((this.incX > 0 && this.object.rect.x < this.endPoint.x) ||
-        (this.incX < 0 && this.object.rect.x > this.endPoint.x))
+    var x = this.object.x, y = this.object.y;
+    
+    if ((this.incX > 0 && this.object.x < this.endPoint.x) ||
+        (this.incX < 0 && this.object.x > this.endPoint.x))
         x += this.incX;
     
-    if ((this.incY > 0 && this.object.rect.y < this.endPoint.y) ||
-        (this.incY < 0 && this.object.rect.y > this.endPoint.y))
+    if ((this.incY > 0 && this.object.y < this.endPoint.y) ||
+        (this.incY < 0 && this.object.y > this.endPoint.y))
         y += this.incY;
     
     //if x and y have NOT been modified, set action finished
-    if (x === this.object.rect.x && y === this.object.rect.y) {
+    if (x === this.object.x && y === this.object.y) {
         clearInterval(this.interval);
         this.setFinished(true);
         return;
@@ -281,8 +283,8 @@ Slide.prototype.slide = function ()
 
 Slide.prototype.skip = function () {
     clearInterval(this.interval);
-    this.object.rect.x = this.endPoint.x;
-    this.object.rect.y = this.endPoint.y;
+    this.object.setX(this.endPoint.x);
+    this.object.setY(this.endPoint.y);
     this.setFinished(true);
 }
 
@@ -291,8 +293,8 @@ Slide.prototype.reset = function () {
     Action.prototype.reset.call(this);
     
     if (this.objectOriginalPosition) {
-        this.object.rect.x = this.objectOriginalPosition.x;
-        this.object.rect.y = this.objectOriginalPosition.y;
+        this.object.setX(this.objectOriginalPosition.x);
+        this.object.setY(this.objectOriginalPosition.y);
     }
     
     this.setFinished(false);
@@ -376,7 +378,7 @@ Dialogue.prototype.updateText = function() {
         return;
     }
 
-    this.object.text += this.text[this.index];
+    this.object.appendText(this.text.charAt(this.index));
     this.index += 1;
     this.object.redraw = true;
 }
@@ -387,9 +389,7 @@ Dialogue.prototype.setVisible = function (visible)
 }
 
 Dialogue.prototype.skip = function () {
-    for(var i=this.index; i !== this.text.length; i++)
-        this.object.text += this.text[i];
-    
+    this.object.appendText(this.text.slice(this.index));
     this.index = this.text.length;
     this.object.redraw = true;
 }
@@ -441,7 +441,7 @@ Wait.prototype.end = function ()
 Wait.prototype.skip = function (){
     if (this.skippable)
         this.setFinished(true);
-    console.log("skipped");
+    _console.log("skipped");
 }
 
 
@@ -543,7 +543,7 @@ Show.prototype.execute = function ()
         this.transitions[i].execute();
     }
     
-    this.object.visible = true;
+    this.object.setVisible(true);
     
     if (this.transitions.length === 0)
         this.setFinished(true);
@@ -603,11 +603,9 @@ Hide.prototype.execute = function ()
         this.transitions[i].execute();
     }
     
-    this.object.visible = true;
-    
     if (this.transitions.length === 0) {
         this.setFinished(true);
-        this.object.visible = false;
+        this.object.setVisible(false);
     }
     else
         this.interval = setInterval(function(){ that.check(); }, this.duration);
@@ -620,7 +618,7 @@ Hide.prototype.check = function ()
             return;
     
     clearInterval(this.interval);
-    this.object.visible = false;
+    this.object.setVisible(false);
     this.setFinished(true);
 }
 
@@ -641,8 +639,7 @@ function ChangeBackground(data)
     this.backgroundColor = null;
     
     if ("backgroundImage" in data){
-         this.backgroundImage = new window.Image();
-         this.backgroundImage.src = data["backgroundImage"];
+         this.backgroundImage = new AnimationImage(data["backgroundImage"]);
     }
     
     if ("backgroundColor" in data)
@@ -858,6 +855,7 @@ Branch.prototype.loadCondition = function(condition)
     var conditionParts = [];
     var symbols = ["==", "!=", ">" , ">=", "<", "<=", "&&", "||"];
     var string = false;
+    condition = condition.split("");
   
     for(i=0; i < condition.length; i++) {
         c = condition[i];
@@ -871,6 +869,7 @@ Branch.prototype.loadCondition = function(condition)
             continue;
         }
 
+        _console.log(condition[0]);
         if (c.search(letter) != -1 || c.search(number) != -1 || c == '"' || c == '\'') {
             if (! name) {
                 if (condition.slice(i, _in.length) == _in) {
@@ -991,8 +990,8 @@ ChangeColor.prototype.execute = function()
     }
     
     if (this.changeObjectBackgroundColor) {
-        this.previousObjectBackgroundColor = this.object.rect.color;
-        this.object.rect.color = this.color;
+        this.previousObjectBackgroundColor = this.object.backgroundColor;
+        this.object.setBackgroundColor(this.color);
     }
     
     if (this.changeObjectColor || this.changeObjectBackgroundColor) {
@@ -1007,11 +1006,11 @@ ChangeColor.prototype.reset = function()
     Action.prototype.reset.call(this);
         
     if (this.changeObjectColor && this.previousObjectColor) {
-        this.object.color = this.previousObjectColor;
+        this.object.setColor(this.previousObjectColor);
     }
     
     if (this.changeObjectBackgroundColor && this.previousObjectBackgroundColor) {
-        this.object.rect.color = this.previousObjectBackgroundColor;
+        this.object.setBackgroundColor(this.previousObjectBackgroundColor);
     }
     
     if (this.changeObjectColor || this.changeObjectBackgroundColor)
@@ -1157,7 +1156,6 @@ StopSound.prototype.reset = function () {
 function ShowMenu(data)
 {
     Action.call(this, data);
-    
     this.options = 0;
    
     if ( "options" in data && typeof data["options"] == "number") 
@@ -1174,7 +1172,7 @@ ShowMenu.prototype.execute = function()
     this.reset();
 
     if (this.object) {
-        Novel.currentScene.objects.push(this.object);
+        Novel.currentScene.addObject(this.object);
     }
 }
 
@@ -1183,7 +1181,6 @@ ShowMenu.prototype.receive = function(event)
   if (event.type == "mouseup") {
     this.object.visible = false;
     this.object.redraw = true;
-  
     this.setFinished(true);
   }
   
@@ -1245,7 +1242,8 @@ GetUserInput.prototype.execute = function()
         this.setFinished(true);
         return;
     }
-       
+    
+    
     var value = prompt(this.message, this.defaultValue);
     if (! value)
         value = this.defaultValue;
@@ -1296,9 +1294,6 @@ ChangeGameVariable.prototype.execute = function()
     if (Novel.containsVariable(this.variable))
         currValue = Novel.value(this.variable);
     
-    //console.log("SET GAME VARIABLE");
-    //console.log(this.variable + " " + this.operator + " " + this.value + " " + currValue);
-    
     //if arithmetic operation
     if (this.validOperators.slice(1,5).contains(this.operator)) {
         if (typeof currValue == "string") {
@@ -1341,5 +1336,5 @@ ChangeGameVariable.prototype.execute = function()
     this.setFinished(true);
 }
 
-console.log("Actions loaded!");
+_console.log("Actions loaded!");
 
