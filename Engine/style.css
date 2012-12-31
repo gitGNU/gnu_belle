@@ -25,9 +25,9 @@ body, html
  
 #container
 {
-  margin: 0 auto;
+  /*margin: 0 auto;*/
   position: relative;
-  background-color: black;
+  background-color: #000000;
   color: #FFFFFF;
 }
 
@@ -43,6 +43,14 @@ body, html
     position: absolute; 
     margin: 0 auto;
     z-index: 1;
+}
+
+#leftPane, #rightPane, #topPane, #bottomPane
+{
+    display: none;
+    position: absolute;
+    z-index: 2;
+    background-color: #000000;
 }
 
 #fps 
@@ -69,4 +77,11 @@ body, html
     padding: 0 0;
     margin: 0 0; 
     white-space: nowrap;
+}
+
+#noscript {
+    color: #FFFFFF;
+    border: 3px solid #FF0000;
+    width: auto;
+    text-align: center;
 }
