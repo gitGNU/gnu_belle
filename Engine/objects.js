@@ -367,8 +367,7 @@ Object.prototype.setBackgroundOpacity = function(alpha)
     if (this.backgroundElement) {
         this.backgroundElement.style.opacity = alpha / 255; 
         _console.log("filter: " + this.backgroundElement.style.filter);
-        //if (this.backgroundElement.style.filter)
-        //this.backgroundElement.style.filter = "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
+        //ie support
         this.backgroundElement.style.filter = "alpha(opacity=" + Math.round(100 * alpha / 255) + ");";
     }
     this.backgroundColor.alpha = alpha; 
@@ -392,8 +391,11 @@ Object.prototype.setColor = function (color)
 Object.prototype.setOpacity = function (alpha)
 {
     this.color.alpha = alpha;
-    if (this.element)
+    if (this.element) {
         this.element.style.opacity = alpha / 255;
+        //ie support
+        this.element.style.filter = "alpha(opacity=" + Math.round(100 * alpha / 255) + ");";
+    }
 }
 
 Object.prototype.backgroundOpacity = function()
