@@ -284,7 +284,7 @@ function gameLoop ()
             }
             removeObjects(Novel.currentScene);
             Novel.currentScene = Novel.scenes[Novel.nextScene];
-            //addObjects(Novel.currentScene);
+            addObjects(Novel.currentScene);
             if (! Novel.usingDOM) {
                 Novel.context.clearRect(0, 0, Novel.width, Novel.height);
                 if (Novel.currentScene)
