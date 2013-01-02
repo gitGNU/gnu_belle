@@ -221,17 +221,17 @@ function replaceVariables(text)
     //until the end of string or until any other character that is not a letter nor a digit.
     for(var i=0; i !== text.length; i++) {
       
-      if (text[i].search(validChar) == -1) {
+      if (text.charAt(i).search(validChar) == -1) {
         appendToVariable = false;          
         if (variable)
           variables.push(variable);
         variable = "";
-        if(text[i] == "$")
+        if(text.charAt(i) == "$")
           appendToVariable = true;
       }
         
       if (appendToVariable)
-        variable += text[i];
+        variable += text.charAt(i);
     }
     
     //replace variables with the respective values and append them to the values list
@@ -356,10 +356,15 @@ function isNumber(n) {
 function initElement(element, info)
 {
     element.style.position = "absolute";
-    if (typeof info.width == "string" && info.width.indexOf("%") != -1)
-        console.log(info.name, info.__parent, info.width);
-    element.style.width = info.width + "px";
-    element.style.height = info.height + "px";
+    if (typeof info.width == "string")
+        element.style.width = info.width;
+    else
+        element.style.width = info.width + "px";
+    
+    if (typeof info.height == "string")
+        element.style.height = info.height;
+    else
+        element.style.height = info.height + "px";
     element.style.display = "none";
 }
 

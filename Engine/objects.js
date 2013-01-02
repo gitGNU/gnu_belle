@@ -168,17 +168,11 @@ function Object(info)
     if ("__parent" in info) 
         var parent = info["__parent"];
     
-    if (typeof info.width == "string" || typeof info.height == "string") {
-        if (typeof info.width == "string" && isPercentSize(info.width) && parent && parseInt(parent.width) != NaN)
-            info.width =  parseInt(info.width) * parent.width / 100;
-        else if (isNumber(info.width))
-            info.width = parseInt(info.width);
-    
-        if (isPercentSize(info.height) && parent && parseInt(parent.height) != NaN)
-            info.height =  parseInt(info.height) * parent.height / 100;
-        else if (isNumber(info.height))
-            info.height = parseInt(info.height);
-    }
+    if (typeof info.width == "string" && isPercentSize(info.width) && parent && parseInt(parent.width) != NaN)
+        info.width =  parseInt(info.width) * parent.width / 100;
+
+    if (typeof info.height == "string" && isPercentSize(info.height) && parent && parseInt(parent.height) != NaN)
+        info.height =  parseInt(info.height) * parent.height / 100;
     
     this.element = document.createElement("div");
     this.backgroundElement = document.createElement("div");
@@ -221,6 +215,7 @@ function Object(info)
     this.borderWidth = 0;
     this.borderColor = this.color;
     this.parent = parent ? parent : null;
+    this.type = info["type"];
 
     var actions;
     var action;
@@ -366,7 +361,6 @@ Object.prototype.setBackgroundOpacity = function(alpha)
 {
     if (this.backgroundElement) {
         this.backgroundElement.style.opacity = alpha / 255; 
-        _console.log("filter: " + this.backgroundElement.style.filter);
         //ie support
         this.backgroundElement.style.filter = "alpha(opacity=" + Math.round(100 * alpha / 255) + ");";
     }
@@ -495,7 +489,7 @@ Object.prototype.processEvent = function(event)
 {
     var x = event.canvasX;
     var y = event.canvasY;
-
+    
     if (! this.visible || ! this.contains(x, y))
         return false;
     
@@ -570,15 +564,23 @@ Object.prototype.fullHeight = function()
 Object.prototype.setWidth = function(width)
 {
     this.width = width;
-    if (this.element)
-        this.element.style.width = width + "px";
+    if (this.element) {
+        if (typeof width == "string" && width.indexOf("%") !== -1)
+            this.element.style.width = this.width;
+        else
+            this.element.style.width = width + "px";
+    }
 }
 
 Object.prototype.setHeight = function(height)
 {
     this.height = height;
-    if (this.element)
-        this.element.style.height = height + "px";
+    if (this.element) {
+        if (typeof height == "string" && height.indexOf("%") !== -1)
+            this.element.style.height = this.height;
+        else
+            this.element.style.height = height + "px";
+    }
 }
 
 Object.prototype.show = function()
@@ -941,14 +943,13 @@ ObjectGroup.prototype.processEvent = function(event)
 {
     var x = event.canvasX;
     var y = event.canvasY;
-
+    
     if (! this.visible || ! this.contains(x, y))
         return false;
     
-    
     var result = Object.prototype.processEvent.call(this, event);
     var object = this.objectAt(x, y);
-    _console.log("object:", object);
+
     if (this.hoveredObject && this.hoveredObject != object)
         this.hoveredObject.mouseLeaveEvent(event);
     
