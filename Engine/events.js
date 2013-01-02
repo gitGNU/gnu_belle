@@ -20,20 +20,32 @@ var pressedObject = null;
 
 function mapToCanvas(event)
 {
-    var x = event.x || event.pageX;
-    var y = event.y || event.pageY;
+    var x;
+    var y;
+    
+    var IE = document.all ? true : false; // check to see if you're using IE
+
+    if (IE) { //do if internet explorer 
+        x = event.clientX + document.body.scrollLeft;
+        y = event.clientY + document.body.scrollTop;
+    }
+    else {  //do for all other browsers
+        x = (window.Event) ? event.pageX : event.clientX + (document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft);
+        y = (window.Event) ? event.pageY : event.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
+    }
+
     var marginLeft = parseInt(container.style.left, 10);
     var marginTop = parseInt(container.style.top, 10);
     
-    ev.canvasX = x - marginLeft;
-    ev.canvasY = y - marginTop;
+    event.canvasX = x - marginLeft;
+    event.canvasY = y - marginTop;
 }
 
 document.onmousemove = function(event)
 {
-    ev = event || window.event;
+    var ev = event || window.Event || window.event;
   
-    if (! Novel.currentScene)
+    if (! Novel || ! Novel.currentScene)
         return;
    
     mapToCanvas(ev);
@@ -56,12 +68,12 @@ document.onmousemove = function(event)
 
 document.onmouseup = function(event)
 {
-    ev = event || window.event;
-    
+    var ev = event || window.Event || window.event;
     var processed = false;
+
     if (pressedObject && hoveredObject == pressedObject) {
         mapToCanvas(ev);
-        if (hoveredObject.processEvent(event))
+        if (hoveredObject.processEvent(ev))
             processed = true;
     }
     
@@ -71,17 +83,21 @@ document.onmouseup = function(event)
 
 document.onmousedown = function(event) 
 {
+    var ev = event || window.Event || window.event;
+    
     pressedObject = hoveredObject;
     
     if (hoveredObject) {
         mapToCanvas(event);
-        hoveredObject.processEvent(event)
+        hoveredObject.processEvent(ev)
     }
 }
 
 document.onkeyup = function(event) 
 {
-    switch(event.keyCode) {
+    var ev = event || window.Event || window.event;
+        
+    switch(ev.keyCode) {
         case 13: //ENTER
         case 32: //SPACE
             //if (Novel.currentAction instanceof Dialogue || Novel.currentAction instanceof Wait)
@@ -106,5 +122,3 @@ if (window.addEventListener)
   window.addEventListener('resize', resize, false);
 else if (window.attachEvent)
   window.attachEvent('resize', resize);
-
-
