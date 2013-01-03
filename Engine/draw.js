@@ -52,7 +52,7 @@ function scaleAll(scaleWidth, scaleHeight, reset)
     var scene = null;
     for(var i=0; i < Novel.scenes.length; i++) {
       scene = Novel.scenes[i];
-      //scene.scale(scaleWidth, scaleHeight);
+      scene.scale(scaleWidth, scaleHeight);
       for (var j=0; j < scene.objects.length; j++) {
           object = scene.objects[j];
           object.scale(scaleWidth, scaleHeight);
