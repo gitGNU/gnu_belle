@@ -517,7 +517,6 @@ Object.prototype.moveTo = function(x, y)
 {
     this.setX(x);
     this.setY(y);
-    //this.moveToPoint = new Point(x, y);
 }
 
 Object.prototype.needsRedraw = function()
@@ -634,7 +633,6 @@ function Image (data)
     if ("image" in data) {
         this.image = new AnimationImage(data["image"], this);
         if (this.element) {
-            initElement(this.image.img, data);
             this.image.img.style.display = "block";
             var firstNode = this.element.childNodes[0];
             this.element.insertBefore(this.image.img, firstNode);
