@@ -249,7 +249,7 @@ Slide.prototype.execute = function ()
     var t = this;
     this.reset();
     var duration = this.duration / this.startPoint.distance(this.endPoint);
-    //duration *= 2;
+    
     this.object.setX(this.startPoint.x);
     this.object.setY(this.startPoint.y);
     
@@ -520,6 +520,14 @@ ChangeVisibility.prototype.reset = function ()
         this.transitions[i].reset();
 }
 
+ChangeVisibility.prototype.scale = function (widthFactor, heightFactor) 
+{
+    //Action.prototype.scale.call(this, widthFactor, heightFactor);
+        
+    for (var i=0; i < this.transitions.length; i++) 
+        this.transitions[i].scale(widthFactor, heightFactor);
+}
+
 /*********** Show Action ***********/
 
 function Show(data)
@@ -575,14 +583,6 @@ Show.prototype.reset = function ()
     
     for (var i=0; i !== this.transitions.length; i++)
         this.transitions[i].reset();
-}
-
-Show.prototype.scale = function (widthFactor, heightFactor) 
-{
-    //Action.prototype.scale.call(this, widthFactor, heightFactor);
-        
-    for (var i=0; i < this.transitions.length; i++) 
-        this.transitions[i].scale(widthFactor, heightFactor);
 }
 
 /*********** HIDE CHARACTER ACTION ***********/
