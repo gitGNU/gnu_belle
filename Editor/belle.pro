@@ -102,7 +102,8 @@ HEADERS      += belle.h\
     engine.h \
     drawing_surface_widget.h \
     add_character_dialog.h \
-    animationimage.h
+    animationimage.h \
+    choosefontwidget.h
                 
 
 SOURCES      += main.cpp\
@@ -190,6 +191,7 @@ SOURCES      += main.cpp\
     engine.cpp \
     drawing_surface_widget.cpp \
     add_character_dialog.cpp \
-    animationimage.cpp
+    animationimage.cpp \
+    choosefontwidget.cpp
 
 RESOURCES += media.qrc
