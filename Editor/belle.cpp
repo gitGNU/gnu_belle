@@ -63,16 +63,6 @@ Belle::Belle(QWidget *widget)
     mDisableClick = false;
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
-    //setup default data
-    mNovelData.insert("title", tr("Untitled"));
-    mNovelData.insert("width", WIDTH);
-    mNovelData.insert("height", HEIGHT);
-    mNovelData.insert("textSpeed", 50);
-    mNovelData.insert("fontSize", 18);
-    mNovelData.insert("fontFamily", "Arial");
-    setNovelProperties(mNovelData);
-    Engine::guessPath();
-
     //setup scenes
     Scene::setEditorWidget(new SceneEditorWidget);
     //init scene manager instance
@@ -81,6 +71,17 @@ Belle::Belle(QWidget *widget)
     connect(SceneManager::instance(), SIGNAL(selectionChanged(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
     connect(SceneManager::instance(), SIGNAL(currentSceneChanged()), this, SLOT(onCurrentSceneChanged()));
     SceneManager::setClipboard(new Clipboard(SceneManager::instance()));
+
+    //setup default data
+    QVariantMap data;
+    data.insert("title", tr("Untitled"));
+    data.insert("width", WIDTH);
+    data.insert("height", HEIGHT);
+    data.insert("textSpeed", 50);
+    data.insert("fontSize", 18);
+    data.insert("fontFamily", QFontInfo(QFont()).family());
+    setNovelProperties(data);
+    Engine::guessPath();
 
     mUi.scenesWidget->setIconSize(QSize(64, 48));
 
@@ -778,7 +779,7 @@ void Belle::exportGameFile(const QString& path)
         return;
 
     QVariantMap jsonFile;
-    QString font = QString("%1px %2").arg(mNovelData.value("fontSize").toInt()).arg(mNovelData.value("fontFamily").toString());
+    QString font = Utils::font(mNovelData.value("fontSize").toInt(), mNovelData.value("fontFamily").toString());
     QMapIterator<QString, QVariant> it(mNovelData);
 
     while(it.hasNext()){
@@ -983,12 +984,14 @@ void Belle::setNovelProperties(const QVariantMap& _data)
 
     if (data.contains("width") && data.value("width").canConvert(QVariant::Int)) {
         mNovelData.insert("width", data.value("width").toInt());
-        SceneManager::instance()->setSceneWidth(data.value("width").toInt());
+        if (SceneManager::instance())
+            SceneManager::instance()->setSceneWidth(data.value("width").toInt());
     }
 
     if (data.contains("height") && data.value("height").canConvert(QVariant::Int)) {
         mNovelData.insert("height", data.value("height").toInt());
-        SceneManager::instance()->setSceneHeight(data.value("height").toInt());
+        if (SceneManager::instance())
+            SceneManager::instance()->setSceneHeight(data.value("height").toInt());
     }
 
     if (data.contains("textSpeed") && data.value("textSpeed").canConvert(QVariant::Int)) {
@@ -998,19 +1001,19 @@ void Belle::setNovelProperties(const QVariantMap& _data)
     if (data.contains("font") && data.value("font").type() == QVariant::String) {
         int fontSize = Utils::fontSize(data.value("font").toString());
         QString fontFamily = Utils::fontFamily(data.value("font").toString());
-        Object::setFontSize(fontSize);
-        Object::setFontFamily(fontFamily);
+        Object::setDefaultFontSize(fontSize);
+        Object::setDefaultFontFamily(fontFamily);
         mNovelData.insert("fontSize", fontSize);
         mNovelData.insert("fontFamily", fontFamily);
     }
 
     if (data.contains("fontSize") && data.value("fontSize").canConvert(QVariant::Int)) {
-        Object::setFontSize(data.value("fontSize").toInt());
+        Object::setDefaultFontSize(data.value("fontSize").toInt());
         mNovelData.insert("fontSize", data.value("fontSize").toInt());
     }
 
     if (data.contains("fontFamily") && data.value("fontFamily").type() == QVariant::String) {
-        Object::setFontFamily(data.value("fontFamily").toString());
+        Object::setDefaultFontFamily(data.value("fontFamily").toString());
         mNovelData.insert("fontFamily", data.value("fontFamily").toString());
     }
 }
