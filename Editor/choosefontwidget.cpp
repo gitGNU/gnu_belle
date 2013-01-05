@@ -6,6 +6,8 @@
 #include <QFileDialog>
 #include <QDebug>
 
+#include "resource_manager.h"
+
 static QStringList mFontFamilies;
 
 ChooseFontWidget::ChooseFontWidget(QWidget *parent) :
@@ -56,7 +58,8 @@ void ChooseFontWidget::onItemActivated(int index)
         QStringList families;
 
         if (! filePath.isEmpty()) {
-            int id = QFontDatabase::addApplicationFont(filePath);
+            int id = ResourceManager::newFont(filePath);
+            qDebug() << id;
             if (id != -1) {
                 mCustomFontsIds.append(id);
                 families = QFontDatabase::applicationFontFamilies(id);

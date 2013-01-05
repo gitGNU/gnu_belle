@@ -32,6 +32,7 @@ static QList<Object*> mResources;
 static ResourceManager* mInstance = new ResourceManager();
 static QHash<QString, AnimationImage*> mImageCache;
 static QHash<AnimationImage*, int> mImageReferences;
+static QHash<QString, int> mFontsPaths;
 static QString mRelativePath = "";
 
 ResourceManager::ResourceManager(QObject *parent) :
@@ -347,11 +348,27 @@ void ResourceManager::setRelativePath(const QString & path)
     mRelativePath = path;
 }
 
+int ResourceManager::newFont(const QString& path)
+{
+    if (mFontsPaths.contains(path))
+        return mFontsPaths.value(path, -1);
+
+    int id = QFontDatabase::addApplicationFont(path);
+    mFontsPaths.insert(path, id);
+    return id;
+}
+
 void ResourceManager::exportResources(const QDir& dir)
 {
     foreach(const QString& path, mImageCache.keys()) {
         AnimationImage* image = mImageCache[path];
         if (image)
             image->save(dir);
+    }
+
+    QHashIterator<QString, int> it(mFontsPaths);
+    while(it.hasNext()) {
+        it.next();
+        QFile::copy(it.key(), dir.absoluteFilePath(it.key()));
     }
 }
