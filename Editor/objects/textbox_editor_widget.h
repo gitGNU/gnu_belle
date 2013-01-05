@@ -25,6 +25,7 @@
 #include "textbox.h"
 #include "object.h"
 #include "object_editor_widget.h"
+#include "choosefontwidget.h"
 
 class TextBox;
 
@@ -35,10 +36,11 @@ class TextPropertiesWidget : public ObjectEditorWidget
     QTextEdit* mTextEdit;
     ColorPushButton* mColorButton;
     TextBox* mCurrentObject;
-    QSpinBox* mLeftPaddingSpinBox;
-    QSpinBox* mTopPaddingSpinBox;
     QComboBox* mHorizontalAlignmentComboBox;
     QComboBox* mVerticalAlignmentComboBox;
+    QSpinBox* mFontSizeSpin;
+    ChooseFontWidget* mChooseFontWidget;
+
 
 public:
     TextPropertiesWidget(QWidget *parent = 0);
@@ -51,9 +53,9 @@ public slots:
     void onColorChosen(const QColor&);
 
 private slots:
-    void onLeftPaddingValueChanged(int);
-    void onTopPaddingValueChanged(int);
     void onAlignmentChanged(int);
+    void onFontSizeChanged(int);
+    void onFontChosen(const QString&);
 
 private:
     Qt::Alignment horizontalAlignment();

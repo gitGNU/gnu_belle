@@ -18,6 +18,7 @@
 
 #include <QTextEdit>
 #include <QPushButton>
+#include <QSpinBox>
 #include <QDebug>
 
 TextPropertiesWidget::TextPropertiesWidget(QWidget *parent) :
@@ -28,9 +29,9 @@ TextPropertiesWidget::TextPropertiesWidget(QWidget *parent) :
 
     QColor color = this->palette().color(QPalette::WindowText);
     mColorButton->setText(color.name());
-    mLeftPaddingSpinBox = new QSpinBox(this);
-    mTopPaddingSpinBox = new QSpinBox(this);
     mTextEdit = new QTextEdit(this);
+    mChooseFontWidget = new ChooseFontWidget(this);
+    mFontSizeSpin = new QSpinBox(this);
     mHorizontalAlignmentComboBox = new QComboBox(this);
     mHorizontalAlignmentComboBox->addItem(tr("Center"), "hcenter");
     mHorizontalAlignmentComboBox->addItem(tr("Right"), "right");
@@ -40,38 +41,27 @@ TextPropertiesWidget::TextPropertiesWidget(QWidget *parent) :
     mVerticalAlignmentComboBox->addItem(tr("Bottom"), "bottom");
     mVerticalAlignmentComboBox->addItem(tr("Top"), "top");
 
-    this->beginGroup("Text");
-    this->appendRow(tr("Text"), mTextEdit);
-    this->appendRow(tr("Color"), mColorButton);
-    appendRow(tr("Left Padding"), mLeftPaddingSpinBox);
-    appendRow(tr("Top Padding"), mTopPaddingSpinBox);
+    beginGroup("Text");
+    appendRow(tr("Text"), mTextEdit);
+    appendRow(tr("Color"), mColorButton);
+    appendRow(tr("Font"), mChooseFontWidget);
+    appendRow(tr("Font size"), mFontSizeSpin);
     appendRow(tr("Horizontal Alignment"), mHorizontalAlignmentComboBox);
     appendRow(tr("Vertical Alignment"), mVerticalAlignmentComboBox);
-    this->endGroup();
+    endGroup();
 
-    connect(mLeftPaddingSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onLeftPaddingValueChanged(int)));
-    connect(mTopPaddingSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onTopPaddingValueChanged(int)));
     connect(mTextEdit, SIGNAL(textChanged()), this, SLOT(onTextEditDataChanged()));
     connect(mColorButton, SIGNAL(colorChosen(const QColor&)), this, SLOT(onColorChosen(const QColor&)));
     connect(mHorizontalAlignmentComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onAlignmentChanged(int)));
     connect(mVerticalAlignmentComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onAlignmentChanged(int)));
+    connect(mFontSizeSpin, SIGNAL(valueChanged(int)), this, SLOT(onFontSizeChanged(int)));
+    connect(mChooseFontWidget, SIGNAL(fontChosen(const QString&)), this, SLOT(onFontChosen(const QString&)));
 
     mTextEdit->setMaximumHeight(mTextEdit->height()/2);
 
     mCurrentObject = 0;
 }
 
-void TextPropertiesWidget::onLeftPaddingValueChanged(int v)
-{
-    if (mCurrentObject)
-        mCurrentObject->setTextPadding("left", v);
-}
-
-void TextPropertiesWidget::onTopPaddingValueChanged(int v)
-{
-    if (mCurrentObject)
-        mCurrentObject->setTextPadding("top", v);
-}
 
 void TextPropertiesWidget::onTextEditDataChanged()
 {
@@ -123,8 +113,8 @@ void TextPropertiesWidget::updateData(Object *obj)
     mTextEdit->setText(mCurrentObject->text());
     mColorButton->setText(mCurrentObject->textColor().name());
     mColorButton->setColor(mCurrentObject->textColor());
-    mLeftPaddingSpinBox->setValue(mCurrentObject->textPadding("left"));
-    mTopPaddingSpinBox->setValue(mCurrentObject->textPadding("top"));
+    mChooseFontWidget->setCurrentFontFamily(mCurrentObject->fontFamily());
+    mFontSizeSpin->setValue(mCurrentObject->fontSize());
 }
 
 void TextPropertiesWidget::onAlignmentChanged(int index)
@@ -173,3 +163,16 @@ Qt::Alignment TextPropertiesWidget::verticalAlignment()
 
     return alignment;
 }
+
+void TextPropertiesWidget::onFontSizeChanged(int size)
+{
+    if (mCurrentObject)
+        mCurrentObject->setFontSize(size);
+}
+
+void TextPropertiesWidget::onFontChosen(const QString & family)
+{
+    if (mCurrentObject)
+        mCurrentObject->setFontFamily(family);
+}
+
