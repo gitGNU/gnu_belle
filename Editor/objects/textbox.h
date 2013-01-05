@@ -34,7 +34,6 @@ class TextBox : public Object
     QColor mTextColor;
     QRect mTextRect;
     QString mPlaceholderText;
-    Padding mTextPadding;
     Qt::Alignment mTextAlignment;
     QFont mFont;
 
@@ -49,11 +48,11 @@ public:
     QColor textColor();
     QRect textRect();
     QString currentText();
+    int fontSize();
+    void setFontSize(int);
 
-    Padding textPadding();
-    int textPadding(const QString&);
-    void setTextPadding(const Padding&);
-    void setTextPadding(const QString&, int);
+    QString fontFamily();
+    void setFontFamily(const QString&);
 
     QString placeholderText() const;
     void setPlaceholderText(const QString&);

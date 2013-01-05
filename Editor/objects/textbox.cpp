@@ -55,9 +55,6 @@ TextBox::TextBox(const QVariantMap & data, QObject * parent):
             mText = data.value("text").toString();
     }
 
-    if (data.contains("textPadding") && data.value("textPadding").type() == QVariant::Map)
-        mTextPadding = Padding(data.value("textPadding").toMap());
-
     if (data.contains("textColor") && data.value("textColor").type() == QVariant::List)
         mTextColor = Utils::listToColor(data.value("textColor").toList());
 
@@ -96,6 +93,8 @@ void TextBox::init(const QString& text)
     mPlaceholderText = "";
     mTextAlignment = Qt::AlignLeft | Qt::AlignTop;
     setType("TextBox");
+    mFont.setFamily(Object::defaultFontFamily());
+    mFont.setPixelSize(Object::defaultFontSize());
 }
 
 TextBox::~TextBox()
@@ -166,27 +165,25 @@ void TextBox::move(int x, int y)
 void TextBox::setX(int x)
 {
     Object::setX(x);
-    mTextRect.moveTo(this->x()+mTextPadding.left(), mTextRect.y());
 }
 
 void TextBox::setY(int y)
 {
     Object::setY(y);
-    mTextRect.moveTo(mTextRect.x(), this->y()+mTextPadding.top());
 }
 
 
 void TextBox::setWidth(int w, bool percent)
 {
     Object::setWidth(w, percent);
-    mTextRect.setWidth(width()-mTextPadding.left()-mTextPadding.right());
+    mTextRect.setWidth(width());
     emit dataChanged();
 }
 
 void TextBox::setHeight(int h, bool percent)
 {
     Object::setHeight(h, percent);
-    mTextRect.setHeight(h-mTextPadding.top()-mTextPadding.bottom());
+    mTextRect.setHeight(h);
     emit dataChanged();
 
 }
@@ -216,34 +213,6 @@ void TextBox::alignText()
 
 }
 
-Padding TextBox::textPadding()
-{
-    return mTextPadding;
-}
-
-int TextBox::textPadding(const QString & side)
-{
-    return mTextPadding.padding(side);
-}
-
-void TextBox::setTextPadding(const Padding& padding)
-{
-    if (mTextPadding.top() != padding.top())
-        mTextRect.setTop(sceneRect().top()+padding.top());
-    if (mTextPadding.left() != padding.left())
-        mTextRect.setLeft(sceneRect().left()+padding.left());
-
-    mTextPadding = padding;
-    emit dataChanged();
-}
-
-void TextBox::setTextPadding(const QString & side, int value)
-{
-    Padding padding = mTextPadding;
-    padding.setPadding(side, value);
-    setTextPadding(padding);
-}
-
 QString TextBox::placeholderText() const {
     return mPlaceholderText;
 }
@@ -263,9 +232,7 @@ void TextBox::paint(QPainter & painter)
     rect.setHeight(contentHeight());
     QPen pen(mTextColor);
     painter.save();
-    QFont font(Object::fontFamily());
-    font.setPixelSize(Object::fontSize());
-    painter.setFont(font);
+    painter.setFont(mFont);
     painter.setPen(pen);
     painter.drawText(rect, mTextAlignment | Qt::TextWordWrap, currentText());
     painter.restore();
@@ -280,8 +247,9 @@ QVariantMap TextBox::toJsonObject()
 
     object.insert("textColor", color);
     object.insert("text", mText);
-    object.insert("textPadding", mTextPadding.toJsonObject());
     object.insert("textAlignment", textAlignmentAsString());
+    if (mFont != Object::defaultFont())
+        object.insert("font", Utils::font(mFont.pixelSize(), mFont.family()));
 
     filterResourceData(object);
 
@@ -329,5 +297,28 @@ void TextBox::setTextAlignment(Qt::Alignment alignment)
     mTextAlignment = alignment;
     emit dataChanged();
 }
+
+int TextBox::fontSize()
+{
+    return mFont.pixelSize();
+}
+
+void TextBox::setFontSize(int size)
+{
+    mFont.setPixelSize(size);
+    emit dataChanged();
+}
+
+QString TextBox::fontFamily()
+{
+    return mFont.family();
+}
+
+void TextBox::setFontFamily(const QString& family)
+{
+    mFont.setFamily(family);
+    emit dataChanged();
+}
+
 
 
