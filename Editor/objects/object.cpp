@@ -19,14 +19,14 @@
 #include <QDebug>
 #include <QFile>
 #include <QColor>
+#include <QFont>
 
 #include "scene.h"
 #include "utils.h"
 #include "scene_manager.h"
 
 static ObjectEditorWidget * mEditorWidget = 0;
-static QString mFontFamily;
-static int mFontSize = 10;
+static QFont mDefaultFont;
 
 Object::Object(QObject* parent):
     QObject(parent)
@@ -982,24 +982,34 @@ void Object::setBorderColor(const QColor & color)
     emit dataChanged();
 }
 
-QString Object::fontFamily()
+QString Object::defaultFontFamily()
 {
-    return mFontFamily;
+    return mDefaultFont.family();
 }
 
-void Object::setFontFamily(const QString& family)
+void Object::setDefaultFontFamily(const QString& family)
 {
-    mFontFamily = family;
+    mDefaultFont.setFamily(family);
 }
 
-int Object::fontSize()
+int Object::defaultFontSize()
 {
-    return mFontSize;
+    return mDefaultFont.pixelSize();
 }
 
-void Object::setFontSize(int size)
+void Object::setDefaultFontSize(int size)
 {
-    mFontSize = size;
+    mDefaultFont.setPixelSize(size);
+}
+
+void Object::setDefaultFont(const QFont& font)
+{
+    mDefaultFont = font;
+}
+
+QFont Object::defaultFont()
+{
+    return mDefaultFont;
 }
 
 Scene* Object::scene()

@@ -138,10 +138,12 @@ class Object : public QObject
 
         bool hasObjectAsParent();
 
-        static QString fontFamily();
-        static void setFontFamily(const QString&);
-        static int fontSize();
-        static void setFontSize(int);
+        static QString defaultFontFamily();
+        static void setDefaultFontFamily(const QString&);
+        static int defaultFontSize();
+        static void setDefaultFontSize(int);
+        static QFont defaultFont();
+        static void setDefaultFont(const QFont&);
 
     public slots:
         void onResizeEvent(QResizeEvent*);
