@@ -229,6 +229,10 @@ inline QString fontFamily(const QString& font)
     return "";
 }
 
+inline QString font(int fontSize, const QString& fontFamily) {
+    return QString("%1px %2").arg(fontSize).arg(fontFamily);
+}
+
 }
 
 #endif // UTILS_H
