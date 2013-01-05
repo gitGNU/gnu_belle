@@ -19,6 +19,7 @@
 #include <QFileDialog>
 #include <QDebug>
 #include <QDesktopServices>
+#include <QFontDatabase>
 
 #include "engine.h"
 
@@ -33,7 +34,7 @@ NovelPropertiesDialog::NovelPropertiesDialog(QVariantMap& data, QWidget *parent)
     mUi.titleEdit->setText(data.value("title").toString());
     mUi.widthCombo->setEditText(data.value("width").toString());
     mUi.heightCombo->setEditText(data.value("height").toString());
-    mUi.fontFamilyChooser->setEditText(data.value("fontFamily").toString());
+    mUi.fontFamilyChooser->setCurrentFontFamily(mNovelData.value("fontFamily").toString());
     mUi.fontSizeSpinner->setValue(data.value("fontSize").toInt());
     setEnginePath(Engine::path());
     mUi.textSpeedSlider->setValue(data.value("textSpeed").toInt());

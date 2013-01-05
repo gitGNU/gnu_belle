@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -149,38 +149,13 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="fontFamilyChooser">
+          <widget class="ChooseFontWidget" name="fontFamilyChooser">
            <property name="toolTip">
             <string>Font family</string>
            </property>
            <property name="editable">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
-           <item>
-            <property name="text">
-             <string>serif</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>sans-serif</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>cursive</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>fantasy</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>monospace</string>
-            </property>
-           </item>
           </widget>
          </item>
         </layout>
@@ -335,6 +310,11 @@
    <class>LineEdit</class>
    <extends>QLineEdit</extends>
    <header>lineedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ChooseFontWidget</class>
+   <extends>QComboBox</extends>
+   <header>choosefontwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources>
