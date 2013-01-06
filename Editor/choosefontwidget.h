@@ -11,13 +11,17 @@ class ChooseFontWidget : public QComboBox
 
     QFontDatabase mFontDatabase;
     QList<int> mCustomFontsIds;
-    int mPreviousIndex;
+    int mCurrentIndex;
+    QString mCurrentFamily;
 
 public:
     explicit ChooseFontWidget(QWidget *parent = 0);
     void loadFonts();
     void addCustomFontItem();
     void setCurrentFontFamily(const QString&);
+
+protected:
+    virtual void focusInEvent(QFocusEvent *e);
     
 signals:
     void fontChosen(const QString&);

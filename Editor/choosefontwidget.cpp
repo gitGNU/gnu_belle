@@ -13,7 +13,8 @@ static QStringList mFontFamilies;
 ChooseFontWidget::ChooseFontWidget(QWidget *parent) :
     QComboBox(parent)
 {
-    mPreviousIndex = 0;
+    mCurrentIndex = 0;
+    mCurrentFamily = "";
     loadFonts();
     connect(this, SIGNAL(activated(int)), this, SLOT(onItemActivated(int)));
 }
@@ -21,8 +22,9 @@ ChooseFontWidget::ChooseFontWidget(QWidget *parent) :
 void ChooseFontWidget::setCurrentFontFamily(const QString& family)
 {
     if (mFontFamilies.contains(family)) {
+        mCurrentFamily = family;
         setCurrentIndex(mFontFamilies.indexOf(family));
-        mPreviousIndex = currentIndex();
+        mCurrentIndex = currentIndex();
     }
 }
 
@@ -42,8 +44,11 @@ void ChooseFontWidget::loadFonts()
         mFontFamilies.sort();
     }
 
+    this->blockSignals(true);
+    clear();
     addItems(mFontFamilies);
     addCustomFontItem();
+    this->blockSignals(false);
 }
 
 void ChooseFontWidget::addCustomFontItem()
@@ -59,7 +64,6 @@ void ChooseFontWidget::onItemActivated(int index)
 
         if (! filePath.isEmpty()) {
             int id = ResourceManager::newFont(filePath);
-            qDebug() << id;
             if (id != -1) {
                 mCustomFontsIds.append(id);
                 families = QFontDatabase::applicationFontFamilies(id);
@@ -69,23 +73,29 @@ void ChooseFontWidget::onItemActivated(int index)
                         mFontFamilies.append(families[i]);
                 mFontFamilies.sort();
 
-                this->blockSignals(true);
-                clear();
-                addItems(mFontFamilies);
-                addCustomFontItem();
-                this->blockSignals(false);
+                loadFonts();
             }
         }
 
         if (families.isEmpty())
-            setCurrentIndex(mPreviousIndex);
+            setCurrentIndex(mCurrentIndex);
         else {
             setCurrentFontFamily(families.first());
             emit fontChosen(mFontFamilies[currentIndex()]);
         }
     }
     else {
-        mPreviousIndex = index;
+        mCurrentIndex = index;
+        mCurrentFamily = currentText();
         emit fontChosen(mFontFamilies[currentIndex()]);
     }
+}
+
+void ChooseFontWidget::focusInEvent(QFocusEvent *e)
+{
+    if (mFontFamilies.size() != count()-1) {
+        loadFonts();
+        setCurrentFontFamily(mCurrentFamily);
+    }
+    QComboBox::focusInEvent(e);
 }
