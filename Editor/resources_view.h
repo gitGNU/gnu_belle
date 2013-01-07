@@ -31,6 +31,7 @@ class ResourcesView : public PropertiesWidget
 public:
     explicit ResourcesView(QWidget *parent = 0);
     void select(const QString&);
+    Object* object(const QModelIndex&);
 
 signals:
     void editResource(Object*);
@@ -45,7 +46,7 @@ public slots:
 private:
     void removeObject(Object*, bool del=false);
     void removeItem(Object*, bool del=false);
-    Object* objectFromIndex(const QModelIndex&);
+
     
 };
 

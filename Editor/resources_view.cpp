@@ -38,7 +38,8 @@ ResourcesView::ResourcesView(QWidget *parent) :
     addAction(removeAction);
 
     setContextMenuPolicy(Qt::ActionsContextMenu);
-    connect(this, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(onItemDoubleClicked(const QModelIndex&)));
+    //connect(this, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(onItemDoubleClicked(const QModelIndex&)));
+    connect(ResourceManager::instance(), SIGNAL(resourceAdded(Object*)), this, SLOT(addObject(Object*)));
     connect(ResourceManager::instance(), SIGNAL(resourceRemoved(Object*)), this, SLOT(onResourceRemoved(Object*)));
 }
 
@@ -157,13 +158,13 @@ void ResourcesView::onRemoveResource()
 
 void ResourcesView::onEditResource()
 {
-    Object* object = objectFromIndex(currentIndex());
+    Object* object = this->object(currentIndex());
 
     if (object)
         emit editResource(object);
 }
 
-Object* ResourcesView::objectFromIndex(const QModelIndex & index)
+Object* ResourcesView::object(const QModelIndex & index)
 {
     QStandardItemModel* model = qobject_cast<QStandardItemModel*>(this->model());
 

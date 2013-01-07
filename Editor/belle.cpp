@@ -139,18 +139,13 @@ Belle::Belle(QWidget *widget)
     widget = mUi.resourcesTabWidget->currentWidget();
     mResourcesView = 0;
     if(widget) {
-        if (widget->layout())
-            layout = widget->layout();
-        else
-            layout = new QVBoxLayout(widget);
-
+        layout = widget->layout() ? widget->layout() : new QVBoxLayout(widget);
         mResourcesView = new ResourcesView(widget);
         mResourcesView->setHeaderHidden(true);
         layout->addWidget(mResourcesView);
 
-        connect(ResourceManager::instance(), SIGNAL(resourceAdded(Object*)), mResourcesView, SLOT(addObject(Object*)));
         connect(mResourcesView, SIGNAL(editResource(Object*)), this, SLOT(onEditResource(Object*)));
-        //connect(mResourcesView, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(onResourcesDoubleClicked(const QModelIndex&)));
+        connect(mResourcesView, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(onResourcesDoubleClicked(const QModelIndex&)));
     }
 
     mUi.resourcesTabWidget->setCurrentIndex(0);
@@ -309,18 +304,16 @@ void Belle::onResourcesDoubleClicked(const QModelIndex& index)
     if (! scene)
         return;
 
-    int row = index.parent().row();
-    int childRow = index.row();
-
-    for (int i=0; i < row; i++ ) {
-        if (model->item(i, 0))
-            childRow += model->item(i)->rowCount();
+    Object* resource = mResourcesView->object(index);
+    if (resource) {
+        QVariantMap data(resource->toJsonObject());
+        Object * object = ResourceManager::instance()->createResource(data, false);
+        if (object) {
+            object->setResource(object);
+            connect(object, SIGNAL(dataChanged()), mDrawingSurfaceWidget, SLOT(update()));
+            scene->appendObject(object, true);
+        }
     }
-
-
-    Object* obj = ResourceManager::resource(childRow);
-    scene->addCopyOfObject(obj);
-
 }
 
 void Belle::onActionCatalogClicked(const QModelIndex& index)
