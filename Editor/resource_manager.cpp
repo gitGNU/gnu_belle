@@ -369,6 +369,20 @@ void ResourceManager::exportResources(const QDir& dir)
     QHashIterator<QString, int> it(mFontsPaths);
     while(it.hasNext()) {
         it.next();
-        QFile::copy(it.key(), dir.absoluteFilePath(it.key()));
+        QFileInfo info(it.key());
+        QFile::copy(it.key(), dir.absoluteFilePath(info.fileName()));
     }
+}
+
+QStringList ResourceManager::customFonts()
+{
+    QStringList fonts;
+    QHashIterator<QString, int> it(mFontsPaths);
+    while(it.hasNext()) {
+        it.next();
+        QFileInfo info(it.key());
+        fonts.append(info.fileName());
+    }
+
+    return fonts;
 }

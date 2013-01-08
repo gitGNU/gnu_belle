@@ -309,7 +309,7 @@ void Belle::onResourcesDoubleClicked(const QModelIndex& index)
         QVariantMap data(resource->toJsonObject());
         Object * object = ResourceManager::instance()->createResource(data, false);
         if (object) {
-            object->setResource(object);
+            object->setResource(resource);
             connect(object, SIGNAL(dataChanged()), mDrawingSurfaceWidget, SLOT(update()));
             scene->appendObject(object, true);
         }
@@ -774,6 +774,9 @@ void Belle::exportGameFile(const QString& path)
     QVariantMap jsonFile;
     QString font = Utils::font(mNovelData.value("fontSize").toInt(), mNovelData.value("fontFamily").toString());
     QMapIterator<QString, QVariant> it(mNovelData);
+    QStringList customFonts = ResourceManager::customFonts();
+
+    jsonFile.insert("customFonts", customFonts);
 
     while(it.hasNext()){
         it.next();
