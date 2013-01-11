@@ -244,9 +244,7 @@ inline QString fontFace(const QString& fileName, QString name="")
 
     lines << "@font-face {"
           << QString("font-family: '%1';").arg(name)
-          << QString("src: url('%1.eot');")
-          << QString("src: local('%1'),")
-          << QString("url('%1.eot?#iefix') format('embedded-opentype'),").arg(name)
+          << QString("src: url('%1.eot?#iefix') format('embedded-opentype'),").arg(name)
           << QString("url('%1.ttf') format('truetype'),").arg(name)
           << QString("url('%1.oft') format('opentype'),").arg(name)
           << QString("url('%1.woff') format('woff'),").arg(name)
