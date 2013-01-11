@@ -367,11 +367,21 @@ void ResourceManager::exportResources(const QDir& dir)
     }
 
     QHashIterator<QString, int> it(mFontsPaths);
+    QFile file(dir.absoluteFilePath("fontfaces.css"));
+    if (! file.open(QFile::WriteOnly | QFile::Text))
+        return;
+
     while(it.hasNext()) {
         it.next();
         QFileInfo info(it.key());
+        //copy font file
         QFile::copy(it.key(), dir.absoluteFilePath(info.fileName()));
+        //write css for font
+        file.write(Utils::fontFace(info.fileName(), info.baseName()).toAscii());
+        file.write("\n");
     }
+
+    file.close();
 }
 
 QStringList ResourceManager::customFonts()

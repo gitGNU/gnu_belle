@@ -667,7 +667,7 @@ QString Belle::exportProject(const QString& _path, bool toRun)
         projectDir = QDir(mCurrentRunDirectory);
     }
 
-    //copy images in use
+    //copy images and fonts in use
     ResourceManager::exportResources(projectDir);
 
     //copy all engine files
@@ -775,7 +775,6 @@ void Belle::exportGameFile(const QString& path)
     QString font = Utils::font(mNovelData.value("fontSize").toInt(), mNovelData.value("fontFamily").toString());
     QMapIterator<QString, QVariant> it(mNovelData);
     QStringList customFonts = ResourceManager::customFonts();
-
     jsonFile.insert("customFonts", customFonts);
 
     while(it.hasNext()){
