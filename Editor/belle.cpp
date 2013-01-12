@@ -205,19 +205,45 @@ Belle::Belle(QWidget *widget)
     mUi.scenesWidget->addAction(mDeleteScene);
     connect(mDeleteScene, SIGNAL(triggered()), this, SLOT(deleteScene()));
 
+    restoreSettings();
+}
+
+void Belle::saveSettings()
+{
+    //save settings
+    mSettings->beginGroup("Window");
+    qDebug() << mUi.showActionsAction->isChecked();
+    mSettings->setValue("Geometry", this->saveGeometry());
+    mSettings->setValue("State", this->saveState());
+    mSettings->endGroup();
+    qDebug() << mUi.showActionsAction->isChecked();
+    mSettings->beginGroup("Project");
+    if (Engine::isValid())
+        mSettings->setValue("enginePath", Engine::path());
+    if (! Engine::browserPath().isEmpty())
+        mSettings->setValue("browser", Engine::browserPath());
+    mSettings->endGroup();
+}
+
+void Belle::restoreSettings()
+{
     //load settings
     mSettings = new QSettings("Belle", "Belle", this);
+
     if (mSettings->contains("Window/Geometry"))
         this->restoreGeometry(mSettings->value("Window/Geometry").toByteArray());
     if (mSettings->contains("Window/State"))
         this->restoreState(mSettings->value("Window/State").toByteArray());
+    if (mSettings->contains("Project/enginePath"))
+        Engine::setPath(mSettings->value("Project/enginePath").toString());
+    if (mSettings->contains("Project/browser"))
+        Engine::setBrowserPath(mSettings->value("Project/browser").toString());
 }
 
 bool Belle::eventFilter(QObject *obj, QEvent *ev)
 {
     return QMainWindow::eventFilter(obj, ev);
 }
-
 
 Belle::~Belle()
 {
@@ -239,17 +265,7 @@ Belle::~Belle()
     ActionInfoManager::destroy();
     ResourceManager::destroy();
 
-    //save settings
-    mSettings->beginGroup("Window");
-    mSettings->setValue("Geometry", this->saveGeometry());
-    mSettings->setValue("State", this->saveState());
-    mSettings->endGroup();
-    mSettings->beginGroup("Project");
-    if (Engine::isValid())
-        mSettings->setValue("enginePath", Engine::path());
-    if (! Engine::browserPath().isEmpty())
-        mSettings->setValue("browser", Engine::browserPath());
-    mSettings->endGroup();
+    saveSettings();
 }
 
 void Belle::onEditResource(Object* object)

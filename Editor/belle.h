@@ -102,6 +102,8 @@ private:
         void setNovelProperties(const QVariantMap&);
         void updateSceneIcon(Scene* scene=0);
         void updateSceneEditorWidget(Scene* scene=0);
+        void restoreSettings();
+        void saveSettings();
 
 };
 
