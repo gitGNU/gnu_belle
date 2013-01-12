@@ -47,6 +47,7 @@ ActionInfoManager::ActionInfoManager(QObject *parent) :
 
 void ActionInfoManager::initEditorWidgets()
 {
+    Action::setActionEditorWidget(new ActionEditorWidget);
     Show::setShowEditorWidget(new ShowEditorWidget());
     Hide::setHideEditorWidget(new HideEditorWidget());
     //ChangeVisibility::setChangeVisibilityEditorWidget(new ChangeVisibilityEditorWidget(ResourceManager::instance()));

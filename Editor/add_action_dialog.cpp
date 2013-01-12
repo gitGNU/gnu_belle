@@ -210,7 +210,8 @@ void AddActionDialog::onNewAction(Action * action)
 
     mCurrentAction = action;
     switchPropertyWidget(action->editorWidget());
-    action->editorWidget()->updateData(action);
+    if (action->editorWidget())
+        action->editorWidget()->updateData(action);
     if (mActionCatalogWidget)
         resize(640, 480);
 }

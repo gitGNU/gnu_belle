@@ -28,8 +28,7 @@ public:
 
 public:
     explicit EndNovel(QObject *parent = 0);
-    ActionEditorWidget* editorWidget();
-    
+
 signals:
     
 public slots:

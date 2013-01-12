@@ -25,8 +25,3 @@ EndNovel::EndNovel(QObject *parent) :
     setName(Info.name);
     setIcon(Info.icon);
 }
-
-ActionEditorWidget* EndNovel::editorWidget()
-{
-    return 0;
-}
