@@ -36,10 +36,10 @@ Button::Button(const QString&text, QObject *parent) :
 Button::Button(const QVariantMap& data, QObject *parent) :
     TextBox(data, parent)
 {
-    init2();
+    setType("Button");
 }
 
-void Button::init2()
+void Button::init()
 {
     if (text().isNull() || text().isEmpty())
         setText(tr("Button"));
@@ -55,11 +55,6 @@ void Button::init2()
     setBorderColor(Qt::black);
     setBorderWidth(1);
     setType("Button");
-}
-
-void Button::init()
-{
-    init2();
 
     int width = Scene::width();
     int height = Scene::height();

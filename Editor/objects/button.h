@@ -33,7 +33,6 @@ public:
 
 private:
     void init();
-    void init2();
 };
 
 #endif // BUTTON_H
