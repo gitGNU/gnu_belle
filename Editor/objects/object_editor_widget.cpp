@@ -198,6 +198,7 @@ void ObjectEditorWidget::updateData(Object *obj)
         return;
 
     connect(mCurrentObject, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(onObjectDataChanged(const QVariantMap&)));
+    connect(mCurrentObject, SIGNAL(destroyed()), this, SLOT(onCurrentObjectDestroyed()));
 
     mBorderColorButton->blockSignals(true);
 
@@ -446,4 +447,9 @@ void ObjectEditorWidget::setObjectSize(int w, int h)
 
     mWidthEditor->blockSignals(false);
     mHeightEditor->blockSignals(false);
+}
+
+void ObjectEditorWidget::onCurrentObjectDestroyed()
+{
+    mCurrentObject = 0;
 }

@@ -65,6 +65,7 @@ private slots:
     void onXChanged(int);
     void onYChanged(int);
     void onObjectDataChanged(const QVariantMap&);
+    void onCurrentObjectDestroyed();
 
 private:
     ColorPushButton* mColorButton;
