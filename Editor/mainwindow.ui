@@ -395,7 +395,7 @@
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Actions</string>
@@ -446,7 +446,7 @@
  <connections>
   <connection>
    <sender>showActionsAction</sender>
-   <signal>toggled(bool)</signal>
+   <signal>triggered(bool)</signal>
    <receiver>actionsDockWidget</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
@@ -462,7 +462,7 @@
   </connection>
   <connection>
    <sender>showActionsCatalogAction</sender>
-   <signal>toggled(bool)</signal>
+   <signal>triggered(bool)</signal>
    <receiver>actionsCatalogDockWidget</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
@@ -478,7 +478,7 @@
   </connection>
   <connection>
    <sender>showPropertiesAction</sender>
-   <signal>toggled(bool)</signal>
+   <signal>triggered(bool)</signal>
    <receiver>propertiesDockWidget</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
@@ -494,7 +494,7 @@
   </connection>
   <connection>
    <sender>showScenesAction</sender>
-   <signal>toggled(bool)</signal>
+   <signal>triggered(bool)</signal>
    <receiver>scenesDockWidget</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
@@ -510,7 +510,7 @@
   </connection>
   <connection>
    <sender>showResourcesAction</sender>
-   <signal>toggled(bool)</signal>
+   <signal>triggered(bool)</signal>
    <receiver>resourcesDockWidget</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
@@ -537,6 +537,86 @@
     <hint type="destinationlabel">
      <x>397</x>
      <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>scenesDockWidget</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>showScenesAction</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>131</x>
+     <y>183</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>resourcesDockWidget</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>showResourcesAction</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>283</x>
+     <y>448</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>propertiesDockWidget</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>showPropertiesAction</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>624</x>
+     <y>448</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionsCatalogDockWidget</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>showActionsCatalogAction</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>738</x>
+     <y>448</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionsDockWidget</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>showActionsAction</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>767</x>
+     <y>183</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>
