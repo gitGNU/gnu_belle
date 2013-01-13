@@ -103,11 +103,9 @@ function getBody()
 
 function textSize(font, text) 
 {
-    var body = getBody();
-    if (! body)
-        return [-1, -1];
-    
-    size = [];
+    if (! font)
+        return [0, 0];
+    var size = [];
     
     var dummy = document.getElementById("dummy");
     dummy.style.font = font;
@@ -115,10 +113,22 @@ function textSize(font, text)
     textNode.nodeValue = text;
     
     size.push(dummy.offsetWidth);
-    textNode.nodeValue = "ABCDEFGHIJKLMNOPQRSTUVXWYZ";
+    textNode.nodeValue = "ABCDEFGHIJKLMNOPQRSTUVXWYZ0123456789";
     size.push(dummy.offsetHeight);
 
     return size;
+}
+
+function textWidth(font, text) 
+{
+    if (! font)
+        return 0;
+    
+    var dummy = document.getElementById("dummy");
+    dummy.style.font = font;
+    var textNode = dummy.childNodes[0];
+    textNode.nodeValue = text;
+    return dummy.offsetWidth;
 }
 
 function splitText(font, text, maxWidth) 
@@ -381,6 +391,60 @@ function windowWidth()
 function windowHeight()
 {
     return window.innerHeight || document.documentElement.clientHeight || document.documentElement.offsetHeight;
+}
+
+function importFile(url, callback, async, mimeType)
+{
+    if (async == "undefined")
+        async = false;
+    
+    var xobj = new XMLHttpRequest();
+    if (xobj.overrideMimeType && mimeType)
+        xobj.overrideMimeType(mimeType);
+    
+    xobj.onreadystatechange = function() {
+        if(xobj.readyState == 4){
+            if (callback)
+                callback(xobj);
+        }
+    };
+    
+    xobj.open("GET", url, async);
+    xobj.send(null);
+}
+
+function isFontLoaded (name)
+{
+    name = getFontName(name);
+
+    var defaultFont = "12px Arial, Helvetica, sans-serif";
+    var font = "12px " + name + ",  Arial, Helvetica, sans-serif";
+    var defaultSize = textWidth("ABCDEFGHIJKLMNOPQRSTUVXWYZ0123456789", defaultFont);
+    var size = textWidth("ABCDEFGHIJKLMNOPQRSTUVXWYZ0123456789", font);
+    if ( size[0] != defaultSize[0])
+        return true;
+    return false;
+}
+
+function isFontAvailable(fontFile)
+{
+    var status = 404;
+    importFile(fontFile, function(obj) {status = obj.status;}, false, "application/octet-stream");
+    if (status == 200)
+        return true;
+    return false;
+}
+
+function getFontName(font)
+{
+    if (font.indexOf(".") !== -1)
+        return font.split(".")[0];
+    if (font.indexOf("px") !== -1)
+        return font.split("px")[1];
+    if (font.indexOf("%") !== -1)
+        return font.split("%")[1];
+    
+    return font;
 }
 
 /*********** POINT **********/
