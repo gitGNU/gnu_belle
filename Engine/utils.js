@@ -101,7 +101,7 @@ function getBody()
     return body;
 }
 
-function textSize(font, text) 
+function textSize(text, font) 
 {
     if (! font)
         return [0, 0];
@@ -119,7 +119,7 @@ function textSize(font, text)
     return size;
 }
 
-function textWidth(font, text) 
+function textWidth(text, font) 
 {
     if (! font)
         return 0;
