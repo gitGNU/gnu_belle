@@ -35,6 +35,7 @@ private slots:
     void onChangeObjectColorToggled(bool);
     void onChangeObjectBackgroundColorToggled(bool);
     void onColorChosen(const QColor&);
+    void onOpacityChanged(int);
 
 
 private:

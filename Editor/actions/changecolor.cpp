@@ -128,7 +128,7 @@ void ChangeColor::setChangeObjectColor(bool change)
 
 bool ChangeColor::changeObjectBackgroundColor()
 {
-    return mChangeObjectColor;
+    return mChangeObjectBackgroundColor;
 }
 
 void ChangeColor::setChangeObjectBackgroundColor(bool change)

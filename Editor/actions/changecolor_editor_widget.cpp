@@ -45,26 +45,29 @@ ChangeColorEditorWidget::ChangeColorEditorWidget(QWidget *parent) :
     connect(mChangeObjectColorCheckBox, SIGNAL(toggled(bool)), this, SLOT(onChangeObjectColorToggled(bool)));
     connect(mChangeObjectBackgroundColorCheckBox, SIGNAL(toggled(bool)), this, SLOT(onChangeObjectBackgroundColorToggled(bool)));
     connect(mColorButton, SIGNAL(colorChosen(const QColor&)), this, SLOT(onColorChosen(const QColor&)));
+    connect(mOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(onOpacityChanged(int)));
 
 }
 
 void ChangeColorEditorWidget::updateData(Action * action)
 {
-    mChangeColorAction = qobject_cast<ChangeColor*>(action);
-    if (! mChangeColorAction)
+    if (! action || mChangeColorAction == action)
         return;
+
+    mChangeColorAction = 0;
+    ChangeColor* changeColorAction = qobject_cast<ChangeColor*>(action);
 
     mObjectsComboBox->clear();
 
-    if (mChangeColorAction->sceneObject()) {
-        mObjectsComboBox->addItem(mChangeColorAction->sceneObject()->objectName());
-        mObjects.append(mChangeColorAction->sceneObject());
+    if (changeColorAction->sceneObject()) {
+        mObjectsComboBox->addItem(changeColorAction->sceneObject()->objectName());
+        mObjects.append(changeColorAction->sceneObject());
     }
 
     QList<Object*> objects = ResourceManager::resources();
 
     foreach(Object* obj, objects) {
-        if (obj == mChangeColorAction->sceneObject())
+        if (obj == changeColorAction->sceneObject())
             continue;
 
         if (obj) {
@@ -73,11 +76,13 @@ void ChangeColorEditorWidget::updateData(Action * action)
         }
     }
 
-    if (! mChangeColorAction->sceneObject() && ! mObjects.isEmpty())
-        mChangeColorAction->setSceneObject(mObjects[0]);
+    if (! changeColorAction->sceneObject() && ! mObjects.isEmpty())
+        changeColorAction->setSceneObject(mObjects[0]);
 
-    mColorButton->setColor(mChangeColorAction->color());
-    mOpacitySlider->setValue(mChangeColorAction->opacity());
+    mColorButton->setColor(changeColorAction->color());
+    mOpacitySlider->setValue(changeColorAction->opacity());
+
+    mChangeColorAction = changeColorAction;
 
 }
 
@@ -113,4 +118,10 @@ void ChangeColorEditorWidget::onChangeObjectBackgroundColorToggled(bool checked)
 
     if(mChangeColorAction)
         mChangeColorAction->setChangeObjectBackgroundColor(mChangeObjectBackgroundColorCheckBox->isChecked());
+}
+
+void ChangeColorEditorWidget::onOpacityChanged(int value)
+{
+    if(mChangeColorAction)
+        mChangeColorAction->setOpacity(value);
 }
