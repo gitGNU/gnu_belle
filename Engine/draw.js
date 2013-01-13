@@ -107,10 +107,6 @@ function initDisplay()
         var bgCanvas = document.getElementById('gameBackgroundCanvas');
         var bgContext = bgCanvas.getContext('2d');
     }
-    var leftPane = document.getElementById('leftPane');
-    var rightPane = document.getElementById('rightPane');
-    var topPane = document.getElementById('topPane');
-    var bottomPane = document.getElementById('bottomPane');
     var _windowWidth = windowWidth();
     var _windowHeight = windowHeight();
     var scaleWidth = Novel.scaleWidthFactor;
@@ -168,25 +164,6 @@ function initDisplay()
       
     _windowWidth += "px";
     _windowHeight += "px";
-      
-    leftPane.style.display = 'block';
-    leftPane.style.width = paddingLeft + "px";
-    leftPane.style.height = _windowHeight;
-    
-    rightPane.style.display = 'block';
-    rightPane.style.left = paddingLeft + width + "px";
-    rightPane.style.width = paddingLeft + "px";
-    rightPane.style.height = _windowHeight;
-    
-    topPane.style.display = 'block';
-    topPane.style.height = paddingTop + "px";
-    topPane.style.top = 0;
-    topPane.style.width = _windowWidth;
-
-    bottomPane.style.display = 'block';
-    bottomPane.style.height = paddingTop + "px";
-    bottomPane.style.width = _windowWidth;
-    bottomPane.style.top = paddingTop + height + "px";
     
     if (Novel.currentScene) {
         Novel.currentScene.redrawBackground = true;
