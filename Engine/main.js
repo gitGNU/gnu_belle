@@ -17,6 +17,7 @@
 var showFps = true;
 var Novel = {
     "resources" : {},
+    "customFonts" : [],
     "currentScene" : null,
     "nextScene" : 0,
     "scenes" : [],
@@ -104,6 +105,17 @@ function initializeData(data)
                 Novel.resources[name] = obj;
         }
     }
+    
+    //load custom fonts
+    /*Novel.customFonts = [];
+    if ("customFonts" in data) {
+        var fonts = data["customFonts"];
+        for (var i=0; i < fonts.length; i++) {
+            //store fonts' names
+            if (isFontAvailable(fonts[i]))
+                Novel.customFonts.push(getFontName(fonts[i])); 
+        }
+    }*/
 
     //init scenes
     if (data["scenes"]) {
@@ -170,6 +182,13 @@ function isGameDataReady() {
     var actions;
     var objects;
     
+    /*for(var i=0; i < Novel.customFonts.length; i++) {
+        if (! isFontLoaded(Novel.customFonts[i])) {
+            ready = false;
+            break;
+        }
+    }*/
+
     for(var property in Novel.resources) {
         if (! resources[property].isReady()) {
             ready = false;
