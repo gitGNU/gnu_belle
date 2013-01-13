@@ -379,7 +379,7 @@ Object.prototype.setBackgroundColor = function(color)
 Object.prototype.setColor = function (color)
 {
     this.color = color;
-    setOpacity(this.color.alpha);
+    this.setOpacity(this.color.alpha);
 }
 
 Object.prototype.setOpacity = function (alpha)
@@ -708,6 +708,11 @@ function TextBox(info)
     this.textElement.style.display = "block";
     this.element.appendChild(this.textElement);
     
+    if ("font" in info) {
+        this.font = info["font"];
+        this.textElement.style.font = this.font;
+    }
+        
     if ("text" in info)
         this.text = info["text"];
     
@@ -720,16 +725,13 @@ function TextBox(info)
         for (var i=0; i !== properties.length; i++) {
         }*/
     }
-     
-    var textNode = document.createTextNode(this.text);
+    
     this.prevText = "";
-    this.prevSize = [0, 60];
     this.textParts = [];
-    this.displayedText = "";
-    var size = textSize(Novel.font, this.text);
-    var height = size[1];
-    this.text = replaceVariables(this.text);
+    this.displayedText = ""; 
+    this.textWidth = textWidth(this.displayedText, this.font);
     this.alignText();
+    var textNode = document.createTextNode(replaceVariables(this.text));
     this.textElement.appendChild(textNode);
 }
 
@@ -748,6 +750,10 @@ TextBox.prototype.paint = function(context)
     var x = this.globalX();
     var y = this.globalY();
     context.fillStyle = this.textColor.toString();
+    var defaultFont = context.font;
+    
+    if (this.font)
+        context.font = this.font;
     
     /*if (this.prevText != this.text) {
         this.textParts = splitText(context.font, this.text, this.rect.width-this.leftPadding);
@@ -759,10 +765,14 @@ TextBox.prototype.paint = function(context)
     if (text != this.displayedText)
       this.textParts = splitText(context.font, text, width-this.textLeftPadding);
     this.displayedText = text;
-
+    
+    
     for (var i=this.textParts.length-1; i !== -1; --i) {
+        console.log("text", this.textParts);
         context.fillText(this.textParts[i], x+this.textLeftPadding, y+this.textTopPadding+this.heightOffset*(i+1), this.width);
     }
+    
+    context.font = defaultFont;
   
     this.redrawing = false;
 }
@@ -770,7 +780,7 @@ TextBox.prototype.paint = function(context)
 TextBox.prototype.alignText = function(size)
 {
     if (! size)
-        size = textSize(Novel.font, this.text);
+        size = textSize(this.text, Novel.font);
     
     var width = size[0];
     var height = size[1];
@@ -811,16 +821,22 @@ TextBox.prototype.alignText = function(size)
     }
 }
 
-
 TextBox.prototype.needsRedraw = function()
 {
     if (this.redraw)
         return true;
     
-    var text = this.text;
-    var newText = replaceVariables(text);
+    var displayText = replaceVariables(this.text);
     
-    if (newText != this.displayedText) {
+    if (displayText != this.displayedText) {
+        this.redraw = true;
+        return true;
+    }
+    
+    var width = textWidth(displayText, this.font);
+    
+    if (this.textWidth != width) {
+        this.textWidth = width;
         this.redraw = true;
         return true;
     }
