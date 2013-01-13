@@ -410,6 +410,8 @@ function Wait(data)
 {
     Action.call(this, data);
     
+    this.skippable = false;
+    
     if ( "time" in data)
         this.time = data["time"] * 1000;
     if ("waitType" in data) {
@@ -429,8 +431,6 @@ Wait.prototype.execute = function ()
     if (this.waitType == "Timed" && this.time > 0) {
         setTimeout(function() {t.end(); }, this.time);
     }
-    //else if ( this.waitType == "MouseClick" || this.waitType == "Forever" )
-        
 }
 
 Wait.prototype.end = function ()
@@ -441,7 +441,6 @@ Wait.prototype.end = function ()
 Wait.prototype.skip = function (){
     if (this.skippable)
         this.setFinished(true);
-    _console.log("skipped");
 }
 
 
