@@ -302,7 +302,7 @@ function createResource(data)
     var obj = Belle[type];
     
     if (! obj) {
-        _console.error("'" + type + "' is not a valid object type.");
+        log("'" + type + "' is not a valid object type.");
         return null;
     }
 
@@ -464,24 +464,6 @@ Point.prototype.distance = function(point)
     return Math.sqrt(Math.pow(point.x-this.x, 2) + Math.pow(point.y-this.y, 2));
 }
 
-_console = (function() {
-    
-    function log (text) {        
-        if (window.console)
-            console.log(text);
-    }
-    
-   function error(text) {
-        if (window.console)
-            console.error(text);
-    }
-    
-    return { 
-        "log": log,
-        "error": error
-    };
-})();
-
 function addJavascript(jsname,pos) 
 {
     var th = document.getElementsByTagName(pos)[0];
@@ -491,4 +473,4 @@ function addJavascript(jsname,pos)
     th.appendChild(s);
 } 
 
-_console.log("Utils loaded!");
+log("Utils loaded!");

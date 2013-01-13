@@ -20,7 +20,7 @@ var Color = function(components)
     var error = false;
     if (components.length < 4) {
         error = true;
-        _console.error("Color(components) : Missing one or more color component(s)");
+        log("Color(components) : Missing one or more color component(s)");
     }
     
     if (error) {
@@ -768,7 +768,7 @@ TextBox.prototype.paint = function(context)
     
     
     for (var i=this.textParts.length-1; i !== -1; --i) {
-        console.log("text", this.textParts);
+        log("text", this.textParts);
         context.fillText(this.textParts[i], x+this.textLeftPadding, y+this.textTopPadding+this.heightOffset*(i+1), this.width);
     }
     
@@ -893,7 +893,7 @@ function ObjectGroup(data)
             obj = createResource(objects[i]);
             
             if (! obj) {
-                _console.error(objects[i].type + ": is not a valid object type. Ignoring...");
+                log(objects[i].type + ": is not a valid object type. Ignoring...");
                 continue;
             }
             var left = parseInt(this.element.style.left);
@@ -1255,4 +1255,4 @@ return {
 
 })();
 
-_console.log("Objects loaded!");
+log("Objects loaded!");

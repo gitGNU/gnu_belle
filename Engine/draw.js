@@ -297,4 +297,4 @@ function drawFPS()
     }
 }
 
-_console.log("Draw module loaded!");
+log("Draw module loaded!");

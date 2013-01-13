@@ -126,7 +126,7 @@ function initializeData(data)
             scene = scenes[i];
             
             if (! Belle[scene.type]) {
-                _console.log("Invalid Scene type: " + scene.type);
+                log("Invalid Scene type: " + scene.type);
                 continue;
             }
             
@@ -150,7 +150,7 @@ function initializeData(data)
                 var actions = scene.actions;
                 for (var j=0; j < actions.length; j++) {
                     if (! window[actions[j].type]) {
-                        _console.error("Invalid Action type: " + actions[j].type);
+                        log("Invalid Action type: " + actions[j].type);
                         continue;
                     }
                     
@@ -275,7 +275,7 @@ function importGameData(path) {
     xobj.onreadystatechange = function() {
         if(xobj.readyState == 4){
             var gameData = JSON.parse(xobj.responseText);
-            _console.log("Game data loaded!");
+            log("Game data loaded!");
             initializeData(gameData);
         }
     };

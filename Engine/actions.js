@@ -868,7 +868,7 @@ Branch.prototype.loadCondition = function(condition)
             continue;
         }
 
-        _console.log(condition[0]);
+        log(condition[0]);
         if (c.search(letter) != -1 || c.search(number) != -1 || c == '"' || c == '\'') {
             if (! name) {
                 if (condition.slice(i, _in.length) == _in) {
@@ -1335,5 +1335,5 @@ ChangeGameVariable.prototype.execute = function()
     this.setFinished(true);
 }
 
-_console.log("Actions loaded!");
+log("Actions loaded!");
 
