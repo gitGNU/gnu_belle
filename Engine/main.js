@@ -287,12 +287,14 @@ function importGameData(path) {
 //game's main loop
 function gameLoop ()
 {   
+    if (Novel.end) {
+        alert("The End");
+        return;
+    }
+    
     if (Novel.currentAction == null || Novel.currentAction.isFinished()) {
       
-        if (Novel.end) {
-            alert("The End");
-            return;
-        }else if (Novel.currentAction && Novel.currentAction.wait) {
+        if (Novel.currentAction && Novel.currentAction.wait) {
             Novel.currentAction = Novel.currentAction.wait;
             Novel.currentAction.execute();
         }
