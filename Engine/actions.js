@@ -136,8 +136,9 @@ function Fade(data)
         this.duration = data["duration"];
     
     this.duration *= 1000;
-    this.time = this.duration / 255;
+    this.intervalDuration = this.duration / 255;
     this.timePassed = 0;
+    this.prevTime = 0;
     //this.object.color.alpha = 0;
     this.target = 1;
     this.increment = 1;
@@ -168,6 +169,9 @@ belle.utils.extend(Action, Fade);
 Fade.prototype.execute = function () {
     var t = this;
     
+    this.prevTime = new Date().getTime();
+    this.timePassed = 0;
+    
     //special case for fade in; fade out usually goes to zero
     if (this.fadeType == "in") {
         this.target = this.object.opacity();
@@ -181,17 +185,26 @@ Fade.prototype.execute = function () {
         this.object.setOpacity(0);
     }
      
-    this.interval = setInterval(function() {t.fade();}, this.time);        
+    this.interval = setInterval(function() {t.fade();}, this.intervalDuration);        
     this.object.redraw = true;
 }
 
 Fade.prototype.fade = function () {
-    this.timePassed += this.time;
+    
+    var now = new Date().getTime();
+    var passed = now - this.prevTime;
+    this.timePassed += passed;
+    this.prevTime = now;
+    
+    if (this.timePassed >= this.duration) {
+        this.object.setOpacity(this.target);
+        this.object.setBackgroundOpacity(this.bgTarget);
+    }
+    
     var backgroundOpacity = this.object.backgroundOpacity();
     var opacity = this.object.color.alpha;
     
-    if (this.timePassed >= this.duration ||
-       (this.fadeType == "in" && opacity >= this.target) ||
+    if ((this.fadeType == "in" && opacity >= this.target) ||
        (this.fadeType == "out" && opacity <= this.target)) {
         clearInterval(this.interval);
         this.interval = null;
@@ -200,17 +213,19 @@ Fade.prototype.fade = function () {
         return;
     }
     
+    passed = passed > this.intervalDuration ? passed : this.intervalDuration;
+    var increment = passed * this.increment / this.intervalDuration; 
     if (this.fadeType == "in") {
       if (opacity < this.target)
-          this.object.setOpacity(opacity + this.increment);
+          this.object.setOpacity(opacity + increment);
       if (backgroundOpacity < this.bgTarget)
-          this.object.setBackgroundOpacity(backgroundOpacity + this.increment);
+          this.object.setBackgroundOpacity(backgroundOpacity + increment);
     }
     else {
       if (opacity > this.target)
-          this.object.setOpacity(opacity+this.increment);
+          this.object.setOpacity(opacity+increment);
       if (backgroundOpacity > this.bgTarget)
-          this.object.setBackgroundOpacity(backgroundOpacity + this.increment);
+          this.object.setBackgroundOpacity(backgroundOpacity + increment);
     }
       
     this.object.redraw = true;
@@ -238,6 +253,9 @@ function Slide(data)
     this.startPoint = new Point(data["startX"], data["startY"]);
     this.endPoint = new Point(data["endX"], data["endY"]);
     this.duration = 0;
+    this.timePassed = 0;
+    this.intervalDuration = 0;
+    this.prevTime = 0;
     this.objectOriginalPosition = null;
     
     if ("duration" in data)
@@ -260,27 +278,41 @@ Slide.prototype.execute = function ()
 {
     var t = this;
     this.reset();
-    var duration = this.duration / this.startPoint.distance(this.endPoint);
+    this.timePassed = 0;
+    this.prevTime = new Date().getTime();
+    this.intervalDuration = Math.round(this.duration / this.startPoint.distance(this.endPoint));
     
     this.object.setX(this.startPoint.x);
     this.object.setY(this.startPoint.y);
     
     this.object.redraw = true;
-    
-    this.interval = setInterval(function() { t.slide(); }, duration);
+    this.interval = setInterval(function() { t.slide(); }, this.intervalDuration);
 }
 
 Slide.prototype.slide = function () 
 {   
+    var now = new Date().getTime();
+    var passed = now - this.prevTime;
+    this.timePassed += passed;
+    this.prevTime = now;
+
+    if (this.timePassed >= this.duration) {
+        this.object.setX(this.endPoint.x);
+        this.object.setY(this.endPoint.y);
+    }
+    
+    passed = passed > this.intervalDuration ? passed : this.intervalDuration;
+    var incX = passed * this.incX / this.intervalDuration;
+    var incY = passed * this.incY / this.intervalDuration;
     var x = this.object.x, y = this.object.y;
     
-    if ((this.incX > 0 && this.object.x < this.endPoint.x) ||
-        (this.incX < 0 && this.object.x > this.endPoint.x))
-        x += this.incX;
+    if ((incX > 0 && this.object.x < this.endPoint.x) ||
+        (incX < 0 && this.object.x > this.endPoint.x))
+        x += incX;
     
-    if ((this.incY > 0 && this.object.y < this.endPoint.y) ||
-        (this.incY < 0 && this.object.y > this.endPoint.y))
-        y += this.incY;
+    if ((incY > 0 && this.object.y < this.endPoint.y) ||
+        (incY < 0 && this.object.y > this.endPoint.y))
+        y += incY;
     
     //if x and y have NOT been modified, set action finished
     if (x === this.object.x && y === this.object.y) {
@@ -301,7 +333,7 @@ Slide.prototype.skip = function () {
 }
 
 Slide.prototype.reset = function () {
-    
+    this.timePassed = 0;
     Action.prototype.reset.call(this);
     
     if (this.objectOriginalPosition) {
@@ -321,6 +353,7 @@ Slide.prototype.scale = function(widthFactor, heightFactor)
     this.endPoint.x *= widthFactor;
     this.endPoint.y *= heightFactor;
 }
+
 
 /*********** DIALOGUE ACTION ***********/
 
@@ -1177,7 +1210,6 @@ function ShowMenu(data)
     if ( "options" in data && typeof data["options"] == "number") 
         this.options = options; 
     
-    log("object", this.object);
     if (this.object)
         this.object.addReceiver(this);
 }
@@ -1196,7 +1228,6 @@ ShowMenu.prototype.execute = function()
 ShowMenu.prototype.receive = function(event) 
 {
   if (event.type == "mouseup") {
-    log("set object invisible!!!!!", this.object.redraw);
     this.object.visible = false;
     this.object.redraw = true;
     this.setFinished(true);
