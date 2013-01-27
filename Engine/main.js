@@ -176,6 +176,7 @@ window.onload = function () {
   }
   
   actions.init();
+  display.loading();
   importgameData("game.json");
 }
 

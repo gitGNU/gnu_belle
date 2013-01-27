@@ -32,6 +32,8 @@ var scaleHeightFactor = 1;
 var showFps = false;
 var width = 0;
 var height = 0;
+var loader = null;
+var progress = null;
 var container = null;
 
 //public variables
@@ -196,6 +198,9 @@ var init = function()
         game.currentScene.redrawBackground = true;
         addObjects(game.currentScene);
     }
+    
+    if (loader.running)
+        stopLoading();
 }
 
 var redraw = function()
@@ -369,6 +374,79 @@ var clear = function()
     display.context.clearRect(0, 0, display.canvas.width, display.canvas.height);
 }
 
+var updateLoading = function()
+{
+    if (! loader)
+        return;
+  
+    container = container || $("#container");
+    var cwidth = container.width();
+    var cheight = container.height();
+    var width = loader.width();
+    
+    if (cwidth != loader.containerWidth || cheight != loader.containerHeight) {
+        var height = loader.height();
+        loader.css("left", parseInt((cwidth - width) / 2));
+        loader.css("top",parseInt((cheight - height) / 2)); 
+    }
+    
+    var left = parseInt(progress.css("left"));
+    var width = loader.width();
+    var staticBarWidth = loader.staticBarWidth;
+  
+    progress.width(staticBarWidth);
+    if (left >= width)
+        left = -staticBarWidth;
+
+    left += 20;
+    progress.css("left", left);
+  
+
+  if (loader.running)
+    setTimeout(updateLoading, 50);
+}
+
+var loading = function()
+{
+    loader = loader || $("#loader");
+    progress = progress || $("#loader #progress");
+    
+    if (! loader.length) {
+        loader = $('<div id="loader"></div>');
+        loader.css("text-align", "center");
+        loader.css("border", "1px solid");
+        progress = $('<div id="progress"></div>');
+        loader.append(progress);
+        $("body").append(loader);
+    }
+    
+    container = container || $("#container");
+    var cwidth = container.width();
+    var cheight = container.height();
+    var barWidth = parseInt(cwidth * 0.4);
+    var barHeight = parseInt(cheight * 0.05);
+    
+    loader.css("left", parseInt((cwidth - barWidth) / 2));
+    loader.css("top",parseInt((cheight - barHeight) / 2)); 
+    loader.width("40%");
+    loader.height("5%");
+    loader.staticBarWidth = barWidth / 3;
+    loader.running = true;
+    loader.containerWidth = cwidth;
+    loader.containerHeight = cheight;    
+    loader.css("display", "block");
+   
+    updateLoading();
+}
+
+var stopLoading = function()
+{
+    if (loader.running) {
+        loader.running = false;
+        $("#loader").css("display", "none");
+    }
+}
+
 //Expose public functions
 display.scaleFont = scaleFont;
 display.scaleAll = scaleAll;
@@ -379,6 +457,8 @@ display.addObject = addObject;
 display.addObjects = addObjects;
 display.needsRedraw = needsRedraw;
 display.drawFPS = drawFPS;
+display.stopLoading = stopLoading;
+display.loading = loading;
 display.init = init;
 display.removeObjects = removeObjects;
 display.addObjects = addObjects;
