@@ -16,6 +16,19 @@
 
 /*********** ACTION ***********/
 
+var belle = belle ||  {};
+belle.actions = {};
+
+(function(actions) {
+
+    
+actions.init = function()
+{
+    Color = belle.objects.Color;
+    Point = belle.objects.Point;
+    utils = belle.utils;
+}
+    
 function Action(data)
 {
     this.finished = false;
@@ -32,13 +45,13 @@ function Action(data)
 
         if ("object" in data) {
             if (typeof data["object"] == "string")
-                this.object = getResource(data["object"], scene);
+                this.object = belle.getObject(data["object"], scene);
             else if (typeof data["object"] == "object") {
                 if (data["object"].name)
-                    this.object = getResource(data["object"].name, scene);
+                    this.object = belle.getObject(data["object"].name, scene);
 
-                if (! this.object && Belle[data["object"].type])  {
-                    var _Object = Belle[data["object"].type];
+                if (! this.object && belle.objects[data["object"].type])  {
+                    var _Object = belle.getObjectPrototype(data["object"].type);
                     this.object = new _Object(data["object"]);
                 }
             }
@@ -150,7 +163,7 @@ function Fade(data)
     }
 }
 
-extend(Action, Fade);
+belle.utils.extend(Action, Fade);
 
 Fade.prototype.execute = function () {
     var t = this;
@@ -239,10 +252,9 @@ function Slide(data)
 
     if (this.startPoint.y > this.endPoint.y)
         this.incY *= -1;
-    
 }
 
-extend(Action, Slide);
+belle.utils.extend(Action, Slide);
 
 Slide.prototype.execute = function () 
 {
@@ -326,7 +338,7 @@ function Dialogue(data)
     if (data) {
         if ("character" in data) {
             this.speakerName = data["character"];
-            this.character = getResource(data["character"]);
+            this.character = belle.getObject(data["character"]);
             if (this.character) 
                 this.speakerName = this.character.name;
         }
@@ -339,7 +351,7 @@ function Dialogue(data)
     this.rawText = this.text;
 }
 
-extend(Action, Dialogue);
+belle.utils.extend(Action, Dialogue);
 
 Dialogue.prototype.execute = function () {
     var t = this;
@@ -357,7 +369,7 @@ Dialogue.prototype.execute = function () {
             this.object.speakerName = this.speakerName;
     }
    
-    this.text = replaceVariables(this.text);
+    this.text = belle.replaceVariables(this.text);
     
     //this.lines = splitText(context.font, this.text, this.object.rect.width-this.object.leftPadding);
     if (this.character)
@@ -365,7 +377,7 @@ Dialogue.prototype.execute = function () {
     
     this.object.visible = true;
     this.object.redraw = true;
-    this.interval = setInterval(function() { t.updateText(); }, Novel.textDelay);
+    this.interval = setInterval(function() { t.updateText(); }, belle.game.textDelay);
 }
 
 Dialogue.prototype.updateText = function() {
@@ -422,7 +434,7 @@ function Wait(data)
     this.needsRedraw = false;
 }
 
-extend(Action, Wait);
+belle.utils.extend(Action, Wait);
 
 Wait.prototype.execute = function ()
 {
@@ -455,11 +467,13 @@ function ChangeVisibility(data)
     if ("transitions" in data) {
         var transitions = data["transitions"];
         for(var i=0; i !== transitions.length; i++) {
-            if (! window[transitions[i].type])
+            if (! belle.getActionPrototype(transitions[i].type)) {
+                log("TypeError: Action '" + transitions[i].type + "' is not a valid Action"); 
                 continue;
+            }
             
             transitions[i].__scene = data.__scene;
-            var transitionAction = window[transitions[i].type];
+            var transitionAction = belle.getActionPrototype([transitions[i].type]);
             var action = new transitionAction(transitions[i]);
             this.transitions.push(action);
 
@@ -471,7 +485,7 @@ function ChangeVisibility(data)
     this.duration *= 1000;
 }
 
-extend(Action, ChangeVisibility);
+belle.utils.extend(Action, ChangeVisibility);
 
 ChangeVisibility.prototype.execute = function () 
 {
@@ -536,7 +550,7 @@ function Show(data)
     
 }
 
-extend(ChangeVisibility, Show);
+belle.utils.extend(ChangeVisibility, Show);
 
 Show.prototype.execute = function () 
 {
@@ -591,7 +605,7 @@ function Hide(data)
     ChangeVisibility.call(this, data);
 }
 
-extend(ChangeVisibility, Hide);
+belle.utils.extend(ChangeVisibility, Hide);
 
 Hide.prototype.execute = function () 
 {
@@ -636,26 +650,27 @@ function ChangeBackground(data)
     
     this.backgroundImage = null;
     this.backgroundColor = null;
-    
+
     if ("backgroundImage" in data){
-         this.backgroundImage = new AnimationImage(data["backgroundImage"]);
+         this.backgroundImage = new belle.objects.AnimationImage(data["backgroundImage"]);
     }
     
     if ("backgroundColor" in data)
         this.backgroundColor = data["backgroundColor"];
 }
 
-extend(Action, ChangeBackground);
+belle.utils.extend(Action, ChangeBackground);
 
 ChangeBackground.prototype.execute = function () 
 {
     this.reset();
+    var game = belle.game;
     
-    if (Novel.currentScene) {
+    if (game.currentScene) {
         if (this.backgroundImage)
-            Novel.currentScene.setBackgroundImage(this.backgroundImage);
+            game.currentScene.setBackgroundImage(this.backgroundImage);
         if (this.backgroundColor)
-            Novel.currentScene.setBackgroundColor(this.backgroundColor);
+            game.currentScene.setBackgroundColor(this.backgroundColor);
     }
     
     this.setFinished(true);
@@ -669,7 +684,7 @@ function Label (data)
     this.needsRedraw = false;
 }
 
-extend (Action, Label);
+belle.utils.extend (Action, Label);
 
 /************* Go TO LABEL *****************/
 
@@ -681,13 +696,14 @@ function GoToLabel(data)
     this.needsRedraw = false;
 }
 
-extend(Action, GoToLabel);
+belle.utils.extend(Action, GoToLabel);
 
 GoToLabel.prototype.execute = function()
 {
    this.reset();
+   var game = belle.game;
    
-   var currentScene = Novel.currentScene;
+   var currentScene = game.currentScene;
    
    if (! currentScene || ! currentScene.actions) {
         this.setFinished(true);
@@ -699,16 +715,16 @@ GoToLabel.prototype.execute = function()
         for (var i=0; i !== currentScene.actions.length; i++) {
             
             if (currentScene.actions[i].name === this.label) {
-                this.resetActions(i, Novel.nextAction-1); 
-                Novel.currentAction.setFinished(true);
-                Novel.nextAction = i;
+                this.resetActions(i, game.nextAction-1); 
+                game.currentAction.setFinished(true);
+                game.nextAction = i;
                 break;
             }
         }
    }
    else if (this.label instanceof Label || typeof this.object === 'label'){
        if (currentScene.actions.indexOf(this.label) != -1)
-            window.nextAction = Novel.currentScene.actions.indexOf(this.label);
+            window.nextAction = game.currentScene.actions.indexOf(this.label);
    }
  
    this.setFinished(true);
@@ -716,7 +732,7 @@ GoToLabel.prototype.execute = function()
 
 GoToLabel.prototype.resetActions = function(from, to)
 {
-    var actions =  Novel.currentScene.actions;
+    var actions =  belle.game.currentScene.actions;
     for(var i=from; i < to && i < actions.length; i++) {
         actions[i].reset();
     }
@@ -734,22 +750,23 @@ function GoToScene(data)
     this.needsRedraw = false;
 }
 
-extend(Action, GoToScene);
+belle.utils.extend(Action, GoToScene);
 
 GoToScene.prototype.execute = function()
 {
    this.reset();
    
-   var scenes = Novel.scenes;
+   var game = belle.game;
+   var scenes = game.scenes;
    
    if (this.scene) {
         for (var i=0; i !== scenes.length; i++) {
             
             if (this.scene == scenes[i].name) {
               
-                Novel.nextAction = Novel.currentScene.actions.length;
-                Novel.nextScene = i;
-                Novel.currentAction.setFinished(true);
+                game.nextAction = game.currentScene.actions.length;
+                game.nextScene = i;
+                game.currentAction.setFinished(true);
                 break;
             }
         }
@@ -775,7 +792,7 @@ function Branch(data)
     if ( "trueActions" in data) {
         actions = data["trueActions"];
         for(var i=0; i < actions.length; i++) {
-          _Action = window[actions[i].type];
+          _Action = belle.getActionPrototype([actions[i].type]);
           if (Action)
             this.trueActions.push(new _Action(actions[i]));
         }
@@ -784,7 +801,7 @@ function Branch(data)
     if ( "falseActions" in data) {
         actions = data["falseActions"];
         for(var i=0; i < actions.length; i++) {
-          _Action = window[actions[i].type];
+          _Action = belle.getActionPrototype([actions[i].type]);
           if (Action)
             this.falseActions.push(new _Action(actions[i]));
         }
@@ -820,7 +837,7 @@ function Branch(data)
     }*/
 }
 
-extend(Action, Branch);
+belle.utils.extend(Action, Branch);
 
 Branch.prototype.execute = function()
 {
@@ -868,7 +885,6 @@ Branch.prototype.loadCondition = function(condition)
             continue;
         }
 
-        log(condition[0]);
         if (c.search(letter) != -1 || c.search(number) != -1 || c == '"' || c == '\'') {
             if (! name) {
                 if (condition.slice(i, _in.length) == _in) {
@@ -904,7 +920,7 @@ Branch.prototype.loadCondition = function(condition)
 
             if (name) {
                 if (name.search(variable) != -1)
-                  conditionParts.push("Novel.variables['" + name + "']");
+                  conditionParts.push("belle.game.variables['" + name + "']");
                 else
                   conditionParts.push(name);
                 name = "";
@@ -940,7 +956,7 @@ Branch.prototype.loadCondition = function(condition)
     
     if (name) {
         if (name.search(variable) != -1)
-          conditionParts.push("Novel.variables['" + name + "']");
+          conditionParts.push("belle.game.variables['" + name + "']");
         else
           conditionParts.push(name);
     }
@@ -972,7 +988,7 @@ function ChangeColor(data)
     }
 }
 
-extend(Action, ChangeColor);
+belle.utils.extend(Action, ChangeColor);
 
 ChangeColor.prototype.execute = function()
 {
@@ -1053,7 +1069,7 @@ function PlaySound(data)
         
 }
 
-extend(Action, PlaySound);
+belle.utils.extend(Action, PlaySound);
 
 PlaySound.prototype.execute = function()
 {
@@ -1103,7 +1119,7 @@ function StopSound(data)
         
 }
 
-extend(Action, StopSound);
+belle.utils.extend(Action, StopSound);
 
 StopSound.prototype.execute = function()
 {
@@ -1128,9 +1144,10 @@ StopSound.prototype.getSound = function (name) {
     *  If the above fails, it attempts to match PlaySound's sound name.
     */
     
-    var actions = Novel.actions;
+    var game = belle.game;
+    var actions = game.actions;
  
-    for (var i=Novel.nextAction-2; i >= 0; i--) {
+    for (var i=game.nextAction-2; i >= 0; i--) {
         //The sound can be matched by either 
         if (actions[i].type == "PlaySound" && (! name || actions[i].name == name || actions[i].soundName == name) ) {
             return actions[i].sound;
@@ -1160,29 +1177,30 @@ function ShowMenu(data)
     if ( "options" in data && typeof data["options"] == "number") 
         this.options = options; 
     
+    log("object", this.object);
     if (this.object)
         this.object.addReceiver(this);
 }
 
-extend(Action, ShowMenu);
+belle.utils.extend(Action, ShowMenu);
 
 ShowMenu.prototype.execute = function()
 {
     this.reset();
 
     if (this.object) {
-        Novel.currentScene.addObject(this.object);
+        belle.addObject(this.object);
     }
 }
 
 ShowMenu.prototype.receive = function(event) 
 {
   if (event.type == "mouseup") {
+    log("set object invisible!!!!!", this.object.redraw);
     this.object.visible = false;
     this.object.redraw = true;
     this.setFinished(true);
   }
-  
 }
 
 ShowMenu.prototype.scale = function(widthFactor, heightFactor)
@@ -1200,11 +1218,11 @@ function EndNovel(data)
     Action.call(this, data);
 }
 
-extend(Action, EndNovel);
+belle.utils.extend(Action, EndNovel);
 
 EndNovel.prototype.execute = function()
 {
-    Novel.end = true;  
+    belle.game.end = true;  
     this.setFinished(true);
 }
 
@@ -1231,7 +1249,7 @@ function GetUserInput(data)
     
 }
 
-extend(Action, GetUserInput);
+belle.utils.extend(Action, GetUserInput);
 
 GetUserInput.prototype.execute = function()
 {
@@ -1242,11 +1260,10 @@ GetUserInput.prototype.execute = function()
         return;
     }
     
-    
     var value = prompt(this.message, this.defaultValue);
     if (! value)
         value = this.defaultValue;
-    Novel.variables[this.variable] = value;
+    belle.insertVariable(this.variable, value);
     
     this.setFinished(true);
 }
@@ -1255,7 +1272,6 @@ GetUserInput.prototype.reset = function()
 {
     Action.prototype.reset.call(this);
     this.value = null;
-    //if (Novel.containsVariable())
 }
 
 /************* Change Game Variable *****************/
@@ -1284,14 +1300,14 @@ function ChangeGameVariable(data)
 
 }
 
-extend(Action, ChangeGameVariable);
+belle.utils.extend(Action, ChangeGameVariable);
 
 ChangeGameVariable.prototype.execute = function()
 {   
     var currValue = "";
     var newValue = this.value;
-    if (Novel.containsVariable(this.variable))
-        currValue = Novel.value(this.variable);
+    if (belle.containsVariable(this.variable))
+        currValue = belle.value(this.variable);
     
     //if arithmetic operation
     if (this.validOperators.slice(1,5).contains(this.operator)) {
@@ -1330,10 +1346,31 @@ ChangeGameVariable.prototype.execute = function()
             break;
     }
     
-    Novel.variables[this.variable] = currValue;
+    belle.insertVariable(this.variable, currValue);
 
     this.setFinished(true);
 }
 
-log("Actions loaded!");
+//Expose objects
+actions.Fade = Fade;
+actions.Slide = Slide;
+actions.Dialogue = Dialogue;
+actions.Wait = Wait;
+actions.Show = Show;
+actions.Hide = Hide;
+actions.ChangeBackground = ChangeBackground;
+actions.Label = Label;
+actions.GoToLabel = GoToLabel;
+actions.GoToScene = GoToScene;
+actions.Branch = Branch;
+actions.ChangeColor = ChangeColor;
+actions.PlaySound = PlaySound;
+actions.StopSound = StopSound;
+actions.ShowMenu = ShowMenu;
+actions.GetUserInput = GetUserInput;
+actions.ChangeGameVariable = ChangeGameVariable;
+
+}(belle.actions));
+
+log("Actions module loaded!");
 

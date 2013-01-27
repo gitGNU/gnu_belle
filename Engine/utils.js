@@ -65,31 +65,14 @@ if (typeof Array.prototype.contains != 'function')
     };
 }
 
-function surrogateCtor() {}
-    
-function extend(base, sub) 
-{
-// Copy the prototype from the base to setup inheritance
-surrogateCtor.prototype = base.prototype;
-// Tricky huh?
-sub.prototype = new surrogateCtor();
-// Remember the constructor property was set wrong, let's fix it
-sub.prototype.constructor = sub;
-}
- 
-function updateSize(object)
-{
-    if (object.image) {
-        object.rect.width = object.image.width;
-        object.rect.height = object.image.height;
-    }
-    else {
-        object.width = object.background.width;
-        object.height = object.background.height;
-    }
-        
-}
+var belle = belle || {};
+belle.utils = {};
 
+(function(utils) {
+
+var dummy = null;
+function surrogateCtor() {}
+ 
 function getBody()
 {
     var body = document.getElementById("body");
@@ -101,13 +84,37 @@ function getBody()
     return body;
 }
 
-function textSize(text, font) 
+var parseSize = function(value)
 {
-    if (! font)
-        return [0, 0];
-    var size = [];
+    if (parseInt(value) != NaN)
+        return parseInt(value);
     
-    var dummy = document.getElementById("dummy");
+    if (utils.isPercentSize(value)) {
+        value.split("%")
+        var parts = value.split("%");
+        if (parts && parseInt(parts[0]) != -1)
+            return parseInt(value);
+    }
+
+    return 0;
+}
+ 
+utils.extend = function (base, sub) 
+{
+    // Copy the prototype from the base to setup inheritance
+    surrogateCtor.prototype = base.prototype;
+    // Tricky huh?
+    sub.prototype = new surrogateCtor();
+    // Remember the constructor property was set wrong, let's fix it
+    sub.prototype.constructor = sub;
+}
+
+utils.textSize = function(text, font) 
+{
+    var size = [];
+    if (! dummy)
+        dummy = document.getElementById("dummy");
+
     dummy.style.font = font;
     var textNode = dummy.childNodes[0];
     textNode.nodeValue = text;
@@ -119,26 +126,27 @@ function textSize(text, font)
     return size;
 }
 
-function textWidth(text, font) 
+utils.textWidth = function(text, font) 
 {
     if (! font)
         return 0;
     
-    var dummy = document.getElementById("dummy");
+    if (! dummy)
+      dummy = document.getElementById("dummy");
     dummy.style.font = font;
     var textNode = dummy.childNodes[0];
     textNode.nodeValue = text;
     return dummy.offsetWidth;
 }
 
-function splitText(font, text, maxWidth) 
+utils.splitText = function(font, text, maxWidth) 
 {
-    var body = getBody();
     var fullText = text;
-    if (! body || ! fullText)
+    if (! fullText)
         return [];
     
-    var dummy = document.getElementById("dummy");
+    if (! dummy)
+        dummy = document.getElementById("dummy");
     dummy.style.font = font;
     var textNode = dummy.childNodes[0];
     textNode.nodeValue = fullText;
@@ -146,8 +154,6 @@ function splitText(font, text, maxWidth)
     var width = 0;
     maxWidth -= 4;
    
-    /*dummy.setAttribute("style", "font:"+font+";"+"position: absolute; visibility: hidden; height: auto; width: auto; border: none; padding: 0 0; margin: 0 0; white-space: nowrap;");
-    body.appendChild(dummy);*/
     width = dummy.offsetWidth;
     
     if ( width > maxWidth ) {
@@ -213,130 +219,14 @@ function splitText(font, text, maxWidth)
     return [fullText];
 }
 
-function replaceVariables(text)
-{
-    if (! text)
-        return text;
-    
-    if (! text.contains("$"))
-        return text;
-    
-    var validChar = /^[a-zA-Z]+[0-9]*$/g;
-    var variable = "";
-    var variables = [];
-    var values = [];
-    var appendToVariable = false;
-    
-    //Parse text to determine variables, which start from "$" 
-    //until the end of string or until any other character that is not a letter nor a digit.
-    for(var i=0; i !== text.length; i++) {
-      
-      if (text.charAt(i).search(validChar) == -1) {
-        appendToVariable = false;          
-        if (variable)
-          variables.push(variable);
-        variable = "";
-        if(text.charAt(i) == "$")
-          appendToVariable = true;
-      }
-        
-      if (appendToVariable)
-        variable += text.charAt(i);
-    }
-    
-    //replace variables with the respective values and append them to the values list
-    for(var i=0; i != variables.length; i++) {
-        if (Novel.containsVariable(variables[i]))
-          values.push(Novel.value(variables[i]));
-        else //if the variable is not found, still add an empty value to the values so we have an equal number of elements in both lists
-          values.push("");
-    }
-    
-    //replace variables with the values previously extracted
-    for(var i=0; i != values.length; i++) {
-      text = text.replace(variables[i], values[i]);
-    }
-    
-    return text;
-}
-
-function initActions(actions, object) 
-{
-    var actionInstances = [];
-    var actionInstance = [];
-    var _Action;
-    
-    for(var i=0; i !== actions.length; i++) {
-        if (! window[actions[i].type])
-            continue;
-        
-        _Action = window[actions[i].type];
-        actionInstance = new _Action(actions[i]);
-        
-        //if 'object' is passed, we overwrite the previous object assigned, which should be null anyways.
-        //The 'object' is usually passed when we're initializing actions from events of a certain object.
-        //Since the object should be calling this from it's constructor, it hasn't been added to the list of scene objects.
-        //Thus we need to explicitly attribute the object.
-        if (object)
-            actionInstance.object = object;
-        
-        actionInstances.push(actionInstance);
-    }
-    
-    return actionInstances;
-    
-}
-
-function createResource(data)
-{
-    var type = data["type"];
-    if (! type) {
-        var resource = data["resource"];
-        if ("resource" in data && resource in Novel.resources) {
-            type = Novel.resources[resource].data.type;
-        }
-        else
-            return null;
-    }
-
-    var obj = Belle[type];
-    
-    if (! obj) {
-        log("'" + type + "' is not a valid object type.");
-        return null;
-    }
-
-    return new obj(data);
-}
-
-function getResource(name, scene)
-{
-    if (! name)
-        return null;
-    
-    if (scene) {
-       var objects = scene.objects;
-        
-       for (var i = 0; i !== objects.length; i++) {
-           if (objects[i].name === name)
-               return objects[i];
-       }
-    }
-    
-    if (name in Novel.resources)
-        return Novel.resources[name];
-        
-    return null;
-}
-
-function extendJsonObject(a, b)
+utils.extendJsonObject = function (a, b)
 {
     for(var key in b)
         if(! a.hasOwnProperty(key))
             a[key] = b[key];
 }
 
-function isPercentSize(value)
+utils.isPercentSize = function(value)
 {
     if (typeof value != "string")
         return false;
@@ -344,26 +234,11 @@ function isPercentSize(value)
     return value.search(/[0-9]+\%/g) != -1;
 }
 
-function parseSize(value)
-{
-    if (parseInt(value) != NaN)
-        return parseInt(value);
-    
-    if (isPercentSize(value)) {
-        value.split("%")
-        var parts = value.split("%");
-        if (parts && parseInt(parts[0]) != -1)
-            return parseInt(value);
-    }
-
-    return 0;
-}
-
-function isNumber(n) {
+utils.isNumber = function(n) {
   return !isNaN(parseFloat(n)) && isFinite(parseFloat(n));
 }
 
-function initElement(element, info)
+utils.initElement = function (element, info)
 {
     element.style.position = "absolute";
     if (typeof info.width == "string")
@@ -378,22 +253,7 @@ function initElement(element, info)
     element.style.display = "none";
 }
 
-function isCanvasSupported() {
-  var elem = document.createElement("canvas");
-  return !!(elem.getContext && elem.getContext('2d'));
-}
-
-function windowWidth() 
-{
-    return window.innerWidth || document.documentElement.clientWidth || document.documentElement.offsetWidth;
-}
-
-function windowHeight()
-{
-    return window.innerHeight || document.documentElement.clientHeight || document.documentElement.offsetHeight;
-}
-
-function importFile(url, callback, async, mimeType)
+utils.importFile = function(url, callback, async, mimeType)
 {
     if (async == "undefined")
         async = false;
@@ -413,29 +273,29 @@ function importFile(url, callback, async, mimeType)
     xobj.send(null);
 }
 
-function isFontLoaded (name)
+utils.isFontLoaded = function(name)
 {
-    name = getFontName(name);
+    name = utils.getFontName(name);
 
     var defaultFont = "12px Arial, Helvetica, sans-serif";
     var font = "12px " + name + ",  Arial, Helvetica, sans-serif";
-    var defaultSize = textWidth("ABCDEFGHIJKLMNOPQRSTUVXWYZ0123456789", defaultFont);
-    var size = textWidth("ABCDEFGHIJKLMNOPQRSTUVXWYZ0123456789", font);
-    if ( size[0] != defaultSize[0])
+    var defaultWidth = utils.textWidth("ABCDEFGHIJKLMNOPQRSTUVXWYZ0123456789", defaultFont);
+    var width = utils.textWidth("ABCDEFGHIJKLMNOPQRSTUVXWYZ0123456789", font);
+    if ( width != defaultWidth)
         return true;
     return false;
 }
 
-function isFontAvailable(fontFile)
+utils.isFontAvailable = function(fontFile)
 {
     var status = 404;
-    importFile(fontFile, function(obj) {status = obj.status;}, false, "application/octet-stream");
+    utils.importFile(fontFile, function(obj) {status = obj.status;}, false, "application/octet-stream");
     if (status == 200)
         return true;
     return false;
 }
 
-function getFontName(font)
+utils.getFontName = function(font)
 {
     if (font.indexOf(".") !== -1)
         return font.split(".")[0];
@@ -447,30 +307,6 @@ function getFontName(font)
     return font;
 }
 
-/*********** POINT **********/
-function Point (x, y)
-{
-    this.x = x;
-    this.y = y;
-    
-    if (this.x === null || this.x === undefined)
-        this.x = 0;
-    if (this.y === null || this.y === undefined)
-        this.y = 0;
-}
+}(belle.utils));
 
-Point.prototype.distance = function(point) 
-{
-    return Math.sqrt(Math.pow(point.x-this.x, 2) + Math.pow(point.y-this.y, 2));
-}
-
-function addJavascript(jsname,pos) 
-{
-    var th = document.getElementsByTagName(pos)[0];
-    var s = document.createElement('script');
-    s.setAttribute('type','text/javascript');
-    s.setAttribute('src',jsname);
-    th.appendChild(s);
-} 
-
-log("Utils loaded!");
+log("Utils module loaded!");

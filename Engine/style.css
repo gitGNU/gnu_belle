@@ -30,16 +30,18 @@ body, html
   background-color: #000000;
   color: #FFFFFF;
   overflow: hidden;
+  width: 100%;
+  height: 100%;
 }
 
-#container #gameBackgroundCanvas 
+#container #backgroundCanvas 
 {
     position: absolute; 
     margin: 0 auto;
     z-index: 0;
 }
 
-#container #gameCanvas 
+#container #canvas 
 {
     position: absolute; 
     margin: 0 auto;
@@ -52,11 +54,6 @@ body, html
     font: 10pt calibre;
     z-index: 2;
     display: none;
-}
-
-#loading {
-    position: absolute;
-    left: 50%;
 }
 
 #dummy

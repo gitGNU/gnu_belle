@@ -14,6 +14,76 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+var belle = belle || {};
+belle.objects = {};
+
+(function(objects) {
+
+/*********** AnimationImage **********/
+
+function AnimationImage(imageData, parent)
+{
+    this.imageLoaded = false;
+    this.frames = null;
+    this.currentFrame = 0;
+    this.frameDelay = 100; // 100ms by default
+    this.framesLoaded = 0;
+    this.image = null;
+    this.interval = null;
+    this.parent = parent;
+    this.animated = false;
+    var that = this;
+      
+    if (typeof imageData === "object" && "src" in imageData) {
+        //activate DOM mode if game contains animated image
+        if ("animated" in imageData && imageData["animated"])
+            belle.display.usingDOM = true;
+        imageData = imageData["src"];
+    }
+    
+    if (typeof imageData === "string") {
+        this.img = new window.Image();
+        this.img.onload = function() { 
+            that.imageLoaded = true;
+        };
+        
+        this.img.src = imageData;
+        this.img.style.width = "100%";
+        this.img.style.height = "100%";
+        this.img.style.display = "block";
+    }
+}
+
+AnimationImage.prototype.isReady = function () { 
+    if (this.frames) {
+        if (this.frames.length == this.framesLoaded)
+            return true;
+        else
+            return false;
+    }
+    
+    if (this.img)
+        return this.img.complete && this.imageLoaded;
+    
+    return true;
+}
+
+AnimationImage.prototype.paint = function(context, x, y, width, height) {
+   
+    if (! context)
+        return;
+    
+    if (this.img.complete) {
+        context.drawImage(this.img, x, y, width, height);
+    }
+    else if (this.frames) {
+        context.drawImage(this.frames[this.currentFrame], x, y, width, height);
+        this.currentFrame++;
+        if (this.currentFrame >= this.frames.length)
+            this.currentFrame = 0;
+    }
+}
+
 /**** COLOR ****/
 var Color = function(components)
 {
@@ -58,128 +128,49 @@ Color.prototype.alphaF = function()
     return this.alpha / 255;
 }
 
-/*********** AnimationImage **********/
-
-function AnimationImage(imageData, parent)
+/*********** POINT **********/
+var Point = function (x, y)
 {
-    this.imageLoaded = false;
-    this.frames = null;
-    this.currentFrame = 0;
-    this.frameDelay = 100; // 100ms by default
-    this.framesLoaded = 0;
-    this.image = null;
-    this.interval = null;
-    this.parent = parent;
-    this.animated = false;
-    var that = this;
+    this.x = x;
+    this.y = y;
     
-    
-    //is it animated
-    /*if (typeof imageData === "object") {
-        
-        if ("animated" in imageData) {
-            this.animated = true;
-        }
-        else if ("frames" in imageData) {
-            var frames = imageData["frames"];
-            var image = null;
-            this.frames = [];
-            for (var i=0; i < frames.length; i++) {
-                image = new window.Image();
-                image.onload = function() { 
-                    that.framesLoaded++;
-                };
-                image.src = frames[i];
-                this.frames.push(image);
-            }
-            
-            if ("frameDelay" in imageData && isNumber(imageData["frameDelay"]))
-                this.frameDelay = parseInt(imageData["frameDelay"]);
-            
-            if (this.parent)
-                this.interval = setInterval(function() { that.parent.frameChanged(); }, this.frameDelay);
-        }
-    }*/
-    
-    if (typeof imageData === "object" && "src" in imageData) {
-        //activate DOM mode if game contains animated image
-        if ("animated" in imageData && imageData["animated"])
-            Novel.usingDOM = true;
-        imageData = imageData["src"];
-    }
-    
-    if (typeof imageData === "string") {
-        this.img = new window.Image();
-        this.img.onload = function() { 
-            that.imageLoaded = true;
-        };
-        
-        this.img.src = imageData;
-        this.img.style.width = "100%";
-        this.img.style.height = "100%";
-        this.img.style.display = "block";
-    }
-    
+    if (this.x === null || this.x === undefined)
+        this.x = 0;
+    if (this.y === null || this.y === undefined)
+        this.y = 0;
 }
 
-AnimationImage.prototype.isReady = function () { 
-    if (this.frames) {
-        if (this.frames.length == this.framesLoaded)
-            return true;
-        else
-            return false;
-    }
-    
-    if (this.img)
-        return this.img.complete && this.imageLoaded;
-    
-    return true;
+Point.prototype.distance = function(point) 
+{
+    return Math.sqrt(Math.pow(point.x-this.x, 2) + Math.pow(point.y-this.y, 2));
 }
-
-AnimationImage.prototype.paint = function(context, x, y, width, height) {
-   
-    if (! context)
-        return;
     
-    if (this.img.complete) {
-        context.drawImage(this.img, x, y, width, height);
-    }
-    else if (this.frames) {
-        context.drawImage(this.frames[this.currentFrame], x, y, width, height);
-        this.currentFrame++;
-        if (this.currentFrame >= this.frames.length)
-            this.currentFrame = 0;
-    }
-}
-
-
-var Belle  = (function() {
-
+    
 /*********** BASE OBJECT ***********/
 
 function Object(info)
 {
-    if ("resource" in info && getResource(info["resource"])) {
-        var resourceData = getResource(info["resource"]).data;
-        extendJsonObject(info, resourceData);
+    if ("resource" in info && belle.getResource(info["resource"])) {
+        var resourceData = belle.getResource(info["resource"]).data;
+        belle.utils.extendJsonObject(info, resourceData);
     }
     
     //check for percent width or height and for percent widths or heights
     if ("__parent" in info) 
         var parent = info["__parent"];
     
-    if (typeof info.width == "string" && isPercentSize(info.width) && parent && parseInt(parent.width) != NaN)
+    if (typeof info.width == "string" && belle.utils.isPercentSize(info.width) && parent && parseInt(parent.width) != NaN)
         info.width =  parseInt(info.width) * parent.width / 100;
 
-    if (typeof info.height == "string" && isPercentSize(info.height) && parent && parseInt(parent.height) != NaN)
+    if (typeof info.height == "string" && belle.utils.isPercentSize(info.height) && parent && parseInt(parent.height) != NaN)
         info.height =  parseInt(info.height) * parent.height / 100;
     
     this.element = document.createElement("div");
     this.backgroundElement = document.createElement("div");
     this.element.appendChild(this.backgroundElement);
     
-    initElement(this.element, info);
-    initElement(this.backgroundElement, info);
+    belle.utils.initElement(this.element, info);
+    belle.utils.initElement(this.backgroundElement, info);
     this.backgroundElement.style.display = "block";
     
     this.setX(info.x);
@@ -229,19 +220,19 @@ function Object(info)
     }
     
     if ("onMousePress" in info) {
-        this.mousePressActions = initActions(info["onMousePress"], this);
+        this.mousePressActions = this.initActions(info["onMousePress"]);
     }
     
     if ("onMouseRelease" in info) {
-        this.mouseReleaseActions = initActions(info["onMouseRelease"], this);
+        this.mouseReleaseActions = this.initActions(info["onMouseRelease"]);
     }
     
     if ("onMouseMove" in info) {
-        this.mouseMoveActions = initActions(info["onMouseMove"], this);
+        this.mouseMoveActions = this.initActions(info["onMouseMove"]);
     }
     
     if ("onMouseLeave" in info) {
-        this.mouseLeaveActions = initActions(info["onMouseLeave"], this);
+        this.mouseLeaveActions = this.initActions(info["onMouseLeave"]);
     }
     
     if ("xRadius" in info) {
@@ -405,16 +396,24 @@ Object.prototype.opacity = function ()
 Object.prototype.paint = function(context)
 {
     if (! this.redraw ||this.redrawing)
-        return;
+        return false;
     
     this.redrawing = true;
+        
+    if (this.paintX != -1 && this.paintX != this.x || this.paintY != -1 && this.paintY != this.y) {
+        context.clearRect(this.paintX, this.paintY, this.width, this.height);
+        this.paintX = -1;
+        this.paintY = -1;
+    }
+    
+    if (! this.visible) {
+        this.redrawing = false;
+        this.redraw = false;
+        return false;
+    }
     
     var x = this.globalX();
     var y = this.globalY();
-    
-    if (this.paintX != -1 && this.paintX != this.x || this.paintY != -1 && this.paintY != this.y) {
-        context.clearRect(this.paintX, this.paintY, this.width, this.height);
-    }
     
     if (this.backgroundImage) {
         this.backgroundImage.paint(context, x, y, this.width, this.height);
@@ -468,6 +467,7 @@ Object.prototype.paint = function(context)
     
     this.redrawing = false;
     this.redraw = false;
+    return true;
 }
 
 Object.prototype.isReady = function()
@@ -538,7 +538,7 @@ Object.prototype.clear = function (context)
 {
   if (! this.visible)
       return;
-      
+
   context.clearRect(this.globalX()-this.borderWidth, this.globalY()-this.borderWidth, this.width+this.borderWidth*2, this.height+this.borderWidth*2);
 }
 
@@ -621,7 +621,27 @@ Object.prototype.scale = function(widthFactor, heightFactor)
   this.redraw = true;
 }
 
-
+Object.prototype.initActions = function(actions) 
+{
+    var actionInstances = [];
+    var actionInstance = [];
+    var _Action;
+    
+    for(var i=0; i !== actions.length; i++) {
+        if (! belle.getActionPrototype([actions[i].type]))
+            continue;
+        
+        _Action = belle.getActionPrototype([actions[i].type]);
+        actionInstance = new _Action(actions[i]);
+        
+        //Since the object should be calling this from it's constructor, it hasn't been added to the list of scene objects.
+        //Thus we need to explicitly attribute the object.
+        actionInstance.object = this;
+        actionInstances.push(actionInstance);
+    }
+    
+    return actionInstances;
+}
 
 /*********** IMAGE OBJECT ***********/
 function Image (data)
@@ -640,11 +660,13 @@ function Image (data)
     }
 }
 
-extend(Object, Image);
+belle.utils.extend(Object, Image);
 
 Image.prototype.paint = function(context)
 {
-    Object.prototype.paint.call(this, context);
+    var draw = Object.prototype.paint.call(this, context);
+    if (! draw)
+        return false;
     
     context.save();
     if (context.globalAlpha != this.color.alphaF())
@@ -654,6 +676,7 @@ Image.prototype.paint = function(context)
     context.restore();
     
     this.redraw = false;
+    return true;
 }
 
 Image.prototype.isReady = function()
@@ -692,7 +715,7 @@ function Character(data)
 }
 
 
-extend(Image, Character);
+belle.utils.extend(Image, Character);
 
 
 /*********** TEXT BOX ***********/
@@ -704,7 +727,7 @@ function TextBox(info)
     this.textTopPadding = 0;
     this.textAlignment = [];
     this.textElement = document.createElement("div");
-    initElement(this.textElement, info);
+    belle.utils.initElement(this.textElement, info);
     this.textElement.style.display = "block";
     this.element.appendChild(this.textElement);
     
@@ -728,21 +751,23 @@ function TextBox(info)
     
     this.prevText = "";
     this.textParts = [];
-    this.displayedText = ""; 
-    this.textWidth = textWidth(this.displayedText, this.font);
+    this.displayedText = "";
+    this.textHeight = 0;
+    this.textWidth = belle.utils.textWidth(this.displayedText, this.font);
     this.alignText();
-    var textNode = document.createTextNode(replaceVariables(this.text));
+    var textNode = document.createTextNode(belle.replaceVariables(this.text));
     this.textElement.appendChild(textNode);
 }
 
-extend(Object, TextBox);
+belle.utils.extend(Object, TextBox);
 
 TextBox.prototype.paint = function(context)
 {
-    if (! this.redraw || this.redrawing)
-        return;
+    var draw = Object.prototype.paint.call(this, context);
     
-    Object.prototype.paint.call(this, context);
+    if (! draw)
+        return false;
+    
     this.redrawing = true;
     
     var width = this.width;
@@ -755,32 +780,25 @@ TextBox.prototype.paint = function(context)
     if (this.font)
         context.font = this.font;
     
-    /*if (this.prevText != this.text) {
-        this.textParts = splitText(context.font, this.text, this.rect.width-this.leftPadding);
-        //this.prevSize = textSize(context.font, this.text);
-        this.prevText = this.text;
-    }*/
-    
-    var text = replaceVariables(this.text);
+    var text = belle.replaceVariables(this.text);
     if (text != this.displayedText)
-      this.textParts = splitText(context.font, text, width-this.textLeftPadding);
+      this.textParts = belle.utils.splitText(context.font, text, width-this.textLeftPadding);
     this.displayedText = text;
-    
-    
+
     for (var i=this.textParts.length-1; i !== -1; --i) {
-        log("text", this.textParts);
         context.fillText(this.textParts[i], x+this.textLeftPadding, y+this.textTopPadding+this.heightOffset*(i+1), this.width);
     }
     
     context.font = defaultFont;
   
     this.redrawing = false;
+    return true;
 }
 
 TextBox.prototype.alignText = function(size)
 {
     if (! size)
-        size = textSize(this.text, Novel.font);
+        size = belle.utils.textSize(this.text, belle.game.font);
     
     var width = size[0];
     var height = size[1];
@@ -826,14 +844,14 @@ TextBox.prototype.needsRedraw = function()
     if (this.redraw)
         return true;
     
-    var displayText = replaceVariables(this.text);
+    var displayText = belle.replaceVariables(this.text);
     
     if (displayText != this.displayedText) {
         this.redraw = true;
         return true;
     }
     
-    var width = textWidth(displayText, this.font);
+    var width = belle.utils.textWidth(displayText, this.font);
     
     if (this.textWidth != width) {
         this.textWidth = width;
@@ -852,7 +870,7 @@ TextBox.prototype.appendText = function(text)
 TextBox.prototype.setText = function(text)
 {
     this.text = text;
-    this.element.childNodes[1].childNodes[0].nodeValue = replaceVariables(text);
+    this.element.childNodes[1].childNodes[0].nodeValue = belle.replaceVariables(text);
 }
 
 TextBox.prototype.setTextColor = function(color)
@@ -890,10 +908,10 @@ function ObjectGroup(data)
         var objects = data["objects"];
         for (var i=0; i !== objects.length; i++) {
             objects[i].__parent = this;
-            obj = createResource(objects[i]);
+            obj = belle.createObject(objects[i]);
             
             if (! obj) {
-                log(objects[i].type + ": is not a valid object type. Ignoring...");
+                log(objects[i].type + ": is not a valid object type!!!!.");
                 continue;
             }
             var left = parseInt(this.element.style.left);
@@ -904,7 +922,7 @@ function ObjectGroup(data)
             var elemTop = parseInt(obj.element.style.top);
             obj.y = elemTop - top;
             
-            if (Novel.usingDOM) {
+            if (belle.display.usingDOM) {
                 obj.element.style.display = "block";
                 obj.element.style.left = obj.x + "px";
                 //temporary hack in DOM mode to fix top/y value
@@ -917,7 +935,7 @@ function ObjectGroup(data)
     }
 }
 
-extend(Object, ObjectGroup);
+belle.utils.extend(Object, ObjectGroup);
 
 ObjectGroup.prototype.objectAt = function(x, y)
 {
@@ -932,10 +950,9 @@ ObjectGroup.prototype.objectAt = function(x, y)
 
 ObjectGroup.prototype.paint = function(context)
 {
-    if (! this.redraw)
-        return;
-    
-    Object.prototype.paint.call(this, context);
+    var draw = Object.prototype.paint.call(this, context);
+    if (! draw)
+        return false;
     
     for(var i=0; i !== this.objects.length; i++) {
         this.objects[i].redraw = true;
@@ -943,6 +960,7 @@ ObjectGroup.prototype.paint = function(context)
     }
     
     this.redraw = false;
+    return true;
 }
 
 ObjectGroup.prototype.mouseLeaveEvent = function(event)
@@ -1037,14 +1055,14 @@ function DialogueBox(data)
     this.speakerName = "";
 }
 
-extend(ObjectGroup, DialogueBox);
+belle.utils.extend(ObjectGroup, DialogueBox);
 
 DialogueBox.prototype.paint = function(context)
 {
-    if (! this.redraw)
-        return;
+    var draw = Object.prototype.paint.call(this, context);
     
-    Object.prototype.paint.call(this, context);
+    if (! draw)
+        return false;
 
     for(var i=0; i !== this.objects.length; i++) {
        
@@ -1058,6 +1076,7 @@ DialogueBox.prototype.paint = function(context)
     }
     
     this.redraw = false;
+    return true;
 }
 
 /************** MENU ************/
@@ -1067,14 +1086,14 @@ function Menu(data)
     ObjectGroup.call(this, data);
 }
 
-extend(ObjectGroup, Menu);
+belle.utils.extend(ObjectGroup, Menu);
 
 Menu.prototype.paint = function(context)
 {
-    if (! this.redraw)
-        return;
-    
-    Object.prototype.paint.call(this, context);
+    var draw = Object.prototype.paint.call(this, context);
+
+    if (! draw)
+        return false;
 
     for(var i=0; i !== this.objects.length; i++) { 
         this.objects[i].redraw = true;
@@ -1082,6 +1101,7 @@ Menu.prototype.paint = function(context)
     }
     
     this.redraw = false;
+    return true;
 }
 
 
@@ -1093,7 +1113,7 @@ function Button(data)
     this.visible = true;
 }
 
-extend(TextBox, Button);
+belle.utils.extend(TextBox, Button);
 
 /*********** SCENE ***********/
 
@@ -1111,8 +1131,8 @@ function Scene(data)
     this.backgroundImageLoaded = false;
     var backgroundImage = "";
     var backgroundColor = null;
-    this.width = Novel.width;
-    this.height = Novel.height;
+    this.width = belle.game.width;
+    this.height = belle.game.height;
     this.x = 0;
     this.y = 0;
     data.width = this.width;
@@ -1125,15 +1145,15 @@ function Scene(data)
     this.element.appendChild(this.backgroundElement);
     this.element.id = data["name"];
     
-    initElement(this.element, data);
-    initElement(this.backgroundElement, data);
+    belle.utils.initElement(this.element, data);
+    belle.utils.initElement(this.backgroundElement, data);
     this.backgroundElement.style.display = "block";
     
     if (data) {
         if ("backgroundImage" in data)
             backgroundImage = data["backgroundImage"];
         if ("backgroundColor" in data)
-            backgroundColor = new Color(data["backgroundColor"]);
+            backgroundColor = new belle.Color(data["backgroundColor"]);
         if ("name" in data)
             this.name = data["name"];
     }
@@ -1146,8 +1166,9 @@ function Scene(data)
 
 Scene.prototype.addObject = function(object) {
     this.objects[this.objects.length] = object;
-    if (Novel.currentScene == this)
-        addObject(object);
+    if (belle.game.currentScene == this) {
+        belle.display.addObject(object);
+    }
 }
 
 Scene.prototype.setBackgroundImage = function(background)
@@ -1187,7 +1208,7 @@ Scene.prototype.setBackgroundColor = function(color)
     if (this.backgroundColor != color) {
         
         if (color instanceof Array)
-            color = new Color(color);
+            color = new belle.Color(color);
         
         this.backgroundColor = color;
         
@@ -1204,11 +1225,11 @@ Scene.prototype.setBackgroundColor = function(color)
 Scene.prototype.paint = function(context)
 {    
     if (this.backgroundImage) {
-        this.backgroundImage.paint(context, 0, 0, Novel.width, Novel.height);
+        this.backgroundImage.paint(context, 0, 0, this.width, this.height);
     }
     else if (this.backgroundColor) {
         context.fillStyle  = this.backgroundColor.toString();
-        context.fillRect(0, 0, Novel.width, Novel.height);
+        context.fillRect(0, 0, this.width, this.height);
     }
     
     this.redrawBackground = false;
@@ -1224,7 +1245,7 @@ Scene.prototype.isReady = function()
 
 Scene.prototype.frameChanged = function()
 {
-    this.paint(Novel.bgContext);
+    this.paint(belle.display.bgContext);
 }
 
 Scene.prototype.scale = function(widthFactor, heightFactor)
@@ -1239,20 +1260,22 @@ Scene.prototype.scale = function(widthFactor, heightFactor)
     }
 }
 
-// Return an object that exposes the public methods
-return { 
-    "Color": Color,
-    "Object": Object,
-    "Image": Image,
-    "Character": Character,
-    "TextBox": TextBox,
-    "ObjectGroup": ObjectGroup,
-    "DialogueBox": DialogueBox,
-    "Scene": Scene,
-    "Button": Button,
-    "Menu": Menu
-};
+// Expose the public methods
 
-})();
+objects.Point = Point;
+objects.AnimationImage = AnimationImage;
+objects.Color = Color;
+objects.AnimationImage = AnimationImage;
+objects.Object = Object;
+objects.Image = Image;
+objects.TextBox = TextBox;
+objects.Character = Character;
+objects.ObjectGroup = ObjectGroup;
+objects.DialogueBox = DialogueBox;
+objects.Scene = Scene;
+objects.Button = Button;
+objects.Menu = Menu;
 
-log("Objects loaded!");
+}(belle.objects));
+
+log("Objects module loaded!");

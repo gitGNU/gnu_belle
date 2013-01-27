@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 Carlos Pais 
+/* Copyright (C) 2012 Carlos Pais
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var showFps = true;
-var Novel = {
+
+var belle = belle || {};
+
+(function(belle) {
+
+var timeout = 50; //50 ms
+var display = belle.display;
+var objects = belle.objects;
+var actions = belle.actions;
+var game = {
     "resources" : {},
+    "actions": [],
     "customFonts" : [],
     "currentScene" : null,
     "nextScene" : 0,
@@ -27,51 +36,147 @@ var Novel = {
     "height" : 480,
     "currentWidth": 640,
     "currentHeight": 480,
-    "scale" : 0,
-    "drawing" : false,
     "variables" : {},
-    "context" : null,
-    "bgContext": null,
-    "drawTimeout" : 50,
     "end" : false,
-    "forceRedraw": false,
-    "scaleWidthFactor" : 1,
-    "scaleHeightFactor": 1,
     "textSpeed" : 10,
-    "textDelay" : 100,
-    "usingDOM": false
+    "textDelay" : 100
 }
 
-Novel.containsVariable = function (variable) {
+var addObject = function (object)
+{
+    if (game.currentScene)
+        game.currentScene.addObject(object);
+}
+
+var createObject = function (data)
+{
+    var type = data["type"];
+    if (! type) {
+        var resource = data["resource"];
+        if ("resource" in data && resource in game.resources) {
+            type = game.resources[resource].data.type;
+        }
+        else
+            return null;
+    }
+
+    var _Object = belle.objects[type];
+    
+    if (! _Object) {
+        log("'" + type + "' is not a valid object type.");
+        return null;
+    }
+
+    return new _Object(data);
+}
+
+function getObjectPrototype(type)
+{
+    return objects[type];
+}
+
+function getActionPrototype(type)
+{
+    return actions[type];
+}
+
+function getObject(name, scene) {
+    if (scene && name) {
+       var objects = scene.objects;
+        
+       for (var i = 0; i !== objects.length; i++) {
+           if (objects[i].name === name)
+               return objects[i];
+       }
+    }
+    
+    return null;
+}
+
+function getResource(name)
+{
+    if (name && name in game.resources)
+        return game.resources[name];
+        
+    return null;
+}
+
+function containsVariable (variable) {
     if (variable.startsWith("$"))
         variable = variable.slice(1);
     
-    return (variable in Novel.variables);
+    return (variable in game.variables);
 }
 
-Novel.value = function (variable) {
-    if (! Novel.containsVariable(variable))
+function value (variable) {
+    if (! containsVariable(variable))
         return "";
         
     if (variable.startsWith("$"))
         variable = variable.slice(1);
     
-    return Novel.variables[variable];
+    return game.variables[variable];
+}
+
+function insertVariable (variable, value) {
+    game.variables[variable] = value;
+}
+
+var replaceVariables = function(text)
+{
+    if (! text)
+        return text;
+    
+    if (! text.contains("$"))
+        return text;
+    
+    var validChar = /^[a-zA-Z]+[0-9]*$/g;
+    var variable = "";
+    var variables = [];
+    var values = [];
+    var appendToVariable = false;
+    
+    //Parse text to determine variables, which start from "$" 
+    //until the end of string or until any other character that is not a letter nor a digit.
+    for(var i=0; i !== text.length; i++) {
+      
+      if (text.charAt(i).search(validChar) == -1) {
+        appendToVariable = false;          
+        if (variable)
+          variables.push(variable);
+        variable = "";
+        if(text.charAt(i) == "$")
+          appendToVariable = true;
+      }
+        
+      if (appendToVariable)
+        variable += text.charAt(i);
+    }
+    
+    //replace variables with the respective values and append them to the values list
+    for(var i=0; i != variables.length; i++) {
+        if (belle.containsVariable(variables[i]))
+          values.push(belle.value(variables[i]));
+        else //if the variable is not found, still add an empty value to the values so we have an equal number of elements in both lists
+          values.push("");
+    }
+    
+    //replace variables with the values previously extracted
+    for(var i=0; i != values.length; i++) {
+      text = text.replace(variables[i], values[i]);
+    }
+    
+    return text;
 }
 
 window.onload = function () {
-  alert("start");
-
-  if (! window["Belle"]) {
+  if (! belle) {
     alert("Couldn't start the engine. There was a problem reading one of the files.");
     return;
   }
   
-  //activate DOM mode if canvas is not supported
-  if (! isCanvasSupported())
-      Novel.usingDOM = true;
-
-  importGameData("game.json");
+  actions.init();
+  importgameData("game.json");
 }
 
 function initializeData(data)
@@ -83,37 +188,38 @@ function initializeData(data)
         if ( member == "resources" || member == "scenes")
             continue;
         
-        Novel[member] = data[member];
+        game[member] = data[member];
     }
     
-    if (Novel.textSpeed < 0)
-        Novel.textSpeed = 0;
-    else if (Novel.textSpeed > 100)
-        Novel.textSpeed = 100;
+    if (game.textSpeed < 0)
+        game.textSpeed = 0;
+    else if (game.textSpeed > 100)
+        game.textSpeed = 100;
     
-    Novel.textDelay = 1000 / Novel.textSpeed;
+    game.textDelay = 1000 / game.textSpeed;
     
-    document.title = "Belle - " + Novel.title;
+    document.title = "Belle - " + game.title;
 
     //init resources
     if (data["resources"]) {
         var resources = data["resources"];
         for (var name in resources) {
-            obj = createResource(resources[name]);
+            obj = createObject(resources[name]);
  
              if (obj)
-                Novel.resources[name] = obj;
+                game.resources[name] = obj;
+             
         }
     }
     
     //load custom fonts
-    /*Novel.customFonts = [];
+    /*game.customFonts = [];
     if ("customFonts" in data) {
         var fonts = data["customFonts"];
         for (var i=0; i < fonts.length; i++) {
             //store fonts' names
             if (isFontAvailable(fonts[i]))
-                Novel.customFonts.push(getFontName(fonts[i])); 
+                game.customFonts.push(getFontName(fonts[i])); 
         }
     }*/
 
@@ -125,12 +231,12 @@ function initializeData(data)
         for(var i=0; i < scenes.length; i++) {
             scene = scenes[i];
             
-            if (! Belle[scene.type]) {
+            if (! belle.objects[scene.type]) {
                 log("Invalid Scene type: " + scene.type);
                 continue;
             }
             
-            var sceneObject = new Belle[scene.type](scene);
+            var sceneObject = new belle.objects[scene.type](scene);
             sceneObject.objects = [];
             sceneObject.actions = [];
             
@@ -139,8 +245,8 @@ function initializeData(data)
                 for(var j=0; j !== scene.objects.length; j++) {
                     var object = scene.objects[j];
                     object.__parent = sceneObject;
-                    obj = createResource(object);
-                    if (obj)
+                    obj = createObject(object);
+                    if (obj) 
                         sceneObject.objects.push(obj);
                 }
             }
@@ -149,51 +255,53 @@ function initializeData(data)
             if (scene.actions && scene.actions.length > 0) {
                 var actions = scene.actions;
                 for (var j=0; j < actions.length; j++) {
-                    if (! window[actions[j].type]) {
+                    if (! belle.actions[actions[j].type]) {
                         log("Invalid Action type: " + actions[j].type);
                         continue;
                     }
                     
                     actions[j].__scene = sceneObject;
-                    var actionObject = new window[actions[j].type](actions[j]);
+                    var actionObject = new belle.actions[actions[j].type](actions[j]);
                     sceneObject.actions.push(actionObject);
                 }
             }
             
-            Novel.scenes.push(sceneObject);
+            game.scenes.push(sceneObject);
         }
     }
     
-    if (Novel.scenes && Novel.scenes.length > 0 ) {
-        Novel.currentScene = Novel.scenes[0];
-        Novel.actions = Novel.currentScene.actions;
-        Novel.nextScene = 1;
-        Novel.nextAction = 0; //first action
+    if (game.scenes && game.scenes.length > 0 ) {
+        game.currentScene = game.scenes[0];
+        game.actions = game.currentScene.actions;
+        game.nextScene = 1;
+        game.nextAction = 0; //first action
     }
     
-    isGameDataReady();
+    isgameDataReady();
 }
 
-function isGameDataReady() {
+function isgameDataReady() {
     
     var ready = true;
-    var scenes = Novel.scenes;
-    var resources = Novel.resources;
+    var scenes = game.scenes;
+    var resources = game.resources;
     var actions;
     var objects;
+    var objectsLoaded = 0;
     
-    /*for(var i=0; i < Novel.customFonts.length; i++) {
-        if (! isFontLoaded(Novel.customFonts[i])) {
+    /*for(var i=0; i < game.customFonts.length; i++) {
+        if (! isFontLoaded(game.customFonts[i])) {
             ready = false;
             break;
         }
     }*/
 
-    for(var property in Novel.resources) {
-        if (! resources[property].isReady()) {
+    for(var name in game.resources) {
+        if (! resources[name].isReady()) {
             ready = false;
             break;
         }
+        objectsLoaded++;
     }
     
     for(var i=0; i < scenes.length; i++) {
@@ -201,6 +309,7 @@ function isGameDataReady() {
             ready = false;
             break;
         }
+        objectsLoaded++;
         
         actions = scenes[i].actions;
         for(var j=0; j < actions.length; j++){
@@ -208,6 +317,8 @@ function isGameDataReady() {
                 ready = false;
                 break;
             }
+            if (actions[j].object)
+                objectsLoaded++;
         }
         
         objects = scenes[i].objects;
@@ -216,58 +327,19 @@ function isGameDataReady() {
                 ready = false;
                 break;
             }
+            objectsLoaded++;
         }
     }
-    
+
     if (! ready)
-        setTimeout(isGameDataReady, 1000);
+        setTimeout(isgameDataReady, 100);
     else {
-        //document.getElementById("loading").style.display = 'none';
-        initDisplay();
+        display.init();
         setTimeout(gameLoop, 1);
     }
 }
 
-function removeObjects(scene)
-{
-    if (! Novel.usingDOM)
-        return;
-    
-    var container = document.getElementById("container"); 
-    var objects = scene.objects;
-    if (scene.element)
-        container.removeChild(scene.element);
-    
-    for(var j=0; j < objects.length; j++){
-        container.removeChild(objects[j].element);
-    }
-}
-
-function addObjects(scene)
-{
-    if (! Novel.usingDOM)
-        return;
-    var container = document.getElementById("container");
-    var objects = scene.objects;
-    addObject(scene);
-    for(var j=0; j < objects.length; j++){
-        addObject(objects[j], container);
-    }
-}
-
-function addObject(object, container)
-{
-    if (! Novel.usingDOM)
-        return;
-    
-    if (! container)
-        container = document.getElementById("container");
-    if (object.visible)
-        object.element.style.display = "block";
-    container.appendChild(object.element);
-}
-
-function importGameData(path) {
+function importgameData(path) {
     var xobj = new XMLHttpRequest();
     if (xobj.overrideMimeType)
         xobj.overrideMimeType("application/json");
@@ -287,50 +359,68 @@ function importGameData(path) {
 //game's main loop
 function gameLoop ()
 {   
-    if (Novel.end) {
+   
+    if (game.end) {
         alert("The End");
         return;
     }
     
-    if (Novel.currentAction == null || Novel.currentAction.isFinished()) {
+    if (game.currentAction == null || game.currentAction.isFinished()) {
       
-        if (Novel.currentAction && Novel.currentAction.wait) {
-            Novel.currentAction = Novel.currentAction.wait;
-            Novel.currentAction.execute();
+        if (game.currentAction && game.currentAction.wait) {
+            game.currentAction = game.currentAction.wait;
+            game.currentAction.execute();
         }
-        else if (Novel.nextAction >= Novel.actions.length) {
-            if (Novel.nextScene >= Novel.scenes.length) {
+        else if (game.nextAction >= game.actions.length) {
+            if (game.nextScene >= game.scenes.length) {
                 alert("The End");
                 return;
             }
-            removeObjects(Novel.currentScene);
-            Novel.currentScene = Novel.scenes[Novel.nextScene];
-            addObjects(Novel.currentScene);
-            if (! Novel.usingDOM) {
-                Novel.context.clearRect(0, 0, Novel.width, Novel.height);
-                if (Novel.currentScene)
-                    Novel.currentScene.paint(Novel.bgContext);
+ 
+            display.removeObjects(game.currentScene);
+            game.currentScene = game.scenes[game.nextScene];
+            display.addObjects(game.currentScene);
+
+            if (! display.usingDOM) {
+                display.clear();
+                if (game.currentScene)
+                    game.currentScene.paint(display.bgContext);
             }
-            Novel.actions = Novel.currentScene.actions;
-            Novel.nextScene++;
-            Novel.nextAction = 0;
-            Novel.currentAction = null;
+            
+            game.actions = game.currentScene.actions;
+            game.nextScene++;
+            game.nextAction = 0;
+            game.currentAction = null;
         }
         else {
-            Novel.currentAction = Novel.currentScene.actions[Novel.nextAction];
-            var object = Novel.currentAction.object;
+            game.currentAction = game.currentScene.actions[game.nextAction];
+            var object = game.currentAction.object;
             if (object)
                 object.visible = true;
             
-            Novel.currentAction.execute();
-            Novel.nextAction++;
+            game.currentAction.execute();
+            game.nextAction++;
         }
     }
     
-    if (! Novel.usingDOM)
-        if (needsRedraw() || showFps) {
-            requestAnimationFrame(draw);
-        }
+    if (! display.usingDOM && display.needsRedraw()) {  
+        display.draw();
+    }
     
-    setTimeout(gameLoop, Novel.drawTimeout);
+    setTimeout(gameLoop, timeout);
 }
+
+//Expose public properties
+belle.addObject = addObject;
+belle.createObject = createObject;
+belle.getObject = getObject;
+belle.getResource = getResource;
+belle.containsVariable = containsVariable;
+belle.value = value;
+belle.replaceVariables = replaceVariables;
+belle.insertVariable = insertVariable;
+belle.game = game;
+belle.getObjectPrototype = getObjectPrototype;
+belle.getActionPrototype = getActionPrototype;
+
+}(belle));

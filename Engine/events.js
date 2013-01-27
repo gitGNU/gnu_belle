@@ -14,9 +14,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+var EventDispatcher = {};
+
+(function(EventDispatcher) {
+
 var container = document.getElementById('container');
 var hoveredObject = null;
 var pressedObject = null;
+var display = belle.display;
+
+function resize() 
+{
+    var _view = 'portrait';
+    if (display.windowWidth() > display.windowHeight())
+        _view = 'landscape';
+        
+    if (display.view != _view) {
+        display.view = _view;    
+        display.init();
+    }
+}
+
+if (window.addEventListener) 
+  window.addEventListener('resize', resize, false);
+else if (window.attachEvent)
+  window.attachEvent('resize', resize);
 
 function mapToCanvas(event)
 {
@@ -43,16 +65,18 @@ function mapToCanvas(event)
 
 document.onmousemove = function(event)
 {
-    var ev = event || window.Event || window.event;
-  
-    if (! Novel || ! Novel.currentScene)
+    if (! belle)
         return;
-   
+    var game = belle.game || {};
+    if (! game.currentScene)
+      return;
+
+    var ev = event || window.Event || window.event;
     mapToCanvas(ev);
     
     var prevHoveredObject = hoveredObject;
     hoveredObject = null;
-    var objects = Novel.currentScene.objects;
+    var objects = game.currentScene.objects;
     for (var i=objects.length-1; i !== -1; --i) {
         if (objects[i].processEvent(ev)) {
             hoveredObject = objects[i];
@@ -70,6 +94,7 @@ document.onmouseup = function(event)
 {
     var ev = event || window.Event || window.event;
     var processed = false;
+    var game = belle.game;
 
     if (pressedObject && hoveredObject == pressedObject) {
         mapToCanvas(ev);
@@ -77,8 +102,8 @@ document.onmouseup = function(event)
             processed = true;
     }
     
-    if (Novel.currentAction && ! processed)
-        Novel.currentAction.skip();
+    if (game.currentAction && ! processed)
+        game.currentAction.skip();
 }
 
 document.onmousedown = function(event) 
@@ -96,29 +121,16 @@ document.onmousedown = function(event)
 document.onkeyup = function(event) 
 {
     var ev = event || window.Event || window.event;
+    var game = belle.game;
         
     switch(ev.keyCode) {
         case 13: //ENTER
         case 32: //SPACE
-            //if (Novel.currentAction instanceof Dialogue || Novel.currentAction instanceof Wait)
-            if (Novel.currentAction)
-                Novel.currentAction.skip();
+            if (game.currentAction)
+                game.currentAction.skip();
     }
 }
 
-function resize() 
-{
-    var _view = 'portrait';  
-    if (windowWidth() > windowHeight())
-        _view = 'landscape';
-        
-    if (window.view != _view) {
-        window.view = _view;    
-        initDisplay();
-    }
-}
+}(EventDispatcher));
 
-if (window.addEventListener) 
-  window.addEventListener('resize', resize, false);
-else if (window.attachEvent)
-  window.attachEvent('resize', resize);
+log("Event module loaded!");
