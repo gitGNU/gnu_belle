@@ -62,10 +62,9 @@ void WaitEditorWidget::onCurrentIndexChanged(int index)
     if (! mCurrentAction)
         return;
 
-    if (index >= 1) {
+    mCurrentAction->setWaitTypeFromIndex(index);
+    if (index >= 1)
        mCurrentAction->setDisplayText(mWaitTypeWidget->currentText());
-       mCurrentAction->setWaitTypeFromIndex(index);
-    }
     else
        mCurrentAction->setTime(mTimeSpin->value());
 
@@ -80,12 +79,7 @@ void WaitEditorWidget::onTimeChanged(double value)
 
 void WaitEditorWidget::updateWidgets(int index)
 {
-    bool enabled = false;
-
-    if (index >= 1)
-       enabled = false;
-    else
-       enabled = true;
+    bool enabled = index >= 1 ? false : true;
 
     mSkipBox->setEnabled(enabled);
     mTimeSpin->setEnabled(enabled);

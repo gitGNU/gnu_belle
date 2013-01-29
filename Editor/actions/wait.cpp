@@ -77,8 +77,10 @@ ActionEditorWidget* Wait::editorWidget()
 void Wait::setTime(double t)
 {
     mTime = t;
-    setDisplayText(QString::number(mTime) + tr(" second(s)"));
-    emit dataChanged();
+    if (mWaitType == Timed) {
+        setDisplayText(QString::number(mTime) + tr(" second(s)"));
+        emit dataChanged();
+    }
 }
 
 double Wait::time()
