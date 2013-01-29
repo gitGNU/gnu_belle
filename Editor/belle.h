@@ -28,6 +28,7 @@
 #include "resource_manager.h"
 #include "drawing_surface_widget.h"
 #include "resources_view.h"
+#include "simple_http_server.h"
 
 #define WIDTH 640
 #define HEIGHT 480
@@ -46,6 +47,7 @@ class Belle : public QMainWindow
     QString mCurrentRunDirectory;
     QList <QIcon> mIcons;
     QSettings *mSettings;
+    SimpleHttpServer mHttpServer;
     
     public:
         explicit Belle(QWidget *widget=0);

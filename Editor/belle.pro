@@ -10,6 +10,7 @@ DEPENDPATH += actions objects
 TARGET = belle
 TARGET.path = $$PREFIX/
 CONFIG+=debug
+QT += network
 
 FORMS += mainwindow.ui\
     novel_properties_dialog.ui \
@@ -103,7 +104,8 @@ HEADERS      += belle.h\
     drawing_surface_widget.h \
     add_character_dialog.h \
     animationimage.h \
-    choosefontwidget.h
+    choosefontwidget.h \
+    simple_http_server.h
                 
 
 SOURCES      += main.cpp\
@@ -192,6 +194,7 @@ SOURCES      += main.cpp\
     drawing_surface_widget.cpp \
     add_character_dialog.cpp \
     animationimage.cpp \
-    choosefontwidget.cpp
+    choosefontwidget.cpp \
+    simple_http_server.cpp
 
 RESOURCES += media.qrc

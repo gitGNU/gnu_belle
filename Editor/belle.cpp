@@ -54,12 +54,14 @@
 #include "novel_properties_dialog.h"
 #include "utils.h"
 #include "engine.h"
+#include "simple_http_server.h"
 
 Belle::Belle(QWidget *widget)
     : QMainWindow(widget)
 {
     mUi.setupUi( this );
 
+    mHttpServer.setServerPort(8000);
     mDisableClick = false;
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
@@ -642,12 +644,20 @@ void Belle::onRunTriggered()
     QString exportedTo = exportProject(QDir::tempPath(), true);
 
     if (! exportedTo.isEmpty()) {
+
+        mHttpServer.setServerDirectory(exportedTo);
+        bool started = mHttpServer.start();
+        if (! started) {
+            QMessageBox::critical(this, tr("Couldn't start the server"), tr("The server couldn't find any free ports on your system, which is very odd."));
+            return;
+        }
+
         //Get browser specified by the user
         QString browserPath = Engine::browserPath();
         if (! browserPath.isEmpty())
-            QProcess::startDetached(browserPath, QStringList() << QDir(exportedTo).absoluteFilePath("index.html"));
+            QProcess::startDetached(browserPath, QStringList() << mHttpServer.serverUrl());
         else //open file (html) with default application
-            QDesktopServices::openUrl(QUrl::fromLocalFile(QDir(exportedTo).absoluteFilePath("index.html")));
+            QDesktopServices::openUrl(QUrl(mHttpServer.serverUrl()));
     }
 }
 
