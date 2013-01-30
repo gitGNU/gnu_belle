@@ -142,9 +142,17 @@ Object* Action::sceneObject() const
 
 void Action::setSceneObject(Object * object)
 {
+    if (mObject)
+        mObject->disconnect(this);
     mObject = object;
+    if (mObject)
+        connect(mObject, SIGNAL(destroyed()), this, SLOT(onSceneObjectDestroyed()));
 }
 
+void Action::onSceneObjectDestroyed()
+{
+    mObject = 0;
+}
 
 void Action::onDataChanged()
 {

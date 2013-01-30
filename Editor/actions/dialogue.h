@@ -61,7 +61,8 @@ public:
 
 signals:
 
-public slots:
+private slots:
+    void onCharacterDestroyed();
 
 private:
     void init();

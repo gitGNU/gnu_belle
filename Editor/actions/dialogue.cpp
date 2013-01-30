@@ -74,7 +74,14 @@ ActionEditorWidget* Dialogue::editorWidget()
 
 void Dialogue::setCharacter(Character *character)
 {
+    if (mCharacter)
+        mCharacter->disconnect(this);
+
     mCharacter = character;
+
+    if (mCharacter)
+        connect(mCharacter, SIGNAL(destroyed()), this, SLOT(onCharacterDestroyed()));
+
     if (character) {
         this->blockSignals(true); //avoid calling dataChanged() twice
         setCharacterName(character->objectName());
@@ -178,4 +185,9 @@ QVariantMap Dialogue::toJsonObject()
 
     object.insert("text", mText);
     return object;
+}
+
+void Dialogue::onCharacterDestroyed()
+{
+    mCharacter = 0;
 }

@@ -96,6 +96,7 @@ signals:
 
 public slots:
     void onDataChanged();
+    void onSceneObjectDestroyed();
 
 private:
     Object* mObject;
