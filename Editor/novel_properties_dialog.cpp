@@ -79,11 +79,12 @@ void NovelPropertiesDialog::onSizeEdited(const QString & text)
 
 void NovelPropertiesDialog::onTitleEdited(const QString & title)
 {
-    if (title.isEmpty()) {
-        mUi.titleEdit->setText(mNovelData.value("title").toString());
+    if (title.isEmpty()) {        
+        mUi.titleEdit->setStyleSheet("background-color: rgba(255, 0, 0, 100);");
         return;
     }
 
+    mUi.titleEdit->setStyleSheet("");
     mNovelData.insert("title", title);
 }
 
