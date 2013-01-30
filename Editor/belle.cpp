@@ -474,7 +474,7 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
         if (accepted) {
             resource = new Character(dialog->name(), dialog->statesAndImagePaths(), ResourceManager::instance());
             ResourceManager::instance()->addResource(resource);
-            object = new Character(dialog->name(), dialog->statesAndImagePaths(), scene);
+            //object = new Character(dialog->name(), dialog->statesAndImagePaths(), scene);
         }
         break;
 
@@ -482,7 +482,7 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
     case 1:
         resource = new TextBox(tr("Text goes here..."), ResourceManager::instance());
         ResourceManager::instance()->addResource(resource);
-        object = new TextBox(tr("Text goes here..."), scene);
+        //object = new TextBox(tr("Text goes here..."), scene);
         break;
 
         //Image
@@ -492,14 +492,14 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
             break;
         resource = new Image(path, ResourceManager::instance());
         ResourceManager::instance()->addResource(resource);
-        object = new Image(path, scene);
+        //object = new Image(path, scene);
         break;
 
        //Dialogue Box
     case 3:
         resource = new DialogueBox(ResourceManager::instance());
         ResourceManager::instance()->addResource(resource);
-        object = new DialogueBox(scene);
+        //object = new DialogueBox(scene);
 
         break;
 
@@ -507,7 +507,7 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
     case 4:
         resource = new Button(ResourceManager::instance());
         ResourceManager::instance()->addResource(resource);
-        object = new Button(scene);
+        //object = new Button(scene);
         break;
     }
 
@@ -516,11 +516,14 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
     if (resource)
         connect(resource, SIGNAL(dataChanged()), mDrawingSurfaceWidget, SLOT(update()));
 
-    if(object && resource) {
-        object->setResource(resource);
-        object->setObjectName(scene->newObjectName(resource->objectName()));
-        scene->appendObject(object);
+        //object->setResource(resource);
+        //object->setObjectName(scene->newObjectName(resource->objectName()));
+        //scene->appendObject(object);
         //switchWidgetInPropertiesWidget(object->editorWidget());
+
+    if (mResourcesView && resource) {
+        mUi.resourcesTabWidget->setCurrentIndex(1);
+        mResourcesView->select(resource->objectName());
     }
 
     if (dialog)
