@@ -29,7 +29,7 @@ public:
     QString path();
     QStringList framesNames() const;
     void save(const QDir&);
-    QVariant toJsonObject();
+    QVariant toJsonObject(bool _export=true);
     
 signals:
     

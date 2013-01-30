@@ -119,7 +119,7 @@ void ResourcesView::removeObject(Object * object, bool del)
         ResourceManager::instance()->removeResource(object, del);
 }
 
-void ResourcesView::onItemDoubleClicked(const QModelIndex & index)
+/*void ResourcesView::onItemDoubleClicked(const QModelIndex & index)
 {
     if (! SceneManager::currentScene())
         return;
@@ -135,7 +135,7 @@ void ResourcesView::onItemDoubleClicked(const QModelIndex & index)
     QStandardItem* item = model->itemFromIndex(index);
     Object* obj = mItemToObject.value(item);
     scene->addCopyOfObject(obj);
-}
+}*/
 
 void ResourcesView::onResourceRemoved(Object* resource)
 {

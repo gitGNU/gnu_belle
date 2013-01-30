@@ -118,7 +118,7 @@ class Object : public QObject
         QList<Action*> actionsForEvent(Interaction::InputEvent);
         virtual void paint(QPainter&);
         Object* copy();
-        virtual QVariantMap toJsonObject();
+        virtual QVariantMap toJsonObject(bool _export=true);
         bool containsResizeRectAt(int, int);
         QRect resizeRectAt(int, int);
         QList<QRect> resizeRects();

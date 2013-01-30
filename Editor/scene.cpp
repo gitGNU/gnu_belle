@@ -144,7 +144,8 @@ void Scene::addCopyOfObject(Object* object, bool select)
     if (! object)
         return;
 
-    QVariantMap data(object->toJsonObject());
+    qDebug() << "......";
+    QVariantMap data(object->toJsonObject(false));
     Object * obj = ResourceManager::instance()->createResource(data, false);
     appendObject(obj, select);
     obj->setResource(object);

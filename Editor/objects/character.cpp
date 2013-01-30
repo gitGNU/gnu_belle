@@ -219,9 +219,9 @@ void Character::setTextColor(const QColor & color)
     mTextColor = color;
 }
 
-QVariantMap Character::toJsonObject()
+QVariantMap Character::toJsonObject(bool _export)
 {
-    QVariantMap object = Object::toJsonObject();
+    QVariantMap object = Object::toJsonObject(_export);
     //QStringList images = mStateToPath.values();
     QHashIterator<QString, QString> it(mStateToPath);
     QVariantMap stateToPath;

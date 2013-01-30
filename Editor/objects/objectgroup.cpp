@@ -239,13 +239,13 @@ void ObjectGroup::deleteObjectAt(int index)
         obj->deleteLater();
 }
 
-QVariantMap ObjectGroup::toJsonObject()
+QVariantMap ObjectGroup::toJsonObject(bool _export)
 {
-    QVariantMap object = Object::toJsonObject();
+    QVariantMap object = Object::toJsonObject(_export);
     QVariantList objects;
 
     for(int i=0; i < mObjects.size(); i++) {
-        objects.append(mObjects[i]->toJsonObject());
+        objects.append(mObjects[i]->toJsonObject(_export));
     }
 
     if (! objects.isEmpty())

@@ -40,7 +40,7 @@ public slots:
     void addObject(Object*);
     void onRemoveResource();
     void onEditResource();
-    void onItemDoubleClicked(const QModelIndex&);
+    //void onItemDoubleClicked(const QModelIndex&);
     void onResourceRemoved(Object*);
 
 private:

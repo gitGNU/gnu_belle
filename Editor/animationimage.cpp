@@ -1,8 +1,9 @@
 #include "animationimage.h"
 
-#include "utils.h"
-
 #include <QFileInfo>
+
+#include "utils.h"
+#include "resource_manager.h"
 
 AnimationImage::AnimationImage(const QString& path, QObject *parent) :
     QPixmap(path)
@@ -128,19 +129,26 @@ void AnimationImage::save(const QDir & dir)
         QFile::copy(mFilePath, dir.absoluteFilePath(mSavedName));
 }
 
-QVariant AnimationImage::toJsonObject()
+QVariant AnimationImage::toJsonObject(bool _export)
 {
+    QString path;
+
+    if (_export)
+        path = mSavedName;
+    else
+        path = ResourceManager::imagePath(this);
+
     if (mMovie) {
         QVariantMap object;
         /*object.insert("frames", framesNames());
         object.insert("frameDelay", mMovie->nextFrameDelay());
         object.insert("source", fileName);*/
-        object.insert("src", mSavedName);
+        object.insert("src", path);
         object.insert("animated", true);
         return object;
     }
 
-    return mSavedName;
+    return path;
 }
 
 QString AnimationImage::path()

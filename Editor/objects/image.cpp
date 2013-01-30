@@ -39,8 +39,15 @@ Image::Image(const QVariantMap& data, QObject* parent):
 {
     init();
 
-    if (data.contains("image") && data.value("image").type() == QVariant::String)
-        setImage(data.value("image").toString());
+    if (data.contains("image")) {
+        if (data.value("image").type() == QVariant::String)
+            setImage(data.value("image").toString());
+        else if (data.value("image").type() == QVariant::Map) {
+            QVariantMap img = data.value("image").toMap();
+            if (img.contains("src") && img.value("src").type() == QVariant::String)
+                setImage(img.value("src").toString());
+        }
+    }
 }
 
 Image::~Image()
@@ -118,11 +125,12 @@ void Image::hide()
         mMovie->stop();
 }
 
-QVariantMap Image::toJsonObject()
+QVariantMap Image::toJsonObject(bool _export)
 {
-    QVariantMap object = Object::toJsonObject();
+    QVariantMap object = Object::toJsonObject(_export);
+
     if (mImage)
-        object.insert("image", mImage->toJsonObject());
+        object.insert("image", mImage->toJsonObject(_export));
 
     filterResourceData(object);
     return object;

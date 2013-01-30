@@ -63,7 +63,7 @@ class Character : public Image
         QColor textColor() const;
         void setNameColor(const QColor&);
         void setTextColor(const QColor&);
-        virtual QVariantMap toJsonObject();
+        virtual QVariantMap toJsonObject(bool _export=true);
 
    private:
         void init(const QString &);

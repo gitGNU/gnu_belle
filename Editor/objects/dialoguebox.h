@@ -36,7 +36,7 @@ class DialogueBox : public ObjectGroup
         virtual void paint(QPainter &);
         virtual void move(int , int);
         void setSpeakerColor(const QColor&);
-        virtual QVariantMap toJsonObject();
+        virtual QVariantMap toJsonObject(bool _export=true);
         /*static DialogueEditorWidget* dialogueEditorWidget();
         static void setDialogueEditorWidget(DialogueEditorWidget *);
         virtual ObjectEditorWidget* editorWidget();*/

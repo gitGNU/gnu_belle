@@ -324,7 +324,7 @@ void Belle::onResourcesDoubleClicked(const QModelIndex& index)
 
     Object* resource = mResourcesView->object(index);
     if (resource) {
-        QVariantMap data(resource->toJsonObject());
+        QVariantMap data(resource->toJsonObject(false));
         Object * object = ResourceManager::instance()->createResource(data, false);
         if (object) {
             object->setResource(resource);
