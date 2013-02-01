@@ -236,7 +236,7 @@ AnimationImage* ResourceManager::newImage(const QVariant& imageData)
     else if (imageData.type() == QVariant::Map) {
         QVariantMap imageMap = imageData.toMap();
         if (imageMap.contains("src"))
-            return newImage(imageMap.value("src", ""));
+            return newImage(imageMap.value("src").toString());
     }
 
     return 0;

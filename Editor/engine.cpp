@@ -32,7 +32,8 @@ bool Engine::isValidPath(const QString & path)
     QDir dir(path);
 
     QStringList engineComponents;
-    engineComponents << "index.html" << "draw.js" << "actions.js" << "objects.js" << "utils.js" << "buzz.js" << "style.css";
+    engineComponents << "index.html" << "display.js" << "actions.js" << "objects.js" << "utils.js"
+                     << "buzz.js" << "style.css" << "events.js" << "jquery.js" << "consolelog.js" << "json-fallback.js";
 
     //check if all necessary files seem to be present
     QStringList missingFiles;
