@@ -105,6 +105,8 @@ Belle::Belle(QWidget *widget)
     QScrollArea * scrollArea = new QScrollArea(mUi.centralwidget);
     mDrawingSurfaceWidget = new DrawingSurfaceWidget(SceneManager::instance());
     scrollArea->setWidget(mDrawingSurfaceWidget);
+    scrollArea->setContentsMargins(0, 0, 0, 0);
+    scrollArea->viewport()->installEventFilter(mDrawingSurfaceWidget);
     scrollArea->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     vLayout->addWidget(scrollArea);
 
@@ -751,7 +753,6 @@ void Belle::openFileOrProject()
     if (object.contains("resources") && object.value("resources").type() == QVariant::Map) {
         QVariantMap resourcesMap = object.value("resources").toMap();
         QMapIterator<QString, QVariant> it(resourcesMap);
-        qDebug() << "RESOURCES";
         while(it.hasNext()) {
             it.next();
             if (it.value().type() != QVariant::Map)
@@ -759,8 +760,6 @@ void Belle::openFileOrProject()
 
             ResourceManager::instance()->createResource(it.value().toMap());
         }
-
-        qDebug() << "/RESOURCES";
     }
 
     if (object.contains("scenes") && object.value("scenes").type() == QVariant::List) {
@@ -775,6 +774,7 @@ void Belle::openFileOrProject()
         }
 
         SceneManager::instance()->setCurrentSceneIndex(0);
+        ResourceManager::setRelativePath("");
         updateActions();
     }
 }

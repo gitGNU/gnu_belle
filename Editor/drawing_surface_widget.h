@@ -34,6 +34,9 @@ class DrawingSurfaceWidget : public QWidget
     SceneManager *mSceneManager;
     bool mMousePressed;
     bool mResizing;
+    bool mCanResize;
+    bool mMoving;
+    bool mCanMove;
     QAction *mMoveUp;
     QAction *mMoveDown;
     QAction *mFillWidth;
@@ -57,13 +60,15 @@ class DrawingSurfaceWidget : public QWidget
         Object* object();
         void drawSelection(QPainter&, Object*);
         static QWidget* instance();
-        
+
     protected:
         void paintEvent(QPaintEvent*);
         void mousePressEvent ( QMouseEvent * );
         void mouseReleaseEvent ( QMouseEvent * );
         void mouseMoveEvent ( QMouseEvent * );
         void resizeEvent ( QResizeEvent *);
+        void adjustSize();
+
 
    signals:
         void selectionChanged(Object*);

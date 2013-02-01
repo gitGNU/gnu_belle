@@ -20,6 +20,7 @@
 #include <QFont>
 #include <QFontDatabase>
 #include <QMenu>
+#include <QLayout>
 
 #include "textbox.h"
 #include "scene.h"
@@ -32,6 +33,9 @@ DrawingSurfaceWidget::DrawingSurfaceWidget(SceneManager *sceneManager, QWidget *
 {
     mMousePressed = false;
     mResizing = false;
+    mCanResize = false;
+    mMoving = false;
+    mCanMove = false;
     mSceneManager = sceneManager;
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -96,6 +100,15 @@ DrawingSurfaceWidget::~DrawingSurfaceWidget()
 {
 }
 
+bool DrawingSurfaceWidget::eventFilter(QObject * obj, QEvent * event)
+{
+    if (mObject && event->type() == QEvent::Resize && obj == parentWidget()) {
+        adjustSize();
+    }
+
+    return QObject::eventFilter(obj, event);
+}
+
 void DrawingSurfaceWidget::paintEvent(QPaintEvent* paint)
 {
 
@@ -115,6 +128,7 @@ void DrawingSurfaceWidget::paintObject(QPaintDevice * paintDevice)
         return;
 
     QPainter painter(paintDevice);
+    painter.fillRect(0, 0, width(), height(), Qt::gray);
     mObject->paint(painter);
     drawSelection(painter, mObject);
 }
@@ -123,9 +137,7 @@ void DrawingSurfaceWidget::setObject(Object* obj)
 {
     mObject = obj;
     if (mObject) {
-        mObject->setX(RESIZE_RECT_WIDTH/2);
-        mObject->setY(RESIZE_RECT_WIDTH/2);
-        setFixedSize(QSize(mObject->width()+RESIZE_RECT_WIDTH, mObject->height()+RESIZE_RECT_WIDTH));
+        adjustSize();
         update();
     }
     else {
@@ -176,16 +188,25 @@ void DrawingSurfaceWidget::drawSelection(QPainter& painter, Object* object)
 
 void DrawingSurfaceWidget::mousePressEvent ( QMouseEvent * event )
 {
-
+    qreal x = event->x(), y = event->y();
+    Object * object = 0;
     mMousePressed = true;
 
-    if (mObject) {
-
-    } else {
-
-        if (! mResizing && mSceneManager->currentScene())
-            mSceneManager->currentScene()->selectObjectAt(event->x(), event->y());
+    if (mObject)
+        object = mObject;
+    else if (mSceneManager->currentScene()) {
+        mSceneManager->currentScene()->selectObjectAt(x, y);
+        object = mSceneManager->currentScene()->selectedObject();
     }
+
+    if (mCanMove) {
+        setCursor(Qt::ClosedHandCursor);
+        mMoving = true;
+    }
+    else if (mCanResize) {
+        mResizing = true;
+    }
+
     //emit selectionChanged(scene->selectedObject());
 
     /*Object *obj = scene->selectedObject();
@@ -207,18 +228,43 @@ void DrawingSurfaceWidget::mousePressEvent ( QMouseEvent * event )
 void DrawingSurfaceWidget::mouseReleaseEvent ( QMouseEvent * event)
 {
     bool resize = mResizing;
+    Object* object = 0;
+    Scene *scene = mSceneManager->currentScene();
+
+    if (mObject)
+        object = mObject;
+    else if (scene)
+        object = scene->selectedObject();
 
     mMousePressed = false;
     mResizing = false;
-    Scene *scene = mSceneManager->currentScene();
+    mCanResize = false;
+    mMoving = false;
 
-    if (! scene )
-        return;
+    if (object) {
+        if (resize)
+            object->stopResizing();
+        object->stopMove();
+        if (object->contains(event->x(), event->y()))
+            setCursor(Qt::OpenHandCursor);
+        else
+            setCursor(Qt::ArrowCursor);
+    }
 
-    if (scene->selectedObject() && resize)
-        scene->selectedObject()->stopResizing();
+    /*if (mObject) {
+        if (resize)
+            mObject->stopResizing();
+        mObject->stopMove();
 
-    scene->stopMoveSelectedObject();
+    }
+    else {
+
+
+        if (scene->selectedObject() && resize)
+            scene->selectedObject()->stopResizing();
+
+        scene->stopMoveSelectedObject();
+    }*/
 
     QWidget::mouseReleaseEvent(event);
 }
@@ -226,33 +272,50 @@ void DrawingSurfaceWidget::mouseReleaseEvent ( QMouseEvent * event)
 void DrawingSurfaceWidget::mouseMoveEvent( QMouseEvent * event)
 {
     Scene *scene = mSceneManager->currentScene();
+    Object* object = 0;
+    qreal x = event->x(), y = event->y();
+    int i;
 
-    if (! scene  || ! scene->selectedObject()) {
+    if (mObject)
+        object = mObject;
+    else
+        object = scene->selectedObject();
+
+    if (! scene  || ! object) {
         if (cursor().shape() != Qt::ArrowCursor)
             setCursor(Qt::ArrowCursor);
         return;
     }
 
     if (mResizing) {
-        scene->selectedObject()->resize(event->x(), event->y());
+        object->resize(x, y);
         update();
         return;
     }
 
-    int i;
-    QList<QRect> rects =  scene->selectedObject()->resizeRects();
+    if (mMoving) {
+        object->dragMove(x, y);
+        update();
+        return;
+    }
+
+    QList<QRect> rects =  object->resizeRects();
     for(i=0; i < rects.size(); i++) {
-        if (rects.at(i).contains(event->x(), event->y()))
+        if (rects.at(i).contains(x, y))
             break;
     }
 
-    if (i == rects.size()) {
-        setCursor(Qt::ArrowCursor);
+    mCanMove = false;
+    mCanResize = false;
+    object->setHoveredResizeRect(i);
 
-        if (mMousePressed) {
-            scene->moveSelectedObject(event->x(), event->y());
-            update();
-        }
+    //if cursor is not hovering one of the rectangles, move the object
+    if (i == rects.size()) {
+        mCanMove = object->contains(x, y);
+        if (mCanMove)
+            setCursor(Qt::OpenHandCursor);
+        else
+            setCursor(Qt::ArrowCursor);
     }
     else {
 
@@ -269,17 +332,14 @@ void DrawingSurfaceWidget::mouseMoveEvent( QMouseEvent * event)
                 setCursor(Qt::SizeHorCursor);
         }
 
-        if (mMousePressed) {
-            mResizing = true;
-            scene->selectedObject()->resize(i, event->x(), event->y());
-            update();
-        }
+        mCanResize = true;
     }
 }
 
 void DrawingSurfaceWidget::resizeEvent(QResizeEvent * event)
 {
     QWidget::resizeEvent(event);
+    setFixedSize(event->size());
     //mSceneManager->onResizeEvent(event);
 }
 
@@ -424,12 +484,6 @@ void DrawingSurfaceWidget::onCancelEditObjectTriggered()
     }
 }
 
-
-bool DrawingSurfaceWidget::eventFilter(QObject * obj, QEvent * ev)
-{
-    return false;
-}
-
 QWidget * DrawingSurfaceWidget::instance()
 {
     return mInstance;
@@ -438,4 +492,22 @@ QWidget * DrawingSurfaceWidget::instance()
 void DrawingSurfaceWidget::onResize(const QResizeEvent & event)
 {
     this->setFixedSize(event.size());
+}
+
+void DrawingSurfaceWidget::adjustSize()
+{
+    if (! mObject)
+        return;
+
+    int w = parentWidget() ? parentWidget()->width() : width();
+    int h = parentWidget() ? parentWidget()->height() : height();
+
+    if (mObject->width() > w)
+        w = mObject->width() + MARGIN*2;
+    if (mObject->height() > h)
+        h = mObject->height() + MARGIN*2;
+
+    setFixedSize(w, h);
+    mObject->setX(w / 2 - mObject->width() / 2);
+    mObject->setY(h / 2 - mObject->height() / 2);
 }
