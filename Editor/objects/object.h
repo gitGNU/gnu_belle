@@ -123,6 +123,7 @@ class Object : public QObject
         QRect resizeRectAt(int, int);
         QList<QRect> resizeRects();
         void updateResizeRect(int, const QPoint&);
+        void setHoveredResizeRect(int);
         virtual Object* objectAt(qreal, qreal);
 
         Padding padding();

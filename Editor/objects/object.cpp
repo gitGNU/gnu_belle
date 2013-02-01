@@ -568,8 +568,6 @@ void Object::filterResourceData(QVariantMap& objectData)
 
 void Object::resize(int pointIndex, int x, int y)
 {
-    int i = pointIndex;
-
     //QPoint point = rect.center();
     QPoint toPoint(x, y);
     mOriginalResizePointIndex = pointIndex;
@@ -580,7 +578,6 @@ void Object::resize(int pointIndex, int x, int y)
       //  updateResizeRects();
     //if (i < 8)
     //    emit dataChanged();
-
 }
 
 void Object::resize(int x, int y)
@@ -715,6 +712,13 @@ bool Object::containsResizeRectAt(int x, int y)
     }
 
     return false;
+}
+
+void Object::setHoveredResizeRect(int i)
+{
+    mOriginalResizePointIndex = i;
+    if (i < 0 || i >= mResizeRects.size())
+        mOriginalResizePointIndex = -1;
 }
 
 void Object::stopResizing()
