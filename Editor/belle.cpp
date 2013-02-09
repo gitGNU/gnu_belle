@@ -70,7 +70,7 @@ Belle::Belle(QWidget *widget)
     //init scene manager instance
     SceneManager::setInstance(new SceneManager(WIDTH, HEIGHT, this));
     connect(SceneManager::instance(), SIGNAL(sceneRemoved(int)), this, SLOT(onSceneRemoved(int)));
-    connect(SceneManager::instance(), SIGNAL(selectionChanged(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
+    //connect(SceneManager::instance(), SIGNAL(selectionChanged(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
     connect(SceneManager::instance(), SIGNAL(currentSceneChanged()), this, SLOT(onCurrentSceneChanged()));
     SceneManager::setClipboard(new Clipboard(SceneManager::instance()));
 
@@ -104,6 +104,7 @@ Belle::Belle(QWidget *widget)
     QLayout *vLayout = centralWidget()->layout();
     QScrollArea * scrollArea = new QScrollArea(mUi.centralwidget);
     mDrawingSurfaceWidget = new DrawingSurfaceWidget(SceneManager::instance());
+    connect(mDrawingSurfaceWidget, SIGNAL(selectionChanged(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
     scrollArea->setWidget(mDrawingSurfaceWidget);
     scrollArea->setContentsMargins(0, 0, 0, 0);
     scrollArea->viewport()->installEventFilter(mDrawingSurfaceWidget);

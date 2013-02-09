@@ -60,6 +60,8 @@ class DrawingSurfaceWidget : public QWidget
         Object* object();
         void drawSelection(QPainter&, Object*);
         static QWidget* instance();
+        Object* objectAt(qreal, qreal);
+        Object* selectedObject();
 
     protected:
         void paintEvent(QPaintEvent*);
