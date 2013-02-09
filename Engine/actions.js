@@ -401,7 +401,8 @@ Dialogue.prototype.execute = function () {
         else
             this.object.speakerName = this.speakerName;
     }
-   
+    this.object.setText("");
+    
     this.text = belle.replaceVariables(this.text);
     
     //this.lines = splitText(context.font, this.text, this.object.rect.width-this.object.leftPadding);
