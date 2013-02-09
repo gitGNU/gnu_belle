@@ -280,7 +280,7 @@ void Scene::fillWidth()
 void Scene::setBackgroundImage(const QString & path)
 {
     AnimationImage* image = ResourceManager::newImage(path);
-    QPixmap* pixmap = image;
+    QPixmap* pixmap = image->pixmap();
 
     if (mBackgroundImage != image) {
         if (mBackgroundImage && mBackgroundImage->movie())
@@ -299,7 +299,7 @@ void Scene::setBackgroundImage(const QString & path)
     }
 }
 
-QPixmap* Scene::backgroundImage()
+AnimationImage* Scene::backgroundImage()
 {
     return mBackgroundImage;
 }
@@ -322,7 +322,7 @@ void Scene::setTemporaryBackgroundImage(AnimationImage* image)
     }
 }
 
-QPixmap* Scene::temporaryBackgroundImage()
+AnimationImage* Scene::temporaryBackgroundImage()
 {
     return mTemporaryBackgroundImage;
 }
@@ -604,11 +604,11 @@ void Scene::paint(QPainter & painter)
     QColor bgColor = backgroundColor().isValid() ? backgroundColor() : Qt::gray;
 
     if (mTemporaryBackgroundImage) {
-        painter.drawPixmap(Scene::point(), *mTemporaryBackgroundImage);
+        painter.drawPixmap(Scene::point(), *mTemporaryBackgroundImage->pixmap());
         if (mTemporaryBackgroundImage->movie())
             painter.drawPixmap(0, 0, Scene::width(), Scene::height(), mTemporaryBackgroundImage->movie()->currentPixmap());
         else
-            painter.drawPixmap(0, 0, *mBackgroundImage);
+            painter.drawPixmap(0, 0, *mBackgroundImage->pixmap());
     }
     else if (mTemporaryBackgroundColor.isValid())
         painter.fillRect(QRect(Scene::point().x(), Scene::point().y(), width(), height()), mTemporaryBackgroundColor);
@@ -616,7 +616,7 @@ void Scene::paint(QPainter & painter)
         if (mBackgroundImage->movie())
             painter.drawPixmap(0, 0, Scene::width(), Scene::height(), mBackgroundImage->movie()->currentPixmap());
         else
-            painter.drawPixmap(0, 0, *mBackgroundImage);
+            painter.drawPixmap(0, 0, *mBackgroundImage->pixmap());
     }
     else
         painter.fillRect(QRect(Scene::point().x(), Scene::point().y(), width(), height()), bgColor);

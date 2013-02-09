@@ -103,7 +103,7 @@ class Object : public QObject
         bool roundedRect() const;
         void setRoundedRect(bool);
 
-        QPixmap* backgroundImage() const;
+        AnimationImage* backgroundImage() const;
         void setBackgroundImage(const QString&);
 
         bool visible();

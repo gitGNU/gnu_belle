@@ -407,7 +407,7 @@ void Object::paint(QPainter & painter)
             if (mBackgroundImage->movie())
                 painter.drawPixmap(rect, mBackgroundImage->movie()->currentPixmap());
             else
-                painter.drawPixmap(rect, *mBackgroundImage);
+                painter.drawPixmap(rect, *mBackgroundImage->pixmap());
         }
         else if (mRoundedRect)
             painter.drawRoundedRect(rect, mXRadius, mYRadius);
@@ -476,7 +476,7 @@ void Object::setBackgroundImage(const QString & path)
     notify("backgroundImage", path, prevPath);
 }
 
-QPixmap* Object::backgroundImage() const
+AnimationImage* Object::backgroundImage() const
 {
     return mBackgroundImage;
 }

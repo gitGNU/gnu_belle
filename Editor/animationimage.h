@@ -6,7 +6,7 @@
 #include <QPixmap>
 #include <QDir>
 
-class AnimationImage : public QPixmap
+class AnimationImage
 {
     QPixmap* mPixmap;
     QMovie* mMovie;
@@ -15,8 +15,8 @@ class AnimationImage : public QPixmap
     QString mSavedName;
 
 public:
-    explicit AnimationImage(const QString& path="", QObject *parent = 0);
-    AnimationImage(QPixmap*, QObject *parent = 0);
+    explicit AnimationImage(const QString& path="");
+    AnimationImage(QPixmap*);
 
     bool hasAnimation();
     QMovie* movie();
@@ -28,6 +28,7 @@ public:
     bool isNull();
     QString path();
     QStringList framesNames() const;
+    QRect rect() const;
     void save(const QDir&);
     QVariant toJsonObject(bool _export=true);
     

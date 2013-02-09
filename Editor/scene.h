@@ -68,7 +68,7 @@ class Scene : public QObject
         static SceneEditorWidget* editorWidget();
 
         void setTemporaryBackgroundImage(AnimationImage*);
-        QPixmap* temporaryBackgroundImage();
+        AnimationImage* temporaryBackgroundImage();
 
         void setTemporaryBackgroundColor(const QColor&);
         QColor temporaryBackgroundColor();
@@ -78,7 +78,7 @@ class Scene : public QObject
         void stopMoveSelectedObject();
         Object *selectedObject();
         void setBackgroundImage(const QString&);
-        QPixmap* backgroundImage();
+        AnimationImage* backgroundImage();
         void setBackgroundColor(const QColor&);
         QColor backgroundColor();
         QString backgroundPath();

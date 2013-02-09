@@ -5,10 +5,9 @@
 #include "utils.h"
 #include "resource_manager.h"
 
-AnimationImage::AnimationImage(const QString& path, QObject *parent) :
-    QPixmap(path)
+AnimationImage::AnimationImage(const QString& path)
 {
-    mPixmap = this;
+    mPixmap = new QPixmap(path);
     mMovie = 0;
     mFilePath = path;
     QFileInfo info(path);
@@ -38,8 +37,7 @@ AnimationImage::AnimationImage(const QString& path, QObject *parent) :
     }
 }
 
-AnimationImage::AnimationImage(QPixmap* pixmap, QObject *parent) :
-    QPixmap(*pixmap)
+AnimationImage::AnimationImage(QPixmap* pixmap)
 {
     mPixmap = pixmap;
     mMovie = 0;
@@ -123,8 +121,10 @@ void AnimationImage::save(const QDir & dir)
 
     //save the original image
     QFileInfo info(mFilePath);
+    bool saved = false;
     mSavedName = Utils::newFileName(dir.absoluteFilePath(info.fileName()));
-    bool saved = QPixmap::save(dir.absoluteFilePath(mSavedName));
+    if (mPixmap)
+        saved = mPixmap->save(dir.absoluteFilePath(mSavedName));
     if (! saved)
         QFile::copy(mFilePath, dir.absoluteFilePath(mSavedName));
 }
@@ -154,4 +154,14 @@ QVariant AnimationImage::toJsonObject(bool _export)
 QString AnimationImage::path()
 {
     return mFilePath;
+}
+
+QRect AnimationImage::rect() const
+{
+    if (mMovie)
+        return mMovie->frameRect();
+    else if (mPixmap)
+        return mPixmap->rect();
+
+    return QRect();
 }

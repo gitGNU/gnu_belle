@@ -66,7 +66,7 @@ void Image::init()
         setObjectName(ResourceManager::instance()->newName("image"));
 }
 
-void Image::setImage(const QString& path, bool deletePrevious)
+void Image::setImage(const QString& path)
 {
     setImage(ResourceManager::newImage(path));
 }
@@ -110,7 +110,7 @@ void Image::paint(QPainter & painter)
     if (mMovie)
         painter.drawPixmap(mSceneRect, mMovie->currentPixmap());
     else if (mImage)
-        painter.drawPixmap(mSceneRect, *mImage);
+        painter.drawPixmap(mSceneRect, *mImage->pixmap());
 }
 
 void Image::show()

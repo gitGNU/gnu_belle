@@ -93,7 +93,7 @@ void Character::removeState(const QString& state)
         setImage(0);
 
     if ((! path.isEmpty()) && mStateToImage.contains(path)) {
-        QPixmap * image = mStateToImage.take(path);
+        AnimationImage * image = mStateToImage.take(path);
         ResourceManager::decrementReference(image);
     }
 }
@@ -162,8 +162,8 @@ void Character::paint(QPainter & painter)
 {
     Object::paint(painter);
 
-    if (image())
-        painter.drawPixmap(mSceneRect, *image(), image()->rect());
+    if (image() && image()->pixmap())
+        painter.drawPixmap(mSceneRect, *image()->pixmap(), image()->rect());
 }
 
 
@@ -178,7 +178,8 @@ void Character::setCurrentState(const QString & state)
     if (mStateToImage.contains(state))
         setImage(mStateToImage.value(state));
     else {
-        setImage(path, false);
+        setImage(path);
+
         mStateToImage.insert(state, image());
     }
 
@@ -222,18 +223,23 @@ void Character::setTextColor(const QColor & color)
 QVariantMap Character::toJsonObject(bool _export)
 {
     QVariantMap object = Object::toJsonObject(_export);
-    //QStringList images = mStateToPath.values();
-    QHashIterator<QString, QString> it(mStateToPath);
     QVariantMap stateToPath;
+    QHashIterator<QString, QString> it(mStateToPath);
 
     while(it.hasNext()) {
         it.next();
-        QFileInfo info(it.value());
-        stateToPath.insert(it.key(), info.fileName());
+        if (_export) {
+            if (QFile::exists(it.value())) {
+                QFileInfo info(it.value());
+                stateToPath.insert(it.key(), info.fileName());
+            }
+        }
+        else {
+            stateToPath.insert(it.key(), it.value());
+        }
     }
 
     object.insert("images", stateToPath);
-
     filterResourceData(object);
 
     return object;
