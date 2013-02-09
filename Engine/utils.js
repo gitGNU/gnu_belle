@@ -98,7 +98,20 @@ var parseSize = function(value)
 
     return 0;
 }
- 
+
+utils.isObjectEmpty = function(object)
+{
+    if (Object.getOwnPropertyNames) {
+        return !(Object.getOwnPropertyNames(object).length);
+    }
+    else {
+        for(var property in object) 
+            if(object.hasOwnProperty(property))
+                return false;
+    }
+    return true;
+}
+
 utils.extend = function (base, sub) 
 {
     // Copy the prototype from the base to setup inheritance
