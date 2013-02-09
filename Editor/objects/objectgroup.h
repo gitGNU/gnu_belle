@@ -25,6 +25,9 @@ class ObjectGroupEditorWidget;
 class ObjectGroup : public Object
 {
     Q_OBJECT
+
+    Object* mSelectedObject;
+
 public:
     explicit ObjectGroup(QObject *parent = 0);
     ObjectGroup(const QVariantMap& data, QObject *parent = 0);
@@ -34,7 +37,6 @@ public:
     virtual ObjectEditorWidget* editorWidget();
 
     void append(Object*);
-    bool contains(const QString&);
     Object* object(int);
     Object* object(const QString&);
     Object* object(const QPoint&);

@@ -59,6 +59,7 @@ void Object::init()
     mResource = 0;
     mBorderWidth = 0;
     mBorderColor = QColor();
+    mSelectedObject = 0;
 }
 
 Object::~Object()
@@ -739,7 +740,19 @@ void Object::setVisible(bool visible)
 
 Object* Object::objectAt(qreal x, qreal y)
 {
-    return this;
+    if (this->contains(x, y))
+        return this;
+    return 0;
+}
+
+void Object::selectObjectAt(qreal x, qreal y)
+{
+    mSelectedObject = objectAt(x, y);
+}
+
+Object* Object::selectedObject()
+{
+    return mSelectedObject;
 }
 
 void Object::setEditableName(bool editable)

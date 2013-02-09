@@ -125,6 +125,8 @@ class Object : public QObject
         void updateResizeRect(int, const QPoint&);
         void setHoveredResizeRect(int);
         virtual Object* objectAt(qreal, qreal);
+        void selectObjectAt(qreal, qreal);
+        Object* selectedObject();
 
         Padding padding();
         int padding(const QString&);
@@ -192,6 +194,7 @@ class Object : public QObject
         int mOriginalResizePointIndex;
         int mBorderWidth;
         QColor mBorderColor;
+        Object* mSelectedObject;
 
 private slots:
         void onResourceDestroyed();

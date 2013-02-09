@@ -52,6 +52,7 @@ void ObjectGroup::init()
 {
     setType("ObjectGroup");
     mEditingMode = false;
+    mSelectedObject = 0;
 }
 
 ObjectGroupEditorWidget* ObjectGroup::objectGroupEditorWidget()
@@ -99,11 +100,6 @@ void ObjectGroup::resize()
 
     setWidth(w);
     setHeight(h);
-}
-
-bool ObjectGroup::contains(const QString& name)
-{
-    return (object(name));
 }
 
 Object * ObjectGroup::object(int index)
@@ -163,11 +159,13 @@ Object* ObjectGroup::objectAt(qreal x, qreal y)
 {
     if (mEditingMode) {
         for(int i=mObjects.size()-1; i >= 0; i--)
-            if (mObjects[i]->contains(x, y))
+            if (mObjects[i]->contains(x, y)) {
                 return mObjects[i];
+            }
     }
-
-    return this;
+    if (this->contains(x, y))
+        return this;
+    return 0;
 }
 
 void ObjectGroup::setX(int x)
