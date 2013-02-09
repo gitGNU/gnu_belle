@@ -701,16 +701,18 @@ function Character(data)
     Image.call(this, data);
     this.states = {};
     this.textColor = new Color([255, 255, 255, 255]);
-    
+
     var image;
+    var property = null;
     if ("images" in data) {
-        for(var property in data["images"]) {
-            image = new window.Image();
+        for(property in data["images"]) {
+            image = new AnimationImage(data["images"][property], this);
             image.src = data.images[property];
             this.states[property] = image;
         }
         
-        this.image.src = this.states[property].src;
+        if (property) 
+            this.image = new AnimationImage(this.states[property], this);
     }
 }
 
@@ -1053,30 +1055,31 @@ function DialogueBox(data)
     
     this.text = "";
     this.speakerName = "";
+    this.speakerTextBox = null;
+    this.dialgueTextBox = null;
+    
+    for(var i=0; i !== this.objects.length; i++) {
+        if (this.objects[i].name === "speakerTextBox")
+            this.speakerTextBox = this.objects[i];
+        else if (this.objects[i].name === "dialogueTextBox")
+            this.dialogueTextBox = this.objects[i];
+    }
 }
 
 belle.utils.extend(ObjectGroup, DialogueBox);
 
-DialogueBox.prototype.paint = function(context)
+DialogueBox.prototype.appendText = function(text)
 {
-    var draw = Object.prototype.paint.call(this, context);
-    
-    if (! draw)
-        return false;
+    if (this.dialogueTextBox)
+        this.dialogueTextBox.appendText(text);
+    this.redraw = true;
+}
 
-    for(var i=0; i !== this.objects.length; i++) {
-       
-        if (this.objects[i].name === "speakerTextBox")
-            this.objects[i].text = this.speakerName;
-        else if (this.objects[i].name === "dialogueTextBox")
-            this.objects[i].text = this.text;
-        
-        this.objects[i].redraw = true;
-        this.objects[i].paint(context);
-    }
-    
-    this.redraw = false;
-    return true;
+DialogueBox.prototype.setText = function(text)
+{
+    if (this.dialogueTextBox)
+        this.dialogueTextBox.setText(text);
+    this.redraw = true;
 }
 
 /************** MENU ************/
@@ -1153,7 +1156,7 @@ function Scene(data)
         if ("backgroundImage" in data)
             backgroundImage = data["backgroundImage"];
         if ("backgroundColor" in data)
-            backgroundColor = new belle.Color(data["backgroundColor"]);
+            backgroundColor = new Color(data["backgroundColor"]);
         if ("name" in data)
             this.name = data["name"];
     }
