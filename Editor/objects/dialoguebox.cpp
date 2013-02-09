@@ -20,8 +20,8 @@
 #include "scene.h"
 #include "resource_manager.h"
 
-DialogueBox::DialogueBox(QObject *parent) :
-    ObjectGroup(parent)
+DialogueBox::DialogueBox(QObject *parent, const QString& name) :
+    ObjectGroup(parent, name)
 {
     init();
 
@@ -50,10 +50,6 @@ DialogueBox::DialogueBox(const QVariantMap& data, QObject* parent):
 void DialogueBox::init()
 {
     setType("DialogueBox");
-    if (objectName().isEmpty()) {
-        QString name = ResourceManager::instance()->newName(type());
-        setObjectName(name);
-    }
 }
 
 DialogueBox::~DialogueBox()

@@ -20,8 +20,8 @@
 
 static ObjectGroupEditorWidget * mEditorWidget = 0;
 
-ObjectGroup::ObjectGroup(QObject *parent) :
-    Object(parent)
+ObjectGroup::ObjectGroup(QObject *parent,  const QString& name) :
+    Object(parent, name)
 {
     init();
 }

@@ -23,8 +23,8 @@
 
 static TextPropertiesWidget* mEditorWidget = 0;
 
-TextBox::TextBox(QObject *parent) :
-    Object(parent)
+TextBox::TextBox(QObject *parent, const QString& name) :
+    Object(parent, name)
 {
     mSceneRect.setY(Scene::height()-(Scene::height()/3));
     mSceneRect.setHeight(Scene::height()/3);
@@ -32,8 +32,8 @@ TextBox::TextBox(QObject *parent) :
     init("");
 }
 
-TextBox::TextBox(const QString& text, QObject* parent):
-    Object(parent)
+TextBox::TextBox(const QString& text, QObject* parent, const QString& name) :
+    Object(parent, name)
 {
     mSceneRect.setY(Scene::height()-(Scene::height()/3));
     mSceneRect.setHeight(Scene::height()/3);

@@ -28,22 +28,22 @@
 static ObjectEditorWidget * mEditorWidget = 0;
 static QFont mDefaultFont;
 
-Object::Object(QObject* parent):
+Object::Object(QObject* parent, const QString& name):
     QObject(parent)
 {
-    init();
+    init(name);
     updateResizeRects();
 }
 
 Object::Object(const QVariantMap& data, QObject* parent):
     QObject(parent)
 {
-    init();
+    init("Object");
     setProperties(data);
     updateResizeRects();
 }
 
-void Object::init()
+void Object::init(const QString& name)
 {
     mBackgroundImage = 0;
     mBackgroundColor.setRgb(255, 255, 255, 0);
@@ -60,6 +60,17 @@ void Object::init()
     mBorderWidth = 0;
     mBorderColor = QColor();
     mSelectedObject = 0;
+
+    //check if name is valid
+    if (objectName().isEmpty()) {
+        if (parent() == ResourceManager::instance())
+            setObjectName(ResourceManager::instance()->newName(name));
+        else {
+            Scene* scene = qobject_cast<Scene*>(parent());
+            if (scene)
+                scene->newObjectName(name);
+        }
+    }
 }
 
 Object::~Object()

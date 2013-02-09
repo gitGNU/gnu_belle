@@ -38,8 +38,8 @@ class TextBox : public Object
     QFont mFont;
 
 public:
-    explicit TextBox(QObject *parent = 0);
-    TextBox(const QString&, QObject* parent=0);
+    explicit TextBox(QObject *parent = 0, const QString& name="TextBox");
+    TextBox(const QString&, QObject* parent=0, const QString& name="TextBox");
     TextBox(const QVariantMap&, QObject*);
     virtual ~TextBox();
     QString text();

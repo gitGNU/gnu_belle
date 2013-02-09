@@ -65,10 +65,8 @@ void Character::init(const QString& name)
     mNameColor = QColor(Qt::white);
     mTextColor = QColor(Qt::white);
     setType("Character");
-    if (name.isEmpty())
-        setObjectName(ResourceManager::instance()->newName(type()));
-    else
-        setObjectName(ResourceManager::instance()->newName(name));
+    if (! name.isEmpty())
+        setObjectName(name);
 }
 
 Character::~Character()

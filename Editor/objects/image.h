@@ -34,8 +34,8 @@ class Image : public Object
     int mCurrentFrame;
 
 public:
-    explicit Image(QPixmap* image=0, QObject *parent = 0);
-    Image(const QString&path, QObject* parent=0);
+    explicit Image(QPixmap* image=0, QObject *parent = 0, const QString& name="Image");
+    Image(const QString&path, QObject* parent=0, const QString& name="Image");
     Image(const QVariantMap&, QObject*);
     virtual ~Image();
     virtual void paint(QPainter &);

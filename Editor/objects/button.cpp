@@ -21,14 +21,14 @@
 #include "scene.h"
 #include "changecolor.h"
 
-Button::Button(QObject *parent) :
-    TextBox(parent)
+Button::Button(QObject *parent, const QString& name) :
+    TextBox(parent, name)
 {
     init();
 
 }
-Button::Button(const QString&text, QObject *parent) :
-    TextBox(parent)
+Button::Button(const QString&text, QObject *parent, const QString& name) :
+    TextBox(parent, name)
 {
     init();
 }

@@ -20,15 +20,15 @@
 #include <QFileInfo>
 #include <QMovie>
 
-Image::Image(QPixmap *image, QObject *parent) :
-    Object(parent)
+Image::Image(QPixmap *image, QObject *parent, const QString& name) :
+    Object(parent, name)
 {
     init();
     setImage(new AnimationImage(image));
 }
 
-Image::Image(const QString& path, QObject *parent) :
-    Object(parent)
+Image::Image(const QString& path, QObject *parent, const QString& name) :
+    Object(parent, name)
 {
     init();
     setImage(path);
@@ -61,9 +61,6 @@ void Image::init()
     setType("Image");
     mMovie = 0;
     mCurrentFrame = 0;
-
-    if (objectName().isEmpty())
-        setObjectName(ResourceManager::instance()->newName("image"));
 }
 
 void Image::setImage(const QString& path)

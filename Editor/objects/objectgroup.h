@@ -29,7 +29,7 @@ class ObjectGroup : public Object
     Object* mSelectedObject;
 
 public:
-    explicit ObjectGroup(QObject *parent = 0);
+    explicit ObjectGroup(QObject *parent = 0, const QString& name="ObjectGroup");
     ObjectGroup(const QVariantMap& data, QObject *parent = 0);
 
     static ObjectGroupEditorWidget* objectGroupEditorWidget();

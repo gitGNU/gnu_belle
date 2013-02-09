@@ -41,7 +41,7 @@ class Object : public QObject
     Q_OBJECT
     
     public:
-        explicit Object(QObject* parent=0);
+        explicit Object(QObject* parent=0, const QString& name="Object");
         Object(const QVariantMap& data, QObject* parent=0);
         virtual ~Object();
         bool contains(qreal, qreal);
@@ -160,7 +160,7 @@ class Object : public QObject
 
     private:
         //void init(const QString &, int, int, QObject*);
-        void init();
+        void init(const QString&);
         void updateResizeRects();
         void movePoint(int, const QPoint&);
         int parentWidth() const;
