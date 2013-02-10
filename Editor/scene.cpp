@@ -79,7 +79,7 @@ Scene::~Scene()
     ResourceManager::decrementReference(mBackgroundImage);
     if (mScenePixmap)
         delete mScenePixmap;
-
+    mScenePixmap = 0;
     mObjects.clear();
     mTemporaryObjects.clear();
 }
@@ -144,7 +144,6 @@ void Scene::addCopyOfObject(Object* object, bool select)
     if (! object)
         return;
 
-    qDebug() << "......";
     QVariantMap data(object->toJsonObject(false));
     Object * obj = ResourceManager::instance()->createResource(data, false);
     appendObject(obj, select);
