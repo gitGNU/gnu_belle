@@ -118,8 +118,12 @@ void DialogueEditorWidget::updateData(Action * action)
     if (mChooseCharacterWidget->count()) {
         if (dialogueAction->characterName().isEmpty())
             dialogueAction->setCharacter(mCharacters[0]);
-        mChooseCharacterWidget->setCurrentIndex(0);
     }
+
+    if (dialogueAction->character())
+        mChooseCharacterWidget->setCurrentIndex(0);
+    else
+        mChooseCharacterWidget->setEditText(dialogueAction->characterName());
 
     //only set currentAction after updating all the widgets
     //otherwise updating the widgets would mess up the currentAction's data.
