@@ -69,9 +69,8 @@ Belle::Belle(QWidget *widget)
     Scene::setEditorWidget(new SceneEditorWidget);
     //init scene manager instance
     SceneManager::setInstance(new SceneManager(WIDTH, HEIGHT, this));
-    connect(SceneManager::instance(), SIGNAL(sceneRemoved(int)), this, SLOT(onSceneRemoved(int)));
     //connect(SceneManager::instance(), SIGNAL(selectionChanged(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
-    connect(SceneManager::instance(), SIGNAL(currentSceneChanged()), this, SLOT(onCurrentSceneChanged()));
+    connect(SceneManager::instance(), SIGNAL(sceneRemoved(int)), this, SLOT(onSceneRemoved(int)));
     SceneManager::setClipboard(new Clipboard(SceneManager::instance()));
 
     //setup default data
@@ -331,7 +330,6 @@ void Belle::onResourcesDoubleClicked(const QModelIndex& index)
         Object * object = ResourceManager::instance()->createResource(data, false);
         if (object) {
             object->setResource(resource);
-            connect(object, SIGNAL(dataChanged()), mDrawingSurfaceWidget, SLOT(update()));
             scene->appendObject(object, true);
         }
     }
@@ -356,11 +354,6 @@ void Belle::onScenesWidgetItemChanged(QTreeWidgetItem* item, int column)
         item->setText(0, currScene->objectName());
 }
 
-void Belle::onCurrentSceneChanged()
-{
-    updateActions();
-}
-
 void Belle::updateActions()
 {
     if (SceneManager::instance()->currentScene()) {
@@ -382,8 +375,8 @@ void Belle::addScene(Scene* scene)
         SceneManager::instance()->addScene(scene);
 
     createSceneTreeItem(scene);
-
     updateSceneEditorWidget();
+    updateActions();
     mDrawingSurfaceWidget->update();
 }
 
@@ -413,21 +406,21 @@ void Belle::deleteScene()
 
     int index = mUi.scenesWidget->indexOfTopLevelItem(mUi.scenesWidget->currentItem());
 
-    if (index != -1) {
-        SceneManager::instance()->removeSceneAt(index);
-        mUi.scenesWidget->takeTopLevelItem(index);
-    }
-
+    if (index != -1)
+        SceneManager::instance()->removeSceneAt(index, true);
 }
 
 void Belle::onSceneItemClicked(QTreeWidgetItem *item, int column)
 {
     mDrawingSurfaceWidget->setObject(0);
     updateSceneIcon(); //update current scene icon
+    int prevIndex = SceneManager::currentSceneIndex();
     SceneManager::instance()->setCurrentSceneIndex(mUi.scenesWidget->indexOfTopLevelItem(item));
     if (SceneManager::currentScene())
         SceneManager::currentScene()->show();
     updateSceneEditorWidget();
+    if (prevIndex != SceneManager::currentSceneIndex())
+        updateActions();
     mDrawingSurfaceWidget->update();
 }
 
@@ -477,7 +470,6 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
         if (accepted) {
             resource = new Character(dialog->name(), dialog->statesAndImagePaths(), ResourceManager::instance());
             ResourceManager::instance()->addResource(resource);
-            //object = new Character(dialog->name(), dialog->statesAndImagePaths(), scene);
         }
         break;
 
@@ -485,7 +477,6 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
     case 1:
         resource = new TextBox(tr("Text goes here..."), ResourceManager::instance());
         ResourceManager::instance()->addResource(resource);
-        //object = new TextBox(tr("Text goes here..."), scene);
         break;
 
         //Image
@@ -495,34 +486,23 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
             break;
         resource = new Image(path, ResourceManager::instance());
         ResourceManager::instance()->addResource(resource);
-        //object = new Image(path, scene);
         break;
 
        //Dialogue Box
     case 3:
         resource = new DialogueBox(ResourceManager::instance());
         ResourceManager::instance()->addResource(resource);
-        //object = new DialogueBox(scene);
-
         break;
 
         //Button
     case 4:
         resource = new Button(ResourceManager::instance());
         ResourceManager::instance()->addResource(resource);
-        //object = new Button(scene);
         break;
     }
 
-    if (object)
-        connect(object, SIGNAL(dataChanged()), mDrawingSurfaceWidget, SLOT(update()));
     if (resource)
         connect(resource, SIGNAL(dataChanged()), mDrawingSurfaceWidget, SLOT(update()));
-
-        //object->setResource(resource);
-        //object->setObjectName(scene->newObjectName(resource->objectName()));
-        //scene->appendObject(object);
-        //switchWidgetInPropertiesWidget(object->editorWidget());
 
     if (mResourcesView && resource) {
         mUi.resourcesTabWidget->setCurrentIndex(1);

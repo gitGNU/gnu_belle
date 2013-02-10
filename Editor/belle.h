@@ -64,7 +64,6 @@ class Belle : public QMainWindow
         void onTwObjectsClicked(QTreeWidgetItem *, int);
         void addScene(Scene* scene=0);
         void deleteScene();
-        void onSceneRemoved(int);
         void onSelectedObjectChanged(Object*);
         void onActionCatalogClicked(const QModelIndex&);
         void onActionsViewClicked(const QModelIndex&);
@@ -83,7 +82,7 @@ class Belle : public QMainWindow
         void onSceneUpped();
         void onSceneDowned();
         void onPropertiesTriggered();
-        void onCurrentSceneChanged();
+        void onSceneRemoved(int);
         QString exportProject(const QString& path="", bool toRun=false);
 
 private:

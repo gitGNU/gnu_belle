@@ -22,6 +22,7 @@
 #include "scene_manager.h"
 #include "textbox.h"
 #include "utils.h"
+#include "drawing_surface_widget.h"
 
 static QSize mSize;
 static QPoint mPoint;
@@ -162,6 +163,7 @@ void Scene::appendObject(Object* object, bool select, bool temporarily)
 
     //test if it's a valid name before adding the object to scene.
     object->setObjectName(newObjectName(object->objectName()));
+    connect(object, SIGNAL(dataChanged()), DrawingSurfaceWidget::instance(), SLOT(update()));
 
     if (temporarily)
         mTemporaryObjects.append(object);
