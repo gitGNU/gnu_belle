@@ -115,7 +115,18 @@ void ActionsViewDelegate::paint( QPainter * painter, const QStyleOptionViewItem 
 
     if (! action->displayText().isEmpty()) {
         textRect.setY(textRect.y() + textHeight);
-        painter->drawText(textRect, Qt::TextWordWrap, action->displayText(), &textRect);
+        QString text = action->displayText();
+        int textWidth = option.fontMetrics.width(text);
+
+        if (textWidth > textRect.width()) {
+            int marginWidth = option.fontMetrics.width("...") + 2;
+            for(int i=text.size()-1; i >= 0 && option.fontMetrics.width(text) >= textRect.width() - marginWidth; i--) {
+                text.remove(i, 1);
+            }
+            text.append("...");
+        }
+
+        painter->drawText(textRect, Qt::TextWordWrap, text, &textRect);
     }
 }
 
