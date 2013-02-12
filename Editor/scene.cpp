@@ -608,16 +608,16 @@ void Scene::paint(QPainter & painter)
         painter.drawPixmap(Scene::point(), *mTemporaryBackgroundImage->pixmap());
         if (mTemporaryBackgroundImage->movie())
             painter.drawPixmap(0, 0, Scene::width(), Scene::height(), mTemporaryBackgroundImage->movie()->currentPixmap());
-        else
-            painter.drawPixmap(0, 0, *mBackgroundImage->pixmap());
+        else if (mTemporaryBackgroundImage->pixmap())
+            painter.drawPixmap(0, 0, Scene::width(), Scene::height(), *mTemporaryBackgroundImage->pixmap());
     }
     else if (mTemporaryBackgroundColor.isValid())
         painter.fillRect(QRect(Scene::point().x(), Scene::point().y(), width(), height()), mTemporaryBackgroundColor);
     else if (mBackgroundImage) {
         if (mBackgroundImage->movie())
             painter.drawPixmap(0, 0, Scene::width(), Scene::height(), mBackgroundImage->movie()->currentPixmap());
-        else
-            painter.drawPixmap(0, 0, *mBackgroundImage->pixmap());
+        else if (mBackgroundImage->pixmap())
+            painter.drawPixmap(0, 0, Scene::width(), Scene::height(), *mBackgroundImage->pixmap());
     }
     else
         painter.fillRect(QRect(Scene::point().x(), Scene::point().y(), width(), height()), bgColor);
