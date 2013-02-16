@@ -59,6 +59,7 @@ private slots:
 
 private:
     bool isValidOutputBox(Object*);
+    void  setTextInOutputBox();
 
 };
 

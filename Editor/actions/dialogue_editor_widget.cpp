@@ -128,6 +128,7 @@ void DialogueEditorWidget::updateData(Action * action)
     //only set currentAction after updating all the widgets
     //otherwise updating the widgets would mess up the currentAction's data.
     mCurrentAction = dialogueAction;
+    setTextInOutputBox();
 }
 
 void DialogueEditorWidget::onTextEdited()
@@ -213,4 +214,22 @@ bool DialogueEditorWidget::isValidOutputBox(Object* object)
         return true;
 
     return false;
+}
+
+void DialogueEditorWidget::setTextInOutputBox()
+{
+    if (! mCurrentAction || ! mCurrentAction->sceneObject())
+        return;
+
+    DialogueBox * dialogueBox = qobject_cast<DialogueBox*>(mCurrentAction->sceneObject());
+    if (dialogueBox) {
+        dialogueBox->setText(mCurrentAction->characterName(), mCurrentAction->text());
+    }
+    else {
+        TextBox* textBox = qobject_cast<TextBox*>(mCurrentAction->sceneObject());
+        if (textBox) {
+            textBox->setText(mCurrentAction->text());
+        }
+    }
+
 }
