@@ -68,18 +68,13 @@ inline QString colorToString(const QColor& color)
                                         .arg(color.alpha());
 }
 
-inline int lastNumberPosition(const QString& text)
+inline QString incrementLastNumber(QString text)
 {
     int j;
     for(j=text.size()-1; j >= 0 && text[j].isDigit(); --j);
-    return j == text.size()-1 ? -1 : j+1;
-}
+    j = j == text.size()-1 ? -1 : j+1;
 
-inline QString incrementLastNumber(QString text)
-{
-    int j = lastNumberPosition(text);
-
-    if (j <= -1)
+    if (j == -1)
         text += "1";
     else {
         int number = text.mid(j).toInt();
@@ -89,6 +84,19 @@ inline QString incrementLastNumber(QString text)
     }
 
     return text;
+}
+
+inline QString incrementFileName(const QFileInfo& info)
+{
+    QString suffix("");
+    if (! info.completeSuffix().isEmpty())
+        suffix = "." + info.completeSuffix();
+    return Utils::incrementLastNumber(info.baseName()) + suffix;
+}
+
+inline QString incrementFileName(const QString& name)
+{
+    return Utils::incrementFileName(QFileInfo(name));
 }
 
 inline QString newFilePath(const QString& path)
@@ -101,7 +109,7 @@ inline QString newFilePath(const QString& path)
     QDir dir = info.absoluteDir();
 
     while(QFile::exists(dir.absoluteFilePath(name)))
-        name = Utils::incrementLastNumber(name);
+        name = Utils::incrementFileName(info);
 
     return dir.absoluteFilePath(name);
 }
@@ -233,14 +241,9 @@ inline QString font(int fontSize, const QString& fontFamily) {
     return QString("%1px %2").arg(fontSize).arg(fontFamily);
 }
 
-inline QString fontFace(const QString& fileName, QString name="")
+inline QString fontFace(const QString& name)
 {
     QStringList lines;
-
-    if (name.isEmpty()) {
-        QFileInfo info(fileName);
-        name = info.baseName();
-    }
 
     lines << "@font-face {"
           << QString("font-family: '%1';").arg(name)
