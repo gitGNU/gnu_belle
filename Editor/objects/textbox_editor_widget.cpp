@@ -86,6 +86,7 @@ void TextPropertiesWidget::updateData(Object *obj)
     if (! mCurrentObject)
         return;
 
+    mChooseFontWidget->loadFonts();
     mHorizontalAlignmentComboBox->blockSignals(true);
     mVerticalAlignmentComboBox->blockSignals(true);
 
