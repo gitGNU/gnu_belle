@@ -331,7 +331,7 @@ function isgameDataReady() {
             objectsLoaded++;
         }
     }
-
+    
     if (! ready)
         setTimeout(isgameDataReady, 100);
     else {
@@ -377,7 +377,7 @@ function gameLoop ()
                 alert("The End");
                 return;
             }
- 
+            
             display.removeObjects(game.currentScene);
             game.currentScene = game.scenes[game.nextScene];
             display.addObjects(game.currentScene);
@@ -395,10 +395,6 @@ function gameLoop ()
         }
         else {
             game.currentAction = game.currentScene.actions[game.nextAction];
-            var object = game.currentAction.object;
-            if (object)
-                object.visible = true;
-            
             game.currentAction.execute();
             game.nextAction++;
         }
