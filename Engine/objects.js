@@ -1068,18 +1068,29 @@ function DialogueBox(data)
 
 belle.utils.extend(ObjectGroup, DialogueBox);
 
+DialogueBox.prototype.setSpeakerName = function(name)
+{
+    if (this.speakerTextBox) {
+        this.speakerTextBox.setText(name);
+        this.redraw = true;
+    }
+}
+
 DialogueBox.prototype.appendText = function(text)
 {
-    if (this.dialogueTextBox)
+    if (this.dialogueTextBox) {
         this.dialogueTextBox.appendText(text);
-    this.redraw = true;
+        this.redraw = true;
+    }
 }
 
 DialogueBox.prototype.setText = function(text)
 {
-    if (this.dialogueTextBox)
+    if (this.dialogueTextBox) {
         this.dialogueTextBox.setText(text);
-    this.redraw = true;
+        this.redraw = true;
+    }
+    
 }
 
 /************** MENU ************/
