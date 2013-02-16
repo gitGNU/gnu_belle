@@ -12,7 +12,7 @@ class AnimationImage
     QMovie* mMovie;
     QStringList mFramesNames;
     QString mFilePath;
-    QString mSavedName;
+    QString mFileName;
 
 public:
     explicit AnimationImage(const QString& path="");
@@ -30,7 +30,8 @@ public:
     QStringList framesNames() const;
     QRect rect() const;
     void save(const QDir&);
-    QVariant toJsonObject(bool _export=true);
+    void setFileName(const QString&);
+    QString fileName() const;
     
 signals:
     

@@ -11,7 +11,7 @@ AnimationImage::AnimationImage(const QString& path)
     mMovie = 0;
     mFilePath = path;
     QFileInfo info(path);
-    mSavedName = info.fileName();
+    mFileName = info.fileName();
 
     //support for animated images
     mMovie = new QMovie(path);
@@ -42,7 +42,7 @@ AnimationImage::AnimationImage(QPixmap* pixmap)
     mPixmap = pixmap;
     mMovie = 0;
     mFilePath = "";
-    mSavedName = "";
+    mFileName = "";
 }
 
 void AnimationImage::init()
@@ -120,35 +120,11 @@ void AnimationImage::save(const QDir & dir)
     }*/
 
     //save the original image
-    QFileInfo info(mFilePath);
     bool saved = false;
-    mSavedName = Utils::newFileName(dir.absoluteFilePath(info.fileName()));
     if (mPixmap)
-        saved = mPixmap->save(dir.absoluteFilePath(mSavedName));
+        saved = mPixmap->save(dir.absoluteFilePath(mFileName));
     if (! saved)
-        QFile::copy(mFilePath, dir.absoluteFilePath(mSavedName));
-}
-
-QVariant AnimationImage::toJsonObject(bool _export)
-{
-    QString path;
-
-    if (_export)
-        path = mSavedName;
-    else
-        path = ResourceManager::imagePath(this);
-
-    if (mMovie) {
-        QVariantMap object;
-        /*object.insert("frames", framesNames());
-        object.insert("frameDelay", mMovie->nextFrameDelay());
-        object.insert("source", fileName);*/
-        object.insert("src", path);
-        object.insert("animated", true);
-        return object;
-    }
-
-    return path;
+        QFile::copy(mFilePath, dir.absoluteFilePath(mFileName));
 }
 
 QString AnimationImage::path()
@@ -164,4 +140,14 @@ QRect AnimationImage::rect() const
         return mPixmap->rect();
 
     return QRect();
+}
+
+void AnimationImage::setFileName(const QString & name)
+{
+    mFileName = name;
+}
+
+QString AnimationImage::fileName() const
+{
+    return mFileName;
 }
