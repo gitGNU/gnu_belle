@@ -99,6 +99,9 @@ QString ChooseFileButton::filePath()
 
 void ChooseFileButton::setFilePath(const QString & path)
 {
+    if (mFilePath == path)
+        return;
+
     mFilePath = path;
     QFileInfo file(mFilePath);
 
