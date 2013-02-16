@@ -29,13 +29,13 @@ Character::Character(QObject* parent) :
     init("");
 }
 
-
 Character::Character(const QString& name, const QHash<QString, QString>& statesAndImagePaths, QObject* parent) :
     Image(0, parent)
 {
     init(name);
 
     mStateToPath = statesAndImagePaths;
+    initStates();
     if (! statesAndImagePaths.isEmpty())
         setCurrentState(statesAndImagePaths.keys().first());
 }
@@ -54,8 +54,20 @@ Character::Character(const QVariantMap& data, QObject* parent) :
         }
     }
 
+    initStates();
+
     if (! mStateToPath.isEmpty())
         setCurrentState(mStateToPath.keys().first());
+}
+
+Character::~Character()
+{
+    QHashIterator<QString, AnimationImage*> it(mStateToImage);
+    while(it.hasNext()) {
+        it.next();
+        ResourceManager::decrementReference(it.value());
+    }
+    mStateToImage.clear();
 }
 
 void Character::init(const QString& name)
@@ -69,16 +81,14 @@ void Character::init(const QString& name)
         setObjectName(name);
 }
 
-Character::~Character()
+void Character::initStates()
 {
-    QHashIterator<QString, AnimationImage*> it(mStateToImage);
+    QHashIterator<QString, QString> it(mStateToPath);
     while(it.hasNext()) {
         it.next();
-        ResourceManager::decrementReference(it.value());
+        mStateToImage.insert(it.key(), ResourceManager::newImage(it.value()));
     }
-    mStateToImage.clear();
 }
-
 
 void Character::removeState(const QString& state)
 {
@@ -156,15 +166,6 @@ bool Character::isAvailable()
     return mAvailable;
 }
 
-void Character::paint(QPainter & painter)
-{
-    Object::paint(painter);
-
-    if (image() && image()->pixmap())
-        painter.drawPixmap(mSceneRect, *image()->pixmap(), image()->rect());
-}
-
-
 void Character::setCurrentState(const QString & state)
 {
     QString path = mStateToPath.value(state);
@@ -177,7 +178,6 @@ void Character::setCurrentState(const QString & state)
         setImage(mStateToImage.value(state));
     else {
         setImage(path);
-
         mStateToImage.insert(state, image());
     }
 
@@ -218,23 +218,16 @@ void Character::setTextColor(const QColor & color)
     mTextColor = color;
 }
 
-QVariantMap Character::toJsonObject(bool _export)
+QVariantMap Character::toJsonObject()
 {
-    QVariantMap object = Object::toJsonObject(_export);
+    QVariantMap object = Object::toJsonObject();
     QVariantMap stateToPath;
-    QHashIterator<QString, QString> it(mStateToPath);
+    QHashIterator<QString, AnimationImage*> it(mStateToImage);
 
     while(it.hasNext()) {
-        it.next();
-        if (_export) {
-            if (QFile::exists(it.value())) {
-                QFileInfo info(it.value());
-                stateToPath.insert(it.key(), info.fileName());
-            }
-        }
-        else {
-            stateToPath.insert(it.key(), it.value());
-        }
+        it.next();        
+        if (it.value())
+            stateToPath.insert(it.key(), it.value()->fileName());
     }
 
     object.insert("images", stateToPath);

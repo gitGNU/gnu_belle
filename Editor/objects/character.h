@@ -55,7 +55,6 @@ class Character : public Image
         QHash <QString, QString> statesToPaths();
         void setAvailable(bool);
         bool isAvailable();
-        virtual void paint(QPainter &);
         void setCurrentState(const QString&);
         QString currentState() const;
         void addStates(const QHash<QString, QString>&);
@@ -63,10 +62,11 @@ class Character : public Image
         QColor textColor() const;
         void setNameColor(const QColor&);
         void setTextColor(const QColor&);
-        virtual QVariantMap toJsonObject(bool _export=true);
+        virtual QVariantMap toJsonObject();
 
    private:
         void init(const QString &);
+        void initStates();
 };
 
 
