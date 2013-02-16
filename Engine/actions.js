@@ -372,15 +372,13 @@ function Dialogue(data)
         if ("character" in data) {
             this.speakerName = data["character"];
             this.character = belle.getObject(data["character"]);
-            if (this.character) 
-                this.speakerName = this.character.name;
         }
         
         if ("text" in data) {
             this.text = data["text"];
         }
     }
-    
+
     this.rawText = this.text;
 }
 
@@ -395,14 +393,13 @@ Dialogue.prototype.execute = function () {
         return;
     }
     
-    if (this.object.speakerName !== undefined) {
+    if (typeof this.object.setSpeakerName == "function") {
         if (this.character) //in case character's name changed since the beginning
-            this.object.speakerName = this.character.name;
+            this.object.setSpeakerName(this.character.name);
         else
-            this.object.speakerName = this.speakerName;
+            this.object.setSpeakerName(this.speakerName);
     }
     this.object.setText("");
-    
     this.text = belle.replaceVariables(this.text);
     
     //this.lines = splitText(context.font, this.text, this.object.rect.width-this.object.leftPadding);
