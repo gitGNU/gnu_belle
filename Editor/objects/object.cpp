@@ -497,7 +497,7 @@ QList<Action*> Object::actionsForEvent(Interaction::InputEvent event)
     return mEventToActions.value(event);
 }
 
-QVariantMap Object::toJsonObject(bool _export)
+QVariantMap Object::toJsonObject()
 {
     QVariantMap object;
     object.insert("name", objectName());
@@ -521,7 +521,7 @@ QVariantMap Object::toJsonObject(bool _export)
     }
 
     if (mBackgroundImage) {
-        object.insert("backgroundImage", mBackgroundImage->toJsonObject());
+        object.insert("backgroundImage", mBackgroundImage->fileName());
     }
 
     QVariantList jsonActions;

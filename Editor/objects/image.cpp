@@ -122,12 +122,12 @@ void Image::hide()
         mMovie->stop();
 }
 
-QVariantMap Image::toJsonObject(bool _export)
+QVariantMap Image::toJsonObject()
 {
-    QVariantMap object = Object::toJsonObject(_export);
+    QVariantMap object = Object::toJsonObject();
 
     if (mImage)
-        object.insert("image", mImage->toJsonObject(_export));
+        object.insert("image", mImage->fileName());
 
     filterResourceData(object);
     return object;

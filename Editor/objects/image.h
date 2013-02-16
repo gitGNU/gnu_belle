@@ -42,7 +42,7 @@ public:
     virtual void setImage(const QString&);
     virtual void setImage(AnimationImage*);
     AnimationImage* image() const;
-    virtual QVariantMap toJsonObject(bool _export);
+    virtual QVariantMap toJsonObject();
 
     virtual void show();
     virtual void hide();

@@ -145,7 +145,7 @@ void Scene::addCopyOfObject(Object* object, bool select)
     if (! object)
         return;
 
-    QVariantMap data(object->toJsonObject(false));
+    QVariantMap data(object->toJsonObject());
     Object * obj = ResourceManager::instance()->createResource(data, false);
     appendObject(obj, select);
     obj->setResource(object);
@@ -511,7 +511,7 @@ QVariantMap Scene::toJsonObject()
     scene.insert("name", objectName());
     scene.insert("type", "Scene");
     if (mBackgroundImage)
-        scene.insert("backgroundImage", mBackgroundImage->toJsonObject());
+        scene.insert("backgroundImage", mBackgroundImage->fileName());
 
     if (mBackgroundColor.isValid())
         scene.insert("backgroundColor", Utils::colorToList(mBackgroundColor));
