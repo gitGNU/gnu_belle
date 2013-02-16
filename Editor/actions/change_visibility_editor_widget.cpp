@@ -134,42 +134,56 @@ QList<Object*> ChangeVisibilityEditorWidget::findObjects(bool shown)
     if (! mCurrentAction)
         return objects;
 
-    scene = qobject_cast<Scene*>(mCurrentAction->parent());
+    scene = mCurrentAction->scene();
     if (! scene)
         return objects;
 
     //mObjectInitialStateWidget->clear();
 
-    if (mCurrentAction->sceneObject()) {
-        objects.append(mCurrentAction->sceneObject());
+    //if (mCurrentAction->sceneObject()) {
+    //    objects.append(mCurrentAction->sceneObject());
         //mObjectInitialStateWidget->addItems(mCurrentAction->character()->statesToPaths().keys());
         //mObjectInitialStateWidget->setDisabled(false);
-    }
+   // }
     /*else {
         mObjectInitialStateWidget->setDisabled(true);
     }*/
 
     objects = scene->objects();
     QHash<Object*, bool> objectsVisibility;
-    Object* obj = 0;
+    Object* object = 0;
     for (int i=0; i < objects.size(); i++) {
-        if (obj)
-            objectsVisibility.insert(obj, false);
+        object = objects[i];
+        if (object)
+            objectsVisibility.insert(object, object->visible());
     }
 
     QList<Action*> actions = scene->actions();
     ChangeVisibility* changeVisibility = 0;
     for(int i=0; i < actions.size(); i++) {
-        if (actions[i] == mCurrentAction)
-            break;
-
-        obj = actions[i]->sceneObject();
-        changeVisibility = qobject_cast<ChangeVisibility*>(actions[i]);
-        if (! obj || ! changeVisibility || obj == mCurrentAction->sceneObject())
+        object = actions[i]->sceneObject();
+        if (! object)
             continue;
 
-        if (changeVisibility->toShow() != shown)
-            objects.removeOne(obj);
+        changeVisibility = qobject_cast<ChangeVisibility*>(actions[i]);
+        if (! changeVisibility)
+            continue;
+
+        objectsVisibility.insert(object, changeVisibility->toShow());
+        if (actions[i] == mCurrentAction)
+            break;
+        //if (changeVisibility->toShow() != shown)
+        //    objects.removeOne(obj);
+    }
+
+    objects.clear();
+    if (mCurrentAction->sceneObject())
+        objects.append(mCurrentAction->sceneObject());
+    QHashIterator<Object*, bool> it(objectsVisibility);
+    while(it.hasNext()) {
+        it.next();
+        if (it.value() == shown)
+            objects.append(it.key());
     }
 
     return objects;
