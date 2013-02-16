@@ -217,11 +217,11 @@ var redraw = function()
         game.currentScene.paint(display.bgContext);
 
     for(i=objectsToDraw.length-1; i !== -1; --i) {
-        if (! objectsToDraw[i].redraw || ! objectsToDraw[i].visible)
+        if (! objectsToDraw[i].redraw)
             continue;
             
         for(j=objectsToDraw.length-1; j !== -1; --j) {
-            if (objectsToDraw[j].redraw || i == j || ! objectsToDraw[j].visible)
+            if (objectsToDraw[j].redraw || i == j)
                 continue;
   
             if (objectsToDraw[i].overlaps(objectsToDraw[j]))
