@@ -326,7 +326,7 @@ void Belle::onResourcesDoubleClicked(const QModelIndex& index)
 
     Object* resource = mResourcesView->object(index);
     if (resource) {
-        QVariantMap data(resource->toJsonObject(false));
+        QVariantMap data(resource->toJsonObject());
         Object * object = ResourceManager::instance()->createResource(data, false);
         if (object) {
             object->setResource(resource);
@@ -728,20 +728,8 @@ void Belle::openFileOrProject()
     mCurrentRunDirectory = "";
 
     QVariantMap object = data.toMap();
-
     setNovelProperties(object);
-
-    if (object.contains("resources") && object.value("resources").type() == QVariant::Map) {
-        QVariantMap resourcesMap = object.value("resources").toMap();
-        QMapIterator<QString, QVariant> it(resourcesMap);
-        while(it.hasNext()) {
-            it.next();
-            if (it.value().type() != QVariant::Map)
-                continue;
-
-            ResourceManager::instance()->createResource(it.value().toMap());
-        }
-    }
+    ResourceManager::importResources(object);
 
     if (object.contains("scenes") && object.value("scenes").type() == QVariant::List) {
         QVariantList scenes = object.value("scenes").toList();
