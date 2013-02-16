@@ -406,7 +406,6 @@ Dialogue.prototype.execute = function () {
     if (this.character)
         this.object.color = this.character.textColor;
     
-    this.object.visible = true;
     this.object.redraw = true;
     this.interval = setInterval(function() { t.updateText(); }, belle.game.textDelay);
 }
@@ -424,11 +423,6 @@ Dialogue.prototype.updateText = function() {
     this.object.appendText(this.text.charAt(this.index));
     this.index += 1;
     this.object.redraw = true;
-}
-
-Dialogue.prototype.setVisible = function (visible) 
-{
-    this.object.visible = visible;
 }
 
 Dialogue.prototype.skip = function () {
@@ -530,7 +524,7 @@ ChangeVisibility.prototype.execute = function ()
         this.transitions[i].execute();
     }
     
-    this.object.visible = true;
+    this.object.setVisible(true);
     
     if (this.transitions.length === 0)
         this.setFinished(true);
@@ -557,7 +551,7 @@ ChangeVisibility.prototype.skip = function ()
 ChangeVisibility.prototype.reset = function () 
 {
     Action.prototype.reset.call(this);
-    this.object.visible = false;
+    this.object.setVisible(false);
     this.object.redraw = true;
     
     for (var i=0; i !== this.transitions.length; i++)
@@ -622,7 +616,7 @@ Show.prototype.skip = function ()
 Show.prototype.reset = function () 
 {
     Action.prototype.reset.call(this);
-    this.object.visible = false;
+    this.object.setVisible(false);
     this.object.redraw = true;
     
     for (var i=0; i !== this.transitions.length; i++)
@@ -669,7 +663,7 @@ Hide.prototype.check = function ()
 Hide.prototype.reset = function () 
 {
     ChangeVisibility.prototype.reset.call(this);
-    this.object.visible = true;
+    this.object.setVisible(true);
     this.object.redraw = true;
 }
 
@@ -1226,7 +1220,7 @@ ShowMenu.prototype.execute = function()
 ShowMenu.prototype.receive = function(event) 
 {
   if (event.type == "mouseup") {
-    this.object.visible = false;
+    this.object.setVisible(false);
     this.object.redraw = true;
     this.setFinished(true);
   }
