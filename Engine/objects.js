@@ -400,12 +400,6 @@ Object.prototype.paint = function(context)
     
     this.redrawing = true;
         
-    if (this.paintX != -1 && this.paintX != this.x || this.paintY != -1 && this.paintY != this.y) {
-        context.clearRect(this.paintX, this.paintY, this.width, this.height);
-        this.paintX = -1;
-        this.paintY = -1;
-    }
-    
     if (! this.visible) {
         this.redrawing = false;
         this.redraw = false;
@@ -451,9 +445,10 @@ Object.prototype.paint = function(context)
         
         context.closePath();
         
-        context.lineWidth = this.borderWidth;
-       
-        context.stroke();
+        if (this.borderWidth > 0 ) {
+            context.lineWidth = this.borderWidth;
+            context.stroke();
+        }
         context.fill();
         
     }
@@ -461,7 +456,7 @@ Object.prototype.paint = function(context)
         context.fillStyle  = this.backgroundColor.toString();
         context.fillRect(x, y, this.width, this.height);
     }
-    
+        
     this.paintX = x;
     this.paintY = y;
     
@@ -536,10 +531,12 @@ Object.prototype.notify = function(event) {
 
 Object.prototype.clear = function (context)
 {
-  if (! this.visible)
-      return;
-
-  context.clearRect(this.globalX()-this.borderWidth, this.globalY()-this.borderWidth, this.width+this.borderWidth*2, this.height+this.borderWidth*2);
+    if (this.paintX != -1 && this.paintY != -1) {
+        //context.clearRect(this.globalX()-this.borderWidth, this.globalY()-this.borderWidth, this.width+this.borderWidth*2, this.height+this.borderWidth*2);
+        context.clearRect(this.paintX-this.borderWidth, this.paintY-this.borderWidth, this.width+this.borderWidth*2, this.height+this.borderWidth*2);
+        this.paintX = -1;
+        this.paintY = -1;
+    }
 }
 
 Object.prototype.contentWidth = function()
@@ -585,6 +582,7 @@ Object.prototype.setHeight = function(height)
 Object.prototype.show = function()
 {
     this.visible = true;
+    this.redraw = true;
     if (this.element)
         this.element.style.display = "block";
 }
@@ -592,6 +590,7 @@ Object.prototype.show = function()
 Object.prototype.hide = function()
 {
     this.visible = false;
+    this.redraw = true;
     if (this.element)
         this.element.style.display = "none";
 }
@@ -667,11 +666,11 @@ Image.prototype.paint = function(context)
     var draw = Object.prototype.paint.call(this, context);
     if (! draw)
         return false;
-    
+
     context.save();
     if (context.globalAlpha != this.color.alphaF())
         context.globalAlpha = this.color.alphaF();
- 
+
     this.image.paint(context, this.globalX(), this.globalY(), this.width, this.height);
     context.restore();
     
@@ -782,15 +781,21 @@ TextBox.prototype.paint = function(context)
     if (this.font)
         context.font = this.font;
     
+    context.save();
+    if (context.globalAlpha != this.color.alphaF())
+        context.globalAlpha = this.color.alphaF();
+    
     var text = belle.replaceVariables(this.text);
     if (text != this.displayedText)
       this.textParts = belle.utils.splitText(context.font, text, width-this.textLeftPadding);
     this.displayedText = text;
 
+    
     for (var i=this.textParts.length-1; i !== -1; --i) {
         context.fillText(this.textParts[i], x+this.textLeftPadding, y+this.textTopPadding+this.heightOffset*(i+1), this.width);
     }
     
+    context.restore();
     context.font = defaultFont;
   
     this.redrawing = false;
@@ -978,6 +983,7 @@ ObjectGroup.prototype.processEvent = function(event)
     var x = event.canvasX;
     var y = event.canvasY;
     
+    
     if (! this.visible || ! this.contains(x, y))
         return false;
     
@@ -998,10 +1004,8 @@ ObjectGroup.prototype.processEvent = function(event)
 
 ObjectGroup.prototype.clear = function (context)
 {
-  if (! this.visible)
-      return;
-    
-  context.clearRect(this.globalX()-this.borderWidth, this.globalY()-this.borderWidth, this.width+this.borderWidth*2, this.height+this.borderWidth*2);
+  Object.prototype.clear.call(this, context);
+  //context.clearRect(this.globalX()-this.borderWidth, this.globalY()-this.borderWidth, this.width+this.borderWidth*2, this.height+this.borderWidth*2);
   
   for(var i=0; i !== this.objects.length; i++) {
       this.objects[i].clear(context);
@@ -1068,29 +1072,18 @@ function DialogueBox(data)
 
 belle.utils.extend(ObjectGroup, DialogueBox);
 
-DialogueBox.prototype.setSpeakerName = function(name)
-{
-    if (this.speakerTextBox) {
-        this.speakerTextBox.setText(name);
-        this.redraw = true;
-    }
-}
-
 DialogueBox.prototype.appendText = function(text)
 {
-    if (this.dialogueTextBox) {
+    if (this.dialogueTextBox)
         this.dialogueTextBox.appendText(text);
-        this.redraw = true;
-    }
+    this.redraw = true;
 }
 
 DialogueBox.prototype.setText = function(text)
 {
-    if (this.dialogueTextBox) {
+    if (this.dialogueTextBox)
         this.dialogueTextBox.setText(text);
-        this.redraw = true;
-    }
-    
+    this.redraw = true;
 }
 
 /************** MENU ************/
@@ -1102,21 +1095,6 @@ function Menu(data)
 
 belle.utils.extend(ObjectGroup, Menu);
 
-Menu.prototype.paint = function(context)
-{
-    var draw = Object.prototype.paint.call(this, context);
-
-    if (! draw)
-        return false;
-
-    for(var i=0; i !== this.objects.length; i++) { 
-        this.objects[i].redraw = true;
-        this.objects[i].paint(context);
-    }
-    
-    this.redraw = false;
-    return true;
-}
 
 
 /************** BUTTON ************/
@@ -1222,7 +1200,7 @@ Scene.prototype.setBackgroundColor = function(color)
     if (this.backgroundColor != color) {
         
         if (color instanceof Array)
-            color = new belle.Color(color);
+            color = new Color(color);
         
         this.backgroundColor = color;
         
