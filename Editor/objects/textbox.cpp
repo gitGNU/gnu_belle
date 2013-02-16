@@ -78,6 +78,12 @@ TextBox::TextBox(const QVariantMap & data, QObject * parent):
 
         mTextAlignment = alignment;
     }
+
+    if (data.contains("font") && data.value("font").type() == QVariant::String) {
+        QString font = data.value("font").toString();
+        mFont.setFamily(Utils::fontFamily(font));
+        mFont.setPixelSize(Utils::fontSize(font));
+    }
 }
 
 void TextBox::init(const QString& text)
@@ -238,7 +244,7 @@ void TextBox::paint(QPainter & painter)
     painter.restore();
 }
 
-QVariantMap TextBox::toJsonObject(bool _export)
+QVariantMap TextBox::toJsonObject()
 {
     QVariantMap object = Object::toJsonObject();
     QVariantList color;
