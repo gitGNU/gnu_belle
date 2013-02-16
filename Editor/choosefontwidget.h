@@ -17,6 +17,8 @@ class ChooseFontWidget : public QComboBox
 public:
     explicit ChooseFontWidget(QWidget *parent = 0);
     void loadFonts();
+    bool loadCustomFonts();
+    bool loadSystemFonts();
     void addCustomFontItem();
     void setCurrentFontFamily(const QString&);
 

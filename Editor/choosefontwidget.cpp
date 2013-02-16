@@ -30,6 +30,25 @@ void ChooseFontWidget::setCurrentFontFamily(const QString& family)
 
 void ChooseFontWidget::loadFonts()
 {
+
+    bool loadedCustom = false, loadedSystem = false;
+    loadedCustom = loadCustomFonts();
+    loadedSystem = loadSystemFonts();
+
+    if (loadedCustom || loadedSystem)
+        mFontFamilies.sort();
+
+    if (mFontFamilies.size() != count()-1) {
+        this->blockSignals(true);
+        clear();
+        addItems(mFontFamilies);
+        addCustomFontItem();
+        this->blockSignals(false);
+    }
+}
+
+bool ChooseFontWidget::loadSystemFonts()
+{
     if (mFontFamilies.isEmpty()) {
         QList<QFontDatabase::WritingSystem> writingSystems = mFontDatabase.writingSystems();
         QStringList families;
@@ -40,15 +59,31 @@ void ChooseFontWidget::loadFonts()
                     mFontFamilies.append(families[j]);
             }
         }
-
-        mFontFamilies.sort();
+        return true;
     }
 
-    this->blockSignals(true);
-    clear();
-    addItems(mFontFamilies);
-    addCustomFontItem();
-    this->blockSignals(false);
+    return false;
+}
+
+bool ChooseFontWidget::loadCustomFonts()
+{
+    if (ResourceManager::customFontsCount() != mCustomFontsIds.size()) {
+        QList<int> ids = ResourceManager::customFontsIds();
+        QStringList families;
+        foreach(int id, ids) {
+            if (! mCustomFontsIds.contains(id)) {
+                mCustomFontsIds.append(id);
+                families = QFontDatabase::applicationFontFamilies(id);
+
+                for(int i=0; i < families.size(); i++)
+                    if (! mFontFamilies.contains(families[i]))
+                        mFontFamilies.append(families[i]);
+            }
+        }
+        return true;
+    }
+
+    return false;
 }
 
 void ChooseFontWidget::addCustomFontItem()
@@ -65,15 +100,8 @@ void ChooseFontWidget::onItemActivated(int index)
         if (! filePath.isEmpty()) {
             int id = ResourceManager::newFont(filePath);
             if (id != -1) {
-                mCustomFontsIds.append(id);
-                families = QFontDatabase::applicationFontFamilies(id);
-
-                for(int i=0; i < families.size(); i++)
-                    if (! mFontFamilies.contains(families[i]))
-                        mFontFamilies.append(families[i]);
-                mFontFamilies.sort();
-
                 loadFonts();
+                families = mFontDatabase.applicationFontFamilies(id);
             }
         }
 
@@ -93,7 +121,7 @@ void ChooseFontWidget::onItemActivated(int index)
 
 void ChooseFontWidget::focusInEvent(QFocusEvent *e)
 {
-    if (mFontFamilies.size() != count()-1) {
+    if (mCustomFontsIds.size() != ResourceManager::customFontsCount() || mFontFamilies.size() != count()-1) {
         loadFonts();
         setCurrentFontFamily(mCurrentFamily);
     }
