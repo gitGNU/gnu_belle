@@ -33,6 +33,8 @@ static ResourceManager* mInstance = new ResourceManager();
 static QHash<QString, AnimationImage*> mImageCache;
 static QHash<AnimationImage*, int> mImageReferences;
 static QHash<QString, int> mFontsPaths;
+static QHash<QString, QString> mMediaResources;
+static QHash<QString, QString> mSounds;
 static QString mRelativePath = "";
 
 ResourceManager::ResourceManager(QObject *parent) :
@@ -163,9 +165,10 @@ void ResourceManager::fillWithResourceData(QVariantMap& data)
 
     QVariantMap resourceData = resource->toJsonObject();
     QStringList keys = resourceData.keys();
-    foreach(const QString& key, keys)
+    foreach(const QString& key, keys) {
         if (! data.contains(key))
             data.insert(key, resourceData.value(key));
+    }
 }
 
 Object *ResourceManager::resource(const QString & name)
@@ -228,6 +231,16 @@ ResourceManager* ResourceManager::instance()
     return mInstance;
 }
 
+QString ResourceManager::absolutePath(const QString& path)
+{
+    if (! mRelativePath.isEmpty()) {
+         QDir dir(mRelativePath);
+         if (dir.exists(path))
+             return dir.absoluteFilePath(path);
+    }
+    return path;
+}
+
 AnimationImage* ResourceManager::newImage(const QVariant& imageData)
 {
     if (imageData.type() == QVariant::String) {
@@ -242,15 +255,14 @@ AnimationImage* ResourceManager::newImage(const QVariant& imageData)
     return 0;
 }
 
-AnimationImage* ResourceManager::newImage(const QString& _path)
+AnimationImage* ResourceManager::newImage(const QString& fileName)
 {
-    QString path(_path);
-
-    if (! mRelativePath.isEmpty()) {
-         QDir dir(mRelativePath);
-         if (dir.exists(path))
-             path = dir.absoluteFilePath(path);
-     }
+    QString path;
+    //fileName can be either a full path or just the file name
+    if (mMediaResources.contains(fileName))
+        path = ResourceManager::mediaPath(fileName);
+    else
+        path = ResourceManager::absolutePath(fileName);
 
     if (mImageCache.contains(path)) {
         incrementReference(mImageCache.value(path));
@@ -261,6 +273,7 @@ AnimationImage* ResourceManager::newImage(const QString& _path)
         return 0;
 
     AnimationImage* image = new AnimationImage(path);
+    image->setFileName(newMedia(path));
     mImageCache.insert(path, image);
     mImageReferences.insert(image, 1);
 
@@ -348,14 +361,53 @@ void ResourceManager::setRelativePath(const QString & path)
     mRelativePath = path;
 }
 
-int ResourceManager::newFont(const QString& path)
+int ResourceManager::newFont(const QString& p)
 {
+    QString path = ResourceManager::absolutePath(p);
     if (mFontsPaths.contains(path))
         return mFontsPaths.value(path, -1);
 
     int id = QFontDatabase::addApplicationFont(path);
     mFontsPaths.insert(path, id);
+    ResourceManager::newMedia(path);
     return id;
+}
+
+QString ResourceManager::newMedia(const QString& path)
+{
+    QString absPath = absolutePath(path);
+    QFileInfo info(absPath);
+    QString name = info.fileName();
+
+    if (mMediaResources.contains(name)) {
+        if (absPath == mMediaResources.value(name))
+            return name; //file already added, do nothing
+
+        while(mMediaResources.contains(name) && mMediaResources.value(name) != absPath)
+            name = Utils::incrementFileName(name);
+    }
+
+    qDebug() << name << absPath;
+    mMediaResources.insert(name, absPath);
+    return name;
+}
+
+QString ResourceManager::mediaPath(const QString& name)
+{
+    if (mMediaResources.contains(name))
+        return mMediaResources.value(name);
+    return "";
+}
+
+QString ResourceManager::mediaName(const QString& path)
+{
+    QHashIterator<QString, QString> it(mMediaResources);
+    while(it.hasNext()) {
+        it.next();
+        if (it.value() == path)
+            return it.key();
+    }
+    return "";
 }
 
 void ResourceManager::exportResources(const QDir& dir)
@@ -366,6 +418,19 @@ void ResourceManager::exportResources(const QDir& dir)
             image->save(dir);
     }
 
+    ResourceManager::exportCustomFonts(dir);
+
+    //export everything else (e.g. sounds)
+    QHashIterator<QString, QString> it(mMediaResources);
+    while(it.hasNext()) {
+        it.next();
+        if (! QFile::exists(dir.absoluteFilePath(it.key())))
+            QFile::copy(it.value(), dir.absoluteFilePath(it.key()));
+    }
+}
+
+void ResourceManager::exportCustomFonts(const QDir& dir)
+{
     QHashIterator<QString, int> it(mFontsPaths);
     QFile file(dir.absoluteFilePath("fontfaces.css"));
     if (! file.open(QFile::WriteOnly | QFile::Text))
@@ -373,15 +438,56 @@ void ResourceManager::exportResources(const QDir& dir)
 
     while(it.hasNext()) {
         it.next();
-        QFileInfo info(it.key());
+        QString fontName = ResourceManager::mediaName(it.key());
+        if (fontName.isEmpty())
+            fontName = QFileInfo(it.key()).baseName();
+
         //copy font file
-        QFile::copy(it.key(), dir.absoluteFilePath(info.fileName()));
+        QFile::copy(it.key(), dir.absoluteFilePath(fontName));
+
+        //determine font's family name.
+        QStringList families = QFontDatabase::applicationFontFamilies(it.value());
+        if (families.size() == 1)
+            fontName = families[0];
+
         //write css for font
-        file.write(Utils::fontFace(info.fileName(), info.baseName()).toAscii());
+        file.write(Utils::fontFace(fontName).toAscii());
         file.write("\n");
     }
 
     file.close();
+}
+
+void ResourceManager::importResources(const QVariantMap& data)
+{
+    if (data.contains("resources") && data.value("resources").type() == QVariant::Map) {
+        QVariantMap resourcesMap = data.value("resources").toMap();
+        QMapIterator<QString, QVariant> it(resourcesMap);
+        while(it.hasNext()) {
+            it.next();
+            if (it.value().type() != QVariant::Map)
+                continue;
+
+            ResourceManager::instance()->createResource(it.value().toMap());
+        }
+    }
+
+    if (data.contains("customFonts") && data.value("customFonts").type() == QVariant::List) {
+        QVariantList fonts = data.value("customFonts").toList();
+        foreach(const QVariant& font, fonts){
+            newFont(font.toString());
+        }
+    }
+}
+
+int ResourceManager::customFontsCount()
+{
+    return mFontsPaths.keys().size();
+}
+
+QList<int> ResourceManager::customFontsIds()
+{
+    return mFontsPaths.values();
 }
 
 QStringList ResourceManager::customFonts()

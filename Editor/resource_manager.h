@@ -54,6 +54,8 @@ public:
 
     static int newFont(const QString&);
     static QStringList customFonts();
+    static int customFontsCount();
+    static QList<int> customFontsIds();
     static AnimationImage* newImage(const QString&);
     static AnimationImage* newImage(const QVariant&);
     static QString imagePath(QPixmap*, QMovie* movie=0);
@@ -61,6 +63,12 @@ public:
     static QMovie* movie(const QString&);
     static QStringList imagePaths();
     static void exportResources(const QDir&);
+    static void exportCustomFonts(const QDir&);
+    static QString newMedia(const QString&);
+    static QString mediaPath(const QString&);
+    static QString mediaName(const QString&);
+    static QString absolutePath(const QString&);
+    static void importResources(const QVariantMap&);
 
     static void incrementReference(AnimationImage*);
     static void decrementReference(AnimationImage*);
