@@ -27,7 +27,7 @@ class PlaySound : public Action
     Q_OBJECT
 
     int mVolume;
-    QString mSoundPath;
+    QString mSoundName;
     bool mLoop;
 
 public:
@@ -42,6 +42,7 @@ public:
 
     void setSoundPath(const QString&);
     QString soundPath();
+    QString soundName();
 
     void setVolume(int);
     int volume();
