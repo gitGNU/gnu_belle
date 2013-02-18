@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 Carlos Pais 
+/* Copyright (C) 2012 Carlos Pais
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,11 +30,13 @@ DialogueEditorWidget::DialogueEditorWidget(QWidget *parent) :
     mChooseTextBoxWidget = new QComboBox(this);
     mChooseCharacterWidget->setEditable(true);
     mTextEdit = new QTextEdit(this);
+    mWaitCheckBox = new QCheckBox(this);
 
     beginGroup("Dialogue Action");
     appendRow(tr("Character"), mChooseCharacterWidget);
     appendRow(tr("Text Box/Dialogue Box"), mChooseTextBoxWidget);
     appendRow(tr("Phrase"), mTextEdit);
+    appendRow(tr("Wait on Finished"), mWaitCheckBox);
     endGroup();
 
     mTextEdit->setMaximumHeight(mTextEdit->height()/2);
@@ -45,6 +47,7 @@ DialogueEditorWidget::DialogueEditorWidget(QWidget *parent) :
     connect(mChooseCharacterWidget, SIGNAL(currentIndexChanged(int)), this, SLOT(onCharacterChanged(int)));
     connect(mChooseCharacterWidget, SIGNAL(highlighted(int)), this, SLOT(onCharacterHighlighted(int)));
     connect(mChooseCharacterWidget, SIGNAL(editTextChanged(const QString&)), this, SLOT(onCharacterNameChanged(const QString&)));
+    connect(mWaitCheckBox, SIGNAL(clicked(bool)), this, SLOT(onWaitOnFinishedChanged(bool)));
 
     if (mChooseTextBoxWidget->view())
         mChooseTextBoxWidget->view()->installEventFilter(this);
@@ -124,6 +127,8 @@ void DialogueEditorWidget::updateData(Action * action)
         mChooseCharacterWidget->setCurrentIndex(0);
     else
         mChooseCharacterWidget->setEditText(dialogueAction->characterName());
+
+    mWaitCheckBox->setChecked(dialogueAction->mouseClickOnFinish());
 
     //only set currentAction after updating all the widgets
     //otherwise updating the widgets would mess up the currentAction's data.
@@ -231,5 +236,10 @@ void DialogueEditorWidget::setTextInOutputBox()
             textBox->setText(mCurrentAction->text());
         }
     }
+}
 
+void DialogueEditorWidget::onWaitOnFinishedChanged(bool state)
+{
+    if (mCurrentAction)
+        mCurrentAction->setMouseClickOnFinish(state);
 }

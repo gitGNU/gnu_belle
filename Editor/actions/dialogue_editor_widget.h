@@ -39,6 +39,7 @@ class DialogueEditorWidget : public ActionEditorWidget
     QTextEdit* mTextEdit;
     QList<Object*> mOutputBoxes;
     QList<Character*> mCharacters;
+    QCheckBox* mWaitCheckBox;
 
 public:
     explicit DialogueEditorWidget(QWidget *parent = 0);
@@ -56,6 +57,7 @@ private slots:
     void onTextBoxHighlighted(int);
     void onCharacterHighlighted(int);
     void onCharacterNameChanged(const QString&);
+    void onWaitOnFinishedChanged(bool);
 
 private:
     bool isValidOutputBox(Object*);
