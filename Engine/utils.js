@@ -154,82 +154,72 @@ utils.textWidth = function(text, font)
 
 utils.splitText = function(font, text, maxWidth) 
 {
-    var fullText = text;
-    if (! fullText)
+    if (! text)
         return [];
     
     if (! dummy)
         dummy = document.getElementById("dummy");
     dummy.style.font = font;
     var textNode = dummy.childNodes[0];
-    textNode.nodeValue = fullText;
+    textNode.nodeValue = text;
 
     var width = 0;
     maxWidth -= 4;
    
     width = dummy.offsetWidth;
     
-    if ( width > maxWidth ) {
+    if ( width > maxWidth || text.contains("\n")) {
         var breaks = Math.ceil(width / maxWidth);
         var textSplitted = [];
-        var textsize = Math.floor(fullText.length / breaks);
+        var textsize = Math.floor(text.length / breaks);
         var txt = "";
+        var textLength = text.length;
         var i, j = 0;
         var start = 0;
+        var breakLine = false;
         
-        for(i=0; i < breaks || j < fullText.length; i++) { 
-            
-            //skip whitespaces
-            for (; fullText[j] == " " && j < textsize*(i+1) && j < fullText.length; j++)
-                continue;
-            
-            //probable text for a line
-            for (; j < textsize*(i+1) && j < fullText.length; j++)
-                txt += fullText[j];
+        for(; j < textLength;) { 
+
+            txt = text.substr(j, textsize);
+            if (txt.indexOf("\n") !== -1) {
+               txt = text.substring(j, text.indexOf("\n"));
+               j = text.indexOf("\n")+1;
+               breakLine = true;
+            }
+            else
+                j += textsize;
         
             textNode.nodeValue = txt;
             
             //test if that text really fits in a line and correct it if it doesn't
+            if (! breakLine && dummy.offsetWidth < maxWidth){        
+                while(dummy.offsetWidth < maxWidth && j < textLength) {
+                    txt += text[j];
+                    textNode.nodeValue = txt;
+                    j++;
+                }
+                if (j == textLength)
+                    j = textLength - 1;
+            }
+            
             if (dummy.offsetWidth > maxWidth) {
-                while(dummy.offsetWidth > maxWidth) {
+                while(j > 0 && (dummy.offsetWidth > maxWidth || (text[j] != " " && text[j] != "\n")) ) {
                     txt = txt.substr(0, txt.length-1);
                     textNode.nodeValue = txt;
                     j--;
                 }
             }
-            else if (dummy.offsetWidth < maxWidth){
-                            
-                while(dummy.offsetWidth < maxWidth) {
-                    if (j >= fullText.length) 
-                        break;
-
-                    txt += fullText[j];
-                    textNode.nodeValue = txt;
-                    j++;
-                }
-            }
-            
-            //fix split words
-            if (j > 0 && j < fullText.length) {
-                if (fullText[j-1] != " " && fullText[j] != " ") {
-                    var k = 0;
-                    while( fullText[j] != " " ) {
-                        --j;
-                        k++;
-                    }
-                    txt = txt.substr(0, txt.length-k);
-                }
-            }
 
             textSplitted.push(txt);
             txt = "";
+            breakLine = false;
         }
 
         return textSplitted;
         
     }
     
-    return [fullText];
+    return [text];
 }
 
 utils.extendJsonObject = function (a, b)
