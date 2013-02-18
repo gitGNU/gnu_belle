@@ -416,13 +416,12 @@ Dialogue.prototype.updateText = function() {
         clearInterval(this.interval);
         this.interval = null;
         this.setFinished(true);
-        this.object.text = this.rawText;
+        this.object.setText(this.rawText);
         return;
     }
 
     this.object.appendText(this.text.charAt(this.index));
     this.index += 1;
-    this.object.redraw = true;
 }
 
 Dialogue.prototype.skip = function () {
