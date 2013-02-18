@@ -179,8 +179,8 @@ function Object(info)
     this.setHeight(info.height);
     this.xRadius = 10;
     this.yRadius = 10;
-    this.paintX = -1;
-    this.paintY = -1;
+    this.paintX = false;
+    this.paintY = false;
     this.roundedRect = false;
     this.backgroundColor = new Color([255, 255, 255, 255]);
     this.fillStyle = this.backgroundColor.toString();
@@ -309,8 +309,8 @@ Object.prototype.overlaps = function(object)
     if ( otherX > x + width || otherY > y + height || x > otherX + otherWidth || y > otherY + otherHeight ) 
         return false;
     
-    if ( otherX > paintX + width || otherY > paintY + height || paintX > otherX + otherWidth || paintY > otherY + otherHeight ) 
-        return false;
+    //if ( otherX > paintX + width || otherY > paintY + height || paintX > otherX + otherWidth || paintY > otherY + otherHeight ) 
+    //    return false;
         
     return true;
 }
@@ -531,11 +531,11 @@ Object.prototype.notify = function(event) {
 
 Object.prototype.clear = function (context)
 {
-    if (this.paintX != -1 && this.paintY != -1) {
+    if (this.paintX !== false && this.paintY !== false) {
         //context.clearRect(this.globalX()-this.borderWidth, this.globalY()-this.borderWidth, this.width+this.borderWidth*2, this.height+this.borderWidth*2);
         context.clearRect(this.paintX-this.borderWidth, this.paintY-this.borderWidth, this.width+this.borderWidth*2, this.height+this.borderWidth*2);
-        this.paintX = -1;
-        this.paintY = -1;
+        this.paintX = false;
+        this.paintY = false;
     }
 }
 
@@ -731,6 +731,7 @@ function TextBox(info)
     belle.utils.initElement(this.textElement, info);
     this.textElement.style.display = "block";
     this.element.appendChild(this.textElement);
+    this.font = belle.game.font;
     
     if ("font" in info) {
         this.font = info["font"];
@@ -780,18 +781,18 @@ TextBox.prototype.paint = function(context)
     
     if (this.font)
         context.font = this.font;
-    
+
     context.save();
     if (context.globalAlpha != this.color.alphaF())
         context.globalAlpha = this.color.alphaF();
     
     var text = belle.replaceVariables(this.text);
     if (text != this.displayedText)
-      this.textParts = belle.utils.splitText(context.font, text, width-this.textLeftPadding);
+      this.textParts = belle.utils.splitText(context.font, text, width);
     this.displayedText = text;
 
-    
     for (var i=this.textParts.length-1; i !== -1; --i) {
+        this.alignText(this.textParts[i]);
         context.fillText(this.textParts[i], x+this.textLeftPadding, y+this.textTopPadding+this.heightOffset*(i+1), this.width);
     }
     
@@ -802,17 +803,19 @@ TextBox.prototype.paint = function(context)
     return true;
 }
 
-TextBox.prototype.alignText = function(size)
+TextBox.prototype.alignText = function(text, size)
 {
+    if (! text)
+        text = this.text;
     if (! size)
-        size = belle.utils.textSize(this.text, belle.game.font);
+        size = belle.utils.textSize(text, this.font);
     
     var width = size[0];
     var height = size[1];
     
     this.heightOffset = height / 1.2;
     
-    if (this.text && this.textAlignment) {
+    if (text && this.textAlignment) {
         if (width < this.width) {
             if (this.textAlignment.contains("HCenter")) {
                 this.textLeftPadding = (this.width - width) / 2;
@@ -876,8 +879,11 @@ TextBox.prototype.appendText = function(text)
 
 TextBox.prototype.setText = function(text)
 {
-    this.text = text;
-    this.element.childNodes[1].childNodes[0].nodeValue = belle.replaceVariables(text);
+    if (this.text != text) {
+        this.text = text;
+        this.element.childNodes[1].childNodes[0].nodeValue = belle.replaceVariables(text.replace("\n", "<br/>"));
+        this.redraw = true;
+    }
 }
 
 TextBox.prototype.setTextColor = function(color)
