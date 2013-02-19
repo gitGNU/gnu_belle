@@ -375,6 +375,11 @@ Object.prototype.setColor = function (color)
 
 Object.prototype.setOpacity = function (alpha)
 {
+    if (alpha < 0)
+        alpha = 0;
+    else if (alpha > 255)
+        alpha = 255;
+    
     this.color.alpha = alpha;
     if (this.element) {
         this.element.style.opacity = alpha / 255;
