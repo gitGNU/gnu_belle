@@ -384,10 +384,9 @@ QString ResourceManager::newMedia(const QString& path)
             return name; //file already added, do nothing
 
         while(mMediaResources.contains(name) && mMediaResources.value(name) != absPath)
-            name = Utils::incrementFileName(name);
+            name = Utils::incrementLastNumber(name);
     }
 
-    qDebug() << name << absPath;
     mMediaResources.insert(name, absPath);
     return name;
 }

@@ -68,35 +68,21 @@ inline QString colorToString(const QColor& color)
                                         .arg(color.alpha());
 }
 
-inline QString incrementLastNumber(QString text)
+inline QString incrementLastNumber(const QString& text)
 {
     int j;
     for(j=text.size()-1; j >= 0 && text[j].isDigit(); --j);
     j = j == text.size()-1 ? -1 : j+1;
 
     if (j == -1)
-        text += "1";
+        return text + "1";
     else {
         int number = text.mid(j).toInt();
         number++;
-        text.replace(j, text.mid(j).size(), "");
-        text += QString::number(number);
+        return text.left(j) + QString::number(number);
     }
 
     return text;
-}
-
-inline QString incrementFileName(const QFileInfo& info)
-{
-    QString suffix("");
-    if (! info.completeSuffix().isEmpty())
-        suffix = "." + info.completeSuffix();
-    return Utils::incrementLastNumber(info.baseName()) + suffix;
-}
-
-inline QString incrementFileName(const QString& name)
-{
-    return Utils::incrementFileName(QFileInfo(name));
 }
 
 inline QString newFilePath(const QString& path)
@@ -105,13 +91,17 @@ inline QString newFilePath(const QString& path)
         return path;
 
     QFileInfo info(path);
-    QString name = info.fileName();
-    QDir dir = info.absoluteDir();
+    QString name(info.baseName());
+    QDir dir = info.dir();
+    QString suffix("");
+    if (! info.completeSuffix().isEmpty())
+        suffix = "." + info.completeSuffix();
 
-    while(QFile::exists(dir.absoluteFilePath(name)))
-        name = Utils::incrementFileName(info);
+    while(dir.exists(name+suffix)) {
+        name = Utils::incrementLastNumber(name);
+    }
 
-    return dir.absoluteFilePath(name);
+    return dir.absoluteFilePath(name+suffix);
 }
 
 inline QString newFilePath(const QDir& dir, const QString& name)
