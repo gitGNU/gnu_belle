@@ -63,6 +63,8 @@ Action::Action(const QVariantMap& data, QObject *parent) :
     if (data.contains("type") && data.value("type").type() == QVariant::String) {
         setType(data.value("type").toString());
     }
+
+    setMouseClickOnFinish(data.contains("wait"));
 }
 
 void Action::init()

@@ -45,6 +45,8 @@ Dialogue::Dialogue(const QVariantMap & data, QObject *parent):
     if (data.contains("text") && data.value("text").type() == QVariant::String) {
             setText(data.value("text").toString());
     }
+
+    setMouseClickOnFinish(data.contains("wait"));
 }
 
 void Dialogue::init()
