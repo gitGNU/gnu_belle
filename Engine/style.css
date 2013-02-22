@@ -23,7 +23,7 @@ body, html
   background-color: black;
 }
  
-#container
+#belle
 {
   /*margin: 0 auto;*/
   position: relative;
@@ -34,14 +34,14 @@ body, html
   height: 100%;
 }
 
-#container #backgroundCanvas 
+#belle #backgroundCanvas 
 {
     position: absolute; 
     margin: 0 auto;
     z-index: 0;
 }
 
-#container #canvas 
+#belle #canvas 
 {
     position: absolute; 
     margin: 0 auto;
