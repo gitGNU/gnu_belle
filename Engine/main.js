@@ -23,6 +23,7 @@ var timeout = 50; //50 ms
 var display = belle.display;
 var objects = belle.objects;
 var actions = belle.actions;
+var loaded = false;
 var game = {
     "resources" : {},
     "actions": [],
@@ -39,7 +40,9 @@ var game = {
     "variables" : {},
     "end" : false,
     "textSpeed" : 10,
-    "textDelay" : 100
+    "textDelay" : 100,
+    "filename" : "game.json",
+    "directory" : ""
 }
 
 var addObject = function (object)
@@ -169,15 +172,32 @@ var replaceVariables = function(text)
     return text;
 }
 
+function setGameFile(gamefile)
+{
+    game.filename = gamefile;
+}
+
+function setGameDirectory(dir)
+{
+    if (dir.length && dir[dir.length-1] !== "/")
+        dir += "/";
+    game.directory = dir;
+}
+
+function load()
+{
+    actions.init();
+    display.loading();
+    importgameData(game.directory+game.filename);
+}
+
 window.onload = function () {
-  if (! belle) {
-    alert("Couldn't start the engine. There was a problem reading one of the files.");
-    return;
-  }
+    if (! belle) {
+        alert("Couldn't start the engine. There was a problem reading one of the files.");
+        return;
+    }
   
-  actions.init();
-  display.loading();
-  importgameData("game.json");
+    load();
 }
 
 function initializeData(data)
@@ -331,7 +351,7 @@ function isgameDataReady() {
             objectsLoaded++;
         }
     }
-    
+
     if (! ready)
         setTimeout(isgameDataReady, 100);
     else {
@@ -408,6 +428,8 @@ function gameLoop ()
 }
 
 //Expose public properties
+belle.setGameFile = setGameFile;
+belle.setGameDirectory = setGameDirectory;
 belle.addObject = addObject;
 belle.createObject = createObject;
 belle.getObject = getObject;
