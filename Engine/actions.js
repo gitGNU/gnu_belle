@@ -1073,7 +1073,7 @@ function PlaySound(data)
     var ext = "";
     
     if ( "sound" in data) {
-        this.soundPath = data["sound"];
+        this.soundPath = belle.game.directory + data["sound"];
         var fileParts = this.soundPath.split(".");
         this.soundName = fileParts[fileParts.length-2];
         if (! this.soundName)

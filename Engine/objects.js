@@ -47,7 +47,7 @@ function AnimationImage(imageData, parent)
             that.imageLoaded = true;
         };
         
-        this.img.src = imageData;
+        this.img.src = belle.game.directory + imageData;
         this.img.style.width = "100%";
         this.img.style.height = "100%";
         this.img.style.display = "block";
