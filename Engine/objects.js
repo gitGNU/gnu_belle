@@ -1195,6 +1195,7 @@ Scene.prototype.setBackgroundImage = function(background)
         this.backgroundImage = background;
         that.backgroundImageLoaded = true; //assume for now
         if (this.backgroundElement) {
+            this.backgroundElement.style.backgroundColor = "";
             if (this.backgroundElement.childNodes.length > 0)
                 this.backgroundElement.removeChild(this.backgroundElement.childNodes[0]);
             this.backgroundElement.appendChild(this.backgroundImage.img);
@@ -1206,6 +1207,7 @@ Scene.prototype.setBackgroundImage = function(background)
             return;
         this.backgroundImage = new AnimationImage(background, this);
         if (this.backgroundElement) {
+            this.backgroundElement.style.backgroundColor = "";
             if (this.backgroundElement.childNodes.length > 0)
                 this.backgroundElement.removeChild(this.backgroundElement.childNodes[0]);
             this.backgroundElement.appendChild(this.backgroundImage.img);
@@ -1223,16 +1225,20 @@ Scene.prototype.setBackgroundColor = function(color)
         
         if (color instanceof Array)
             color = new Color(color);
-        
+
         this.backgroundColor = color;
         
         if (this.backgroundImage) {
-            this.backgroundImage.src = null;
+            if (this.backgroundElement.childNodes.length > 0)
+                this.backgroundElement.removeChild(this.backgroundElement.childNodes[0]);
+            this.backgroundImage.src = "";
             this.backgroundImage = null;
         }
         
-        if (this.backgroundColor)
+        if (this.backgroundColor) {
             this.redrawBackground = true;
+            this.backgroundElement.style.backgroundColor = this.backgroundColor.toHex();
+        }
     }
 }
 
