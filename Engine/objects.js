@@ -701,25 +701,26 @@ Image.prototype.isReady = function()
 function Character(data)
 {
     var path = "";
-    
-    Image.call(this, data);
+    var image;
+    var state = null;
     this.states = {};
     this.textColor = new Color([255, 255, 255, 255]);
 
-    var image;
-    var property = null;
     if ("images" in data) {
-        for(property in data["images"]) {
-            image = new AnimationImage(data["images"][property], this);
-            image.src = data.images[property];
-            this.states[property] = image;
+        for(state in data["images"]) {
+            image = new AnimationImage(data["images"][state], this);
+            image.src = data.images[state];
+            this.states[state] = image;
         }
         
-        if (property) 
-            this.image = new AnimationImage(this.states[property], this);
+        if (state) {
+            data["image"] = this.states[state];
+            this.image = new AnimationImage(this.states[state], this);
+        }
     }
+    
+    Image.call(this, data);
 }
-
 
 belle.utils.extend(Image, Character);
 
