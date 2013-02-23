@@ -75,7 +75,7 @@ var scaleAll = function(scaleWidth, scaleHeight, reset)
     var game = belle.game;
     var width = game.width;
     var height = game.height;
-    var container = document.getElementById('container');
+    var container = document.getElementById('belle');
     if (! display.usingDOM) {
         display.canvas = display.canvas ? display.canvas : document.getElementById('canvas');
         display.bgCanvas = display.bgCanvas ? display.bgCanvas : document.getElementById('backgroundCanvas');      
@@ -131,15 +131,18 @@ var init = function()
     var height = game.height;
     var paddingTop = 0;
     var paddingLeft = 0;
-    var container = document.getElementById('container');
+    var container = document.getElementById('belle');
     if (! display.usingDOM) {
         display.canvas = display.canvas ? display.canvas : document.getElementById('canvas');
         display.bgCanvas = display.bgCanvas ? display.bgCanvas : document.getElementById('backgroundCanvas');      
         display.bgContext = display.bgContext ? display.bgContext : display.bgCanvas.getContext('2d');
         display.context = display.context ? display.context : display.canvas.getContext('2d');
     }
-    var _windowWidth = windowWidth();
-    var _windowHeight = windowHeight();
+
+    var _windowWidth = $(container).parent().width();
+    _windowWidth = _windowWidth ? _windowWidth : game.width;
+    var _windowHeight = $(container).parent().height();
+    _windowHeight = _windowHeight ? _windowHeight : game.height;
     var scaleWidth = scaleWidthFactor;
     var scaleHeight = scaleHeightFactor;
     
@@ -199,7 +202,7 @@ var init = function()
         addObjects(game.currentScene);
     }
     
-    if (loader.running)
+    if (loader && loader.running)
         stopLoading();
 }
 
@@ -319,7 +322,7 @@ var removeObjects = function(scene)
     if (! display.usingDOM)
         return;
     
-    var container = document.getElementById("container"); 
+    var container = document.getElementById("belle"); 
     var objects = scene.objects;
     if (scene.element)
         container.removeChild(scene.element);
@@ -333,7 +336,7 @@ var addObjects = function(scene)
 {
     if (! display.usingDOM)
         return;
-    var container = document.getElementById("container");
+    var container = document.getElementById("belle");
     var objects = scene.objects;
     addObject(scene);
     for(var j=0; j < objects.length; j++){
@@ -347,7 +350,7 @@ var addObject = function(object, container)
         return;
     
     if (! container)
-        container = document.getElementById("container");
+        container = document.getElementById("belle");
     if (object.visible)
         object.element.style.display = "block";
     container.appendChild(object.element);
@@ -379,7 +382,7 @@ var updateLoading = function()
     if (! loader)
         return;
   
-    container = container || $("#container");
+    container = container || $("#belle");
     var cwidth = container.width();
     var cheight = container.height();
     var width = loader.width();
@@ -408,8 +411,8 @@ var updateLoading = function()
 
 var loading = function()
 {
-    loader = loader || $("#loader");
-    progress = progress || $("#loader #progress");
+    loader = loader || $("#belle #loader");
+    progress = progress || $("#belle #loader #progress");
     
     if (! loader.length) {
         loader = $('<div id="loader"></div>');
@@ -417,10 +420,10 @@ var loading = function()
         loader.css("border", "1px solid");
         progress = $('<div id="progress"></div>');
         loader.append(progress);
-        $("body").append(loader);
+        $("#belle").append(loader);
     }
     
-    container = container || $("#container");
+    container = container || $("#belle");
     var cwidth = container.width();
     var cheight = container.height();
     var barWidth = parseInt(cwidth * 0.4);
