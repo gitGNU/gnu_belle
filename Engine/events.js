@@ -18,7 +18,7 @@ var EventDispatcher = {};
 
 (function(EventDispatcher) {
 
-var container = document.getElementById('container');
+var container = $("#belle");
 var hoveredObject = null;
 var pressedObject = null;
 var display = belle.display;
@@ -40,12 +40,13 @@ if (window.addEventListener)
 else if (window.attachEvent)
   window.attachEvent('resize', resize);
 
-function mapToCanvas(event)
+function mapToDisplay(event)
 {
+    if (! container.length)
+        container = $("#belle");
     var x;
     var y;
-    
-    var IE = document.all ? true : false; // check to see if you're using IE
+    var IE = document.all ? true : false; // check to see if using IE
 
     if (IE) { //do if internet explorer 
         x = event.clientX + document.body.scrollLeft;
@@ -56,11 +57,18 @@ function mapToCanvas(event)
         y = (window.Event) ? event.pageY : event.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
     }
 
-    var marginLeft = parseInt(container.style.left, 10);
-    var marginTop = parseInt(container.style.top, 10);
+    var offset = container.offset();
+    var width = container.width();
+    var height = container.height();
+    x -= offset.left;
+    y -= offset.top;
+    event.canvasX = x;
+    event.canvasY = y;
     
-    event.canvasX = x - marginLeft;
-    event.canvasY = y - marginTop;
+    if (x < 0 || y < 0 || x > width || y > height)
+        return false;
+    
+    return true;
 }
 
 document.onmousemove = function(event)
@@ -72,7 +80,8 @@ document.onmousemove = function(event)
       return;
 
     var ev = event || window.Event || window.event;
-    mapToCanvas(ev);
+    if (! mapToDisplay(ev))
+        return;
     
     var prevHoveredObject = hoveredObject;
     hoveredObject = null;
@@ -95,9 +104,10 @@ document.onmouseup = function(event)
     var ev = event || window.Event || window.event;
     var processed = false;
     var game = belle.game;
-
+    if (! mapToDisplay(ev))
+        return;
+    
     if (pressedObject && hoveredObject == pressedObject) {
-        mapToCanvas(ev);
         if (hoveredObject.processEvent(ev))
             processed = true;
     }
@@ -113,7 +123,7 @@ document.onmousedown = function(event)
     pressedObject = hoveredObject;
     
     if (hoveredObject) {
-        mapToCanvas(event);
+        mapToDisplay(event);
         hoveredObject.processEvent(ev)
     }
 }
