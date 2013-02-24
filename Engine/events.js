@@ -49,8 +49,10 @@ function mapToDisplay(event)
     var IE = document.all ? true : false; // check to see if using IE
 
     if (IE) { //do if internet explorer 
-        x = event.clientX + document.body.scrollLeft;
-        y = event.clientY + document.body.scrollTop;
+        var scrollLeft = document.documentElement ? document.documentElement.scrollLeft :document.body.scrollLeft;
+        x = event.clientX + scrollLeft;
+        var scrollTop = document.documentElement ? document.documentElement.scrollTop :document.body.scrollTop;
+        y = event.clientY + scrollTop;
     }
     else {  //do for all other browsers
         x = (window.Event) ? event.pageX : event.clientX + (document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft);
@@ -79,7 +81,7 @@ document.onmousemove = function(event)
     if (! game.currentScene)
       return;
 
-    var ev = event || window.Event || window.event;
+    var ev = event || window.event || window.Event;
     if (! mapToDisplay(ev))
         return;
     
@@ -101,7 +103,7 @@ document.onmousemove = function(event)
 
 document.onmouseup = function(event)
 {
-    var ev = event || window.Event || window.event;
+    var ev = event || window.event || window.Event;
     var processed = false;
     var game = belle.game;
     if (! mapToDisplay(ev))
@@ -118,7 +120,7 @@ document.onmouseup = function(event)
 
 document.onmousedown = function(event) 
 {
-    var ev = event || window.Event || window.event;
+    var ev = event || window.event || window.Event;
     
     pressedObject = hoveredObject;
     
@@ -130,7 +132,7 @@ document.onmousedown = function(event)
 
 document.onkeyup = function(event) 
 {
-    var ev = event || window.Event || window.event;
+    var ev = event || window.event || window.Event;
     var game = belle.game;
         
     switch(ev.keyCode) {
@@ -140,6 +142,9 @@ document.onkeyup = function(event)
                 game.currentAction.skip();
     }
 }
+if (document.body)
+document.body.onkeyup = document.onkeyup;
+
 
 }(EventDispatcher));
 
