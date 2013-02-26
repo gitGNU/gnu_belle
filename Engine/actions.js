@@ -1074,10 +1074,13 @@ function PlaySound(data)
     
     if ( "sound" in data) {
         this.soundPath = belle.game.directory + data["sound"];
-        var fileParts = this.soundPath.split(".");
-        this.soundName = fileParts[fileParts.length-2];
-        if (! this.soundName)
-          this.soundName = this.soundPath;
+        this.soundName = this.soundPath;
+        if (this.soundPath.indexOf("/") !== -1) {
+            var parts = this.soundPath.split("/");
+            this.soundName = parts[parts.length-1];
+        }
+        if (this.soundName.indexOf(".") !== -1)
+            this.soundName = this.soundName.split(".")[0];
     }
     
     if ("loop" in data) {
@@ -1105,7 +1108,7 @@ PlaySound.prototype.execute = function()
     }
     
     this.sound = new buzz.sound(this.soundPath);
-    //sound.setVolume(this.volume);
+    this.sound.setVolume(this.volume);
     
     if (this.loop)
         this.sound.play().loop();
