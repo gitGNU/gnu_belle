@@ -446,14 +446,14 @@ function Wait(data)
 {
     Action.call(this, data);
     
-    this.skippable = false;
-    
     if ( "time" in data)
         this.time = data["time"] * 1000;
     if ("waitType" in data) {
         this.waitType = data["waitType"];
         if (this.waitType == "MouseClick")
             this.skippable = true;
+        else if (this.waitType == "Forever")
+            this.skippable = false;
     }
     this.needsRedraw = false;
 }
@@ -1142,7 +1142,7 @@ function StopSound(data)
         this.soundPath = data["sound"];
     
     if ("fade" in data && typeof data["fade"] === "number") 
-        this.fade = data["fade"];
+        this.fade = data["fade"] * 1000;
         
 }
 
