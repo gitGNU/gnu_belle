@@ -44,10 +44,12 @@ if (typeof String.prototype.contains != 'function')
     };
 }
 
-if(! String.prototype.trim) {  
-  String.prototype.trim = function () {  
-    return this.replace(/^\s+|\s+$/g,'');  
-  };  
+if (typeof String.prototype.trim != 'function') 
+{
+    String.prototype.trim =  function(){
+        return this.replace(/^\s+|\s+$/g, '');
+        
+    };
 }
 
 if (typeof String.prototype.isDigit != 'function') 
@@ -58,12 +60,20 @@ if (typeof String.prototype.isDigit != 'function')
     };
 }
 
+if (typeof String.prototype.hasBreakPointAt != 'function') 
+{
+    String.prototype.hasBreakPointAt = function(i) { 
+        return this[i] == " " || this[i] == "\n"; 
+    };
+}
+
 if (typeof Array.prototype.contains != 'function') 
 {
     Array.prototype.contains = function(text) { 
         return this.indexOf(text) != -1; 
     };
 }
+
 
 var belle = belle || {};
 belle.utils = {};
@@ -129,11 +139,9 @@ utils.textSize = function(text, font)
         dummy = document.getElementById("dummy");
 
     dummy.style.font = font;
-    var textNode = dummy.childNodes[0];
-    textNode.nodeValue = text;
+    dummy.innerHTML = text;
     
     size.push(dummy.offsetWidth);
-    textNode.nodeValue = "ABCDEFGHIJKLMNOPQRSTUVXWYZ0123456789";
     size.push(dummy.offsetHeight);
 
     return size;
@@ -147,12 +155,11 @@ utils.textWidth = function(text, font)
     if (! dummy)
       dummy = document.getElementById("dummy");
     dummy.style.font = font;
-    var textNode = dummy.childNodes[0];
-    textNode.nodeValue = text;
+    dummy.innerHTML = text;
     return dummy.offsetWidth;
 }
 
-utils.splitText = function(font, text, maxWidth) 
+utils.splitText = function(text, font, maxWidth) 
 {
     if (! text)
         return [];
@@ -160,15 +167,12 @@ utils.splitText = function(font, text, maxWidth)
     if (! dummy)
         dummy = document.getElementById("dummy");
     dummy.style.font = font;
-    var textNode = dummy.childNodes[0];
-    textNode.nodeValue = text;
-
-    var width = 0;
+    dummy.innerHTML = text;
+    var width = dummy.offsetWidth;
     maxWidth -= 4;
-   
-    width = dummy.offsetWidth;
+    text = text.trim();
     
-    if ( width > maxWidth || text.contains("\n")) {
+    if (width > maxWidth || text.contains("\n")) {
         var breaks = Math.ceil(width / maxWidth);
         var textSplitted = [];
         var textsize = Math.floor(text.length / breaks);
@@ -179,34 +183,41 @@ utils.splitText = function(font, text, maxWidth)
         var breakLine = false;
         
         for(; j < textLength;) { 
-
+            
             txt = text.substr(j, textsize);
             if (txt.indexOf("\n") !== -1) {
-               txt = text.substring(j, text.indexOf("\n"));
-               j = text.indexOf("\n")+1;
+               txt = txt.substring(0, txt.indexOf("\n"));
+               j++;
                breakLine = true;
             }
-            else
-                j += textsize;
-        
-            textNode.nodeValue = txt;
+            j += txt.length;
             
-            //test if that text really fits in a line and correct it if it doesn't
+            //fix split words
+            if (j < textLength && j+1 < textLength && ! text.hasBreakPointAt(j) && ! text.hasBreakPointAt(j+1))
+                while(j < textLength && ! text.hasBreakPointAt(j)) {
+                    txt += text[j];
+                    j++;
+                }
+                
+            dummy.innerHTML = txt;
+            
+            //test if the text really fits in a line and correct it if it doesn't
             if (! breakLine && dummy.offsetWidth < maxWidth){        
                 while(dummy.offsetWidth < maxWidth && j < textLength) {
                     txt += text[j];
-                    textNode.nodeValue = txt;
+                    dummy.innerHTML = txt;
                     j++;
                 }
-                if (j == textLength)
-                    j = textLength - 1;
             }
             
-            if (dummy.offsetWidth > maxWidth) {
-                while(j > 0 && (dummy.offsetWidth > maxWidth || (text[j] != " " && text[j] != "\n")) ) {
-                    txt = txt.substr(0, txt.length-1);
-                    textNode.nodeValue = txt;
-                    j--;
+            if (dummy.offsetWidth >= maxWidth) {
+                var txtLength = txt.length;
+                i = txt.length - 1;
+                while(i > 0 && (dummy.offsetWidth >= maxWidth || ! txt.hasBreakPointAt(i))) {
+                    txt = txt.substring(0, i);
+                    dummy.innerHTML = txt;
+                    --i;
+                    --j;
                 }
             }
 
