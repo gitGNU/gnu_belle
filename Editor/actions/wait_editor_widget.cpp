@@ -26,11 +26,11 @@ WaitEditorWidget::WaitEditorWidget(QWidget *parent) :
     mWaitTypeWidget->addItem(tr("Until mouse button is clicked"));
     mWaitTypeWidget->addItem(tr("Forever"));
 
-
     mSkipBox = new QCheckBox(this);
     mTimeSpin = new QDoubleSpinBox(this);
     mTimeSpin->setValue(1);
     mTimeSpin->setSingleStep(0.1);
+    mTimeSpin->setMaximum(3600);
 
     beginGroup(tr("Wait"));
     appendRow(tr("Type"), mWaitTypeWidget);
@@ -49,12 +49,18 @@ WaitEditorWidget::WaitEditorWidget(QWidget *parent) :
 
 void WaitEditorWidget::updateData(Action * action)
 {
-    mCurrentAction = qobject_cast<Wait*>(action);
-    if (! mCurrentAction)
+    if (action == mCurrentAction)
         return;
+    Wait* waitAction = qobject_cast<Wait*>(action);
+    if (! waitAction)
+        return;
+    mCurrentAction = 0; //updating widgets could mess up current action's data
 
-    mWaitTypeWidget->setCurrentIndex(mCurrentAction->waitType());
+    mWaitTypeWidget->setCurrentIndex(waitAction->waitType());
     updateWidgets(mWaitTypeWidget->currentIndex());
+    mTimeSpin->setValue(waitAction->time());
+    mSkipBox->setChecked(waitAction->allowSkipping());
+    mCurrentAction = waitAction;
 }
 
 void WaitEditorWidget::onCurrentIndexChanged(int index)
