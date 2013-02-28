@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 Carlos Pais 
+/* Copyright (C) 2012, 2013 Carlos Pais 
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -334,10 +334,12 @@ var removeObjects = function(scene)
 
 var addObjects = function(scene)
 {
+    
     if (! display.usingDOM)
         return;
     var container = document.getElementById("belle");
     var objects = scene.objects;
+    
     addObject(scene);
     for(var j=0; j < objects.length; j++){
         addObject(objects[j], container);
@@ -382,7 +384,6 @@ var updateLoading = function()
     if (! loader)
         return;
   
-    container = container || $("#belle");
     var cwidth = container.width();
     var cheight = container.height();
     var width = loader.width();
@@ -394,7 +395,6 @@ var updateLoading = function()
     }
     
     var left = parseInt(progress.css("left"));
-    var width = loader.width();
     var staticBarWidth = loader.staticBarWidth;
   
     progress.width(staticBarWidth);
@@ -404,7 +404,6 @@ var updateLoading = function()
     left += 20;
     progress.css("left", left);
   
-
   if (loader.running)
     setTimeout(updateLoading, 50);
 }
@@ -434,6 +433,7 @@ var loading = function()
     loader.width("40%");
     loader.height("5%");
     loader.staticBarWidth = barWidth / 3;
+    progress.width(loader.staticBarWidth);
     loader.running = true;
     loader.containerWidth = cwidth;
     loader.containerHeight = cheight;    

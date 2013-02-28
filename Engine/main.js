@@ -197,7 +197,7 @@ window.onload = function () {
         return;
     }
   
-    load();
+    //load();
 }
 
 function initializeData(data)
@@ -206,7 +206,7 @@ function initializeData(data)
     var objName;
     
     for (var member in data ) {
-        if ( member == "resources" || member == "scenes")
+        if (member == "resources" || member == "scenes")
             continue;
         
         game[member] = data[member];
@@ -218,7 +218,6 @@ function initializeData(data)
         game.textSpeed = 100;
     
     game.textDelay = 1000 / game.textSpeed;
-    
     document.title = "Belle - " + game.title;
 
     //init resources
@@ -316,7 +315,7 @@ function isgameDataReady() {
             break;
         }
     }*/
-
+    
     for(var name in game.resources) {
         if (! resources[name].isReady()) {
             ready = false;
@@ -430,6 +429,7 @@ function gameLoop ()
 //Expose public properties
 belle.setGameFile = setGameFile;
 belle.setGameDirectory = setGameDirectory;
+belle.load = load;
 belle.addObject = addObject;
 belle.createObject = createObject;
 belle.getObject = getObject;

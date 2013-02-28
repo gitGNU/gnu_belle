@@ -21,6 +21,16 @@
     <title>Belle Engine</title>
     <link rel="stylesheet" type="text/css" href="style.css"/>
     <link rel="stylesheet" type="text/css" href="fontfaces.css"/>
+    <script>
+        var _load = function() {
+            belle.load();
+        }
+        if (window.addEventListener) 
+            window.addEventListener('load', _load, false);
+        else if (window.attachEvent)
+            window.attachEvent('load', _load);
+
+    </script>
   </head>
   <body>
     <meta name = "viewport" content = "user-scalable=no,
@@ -35,7 +45,7 @@
         <div id="loader">
             <div id="progress">
             </div>
-            <p id="text">LOADING</p>
+            <p id="text"></p>
         </div>
     </div>
 
