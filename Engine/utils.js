@@ -265,6 +265,7 @@ utils.initElement = function (element, info)
     else
         element.style.height = info.height + "px";
     element.style.display = "none";
+    element.style.filter = "inherit";
 }
 
 utils.importFile = function(url, callback, async, mimeType)
