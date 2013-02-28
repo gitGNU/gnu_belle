@@ -364,7 +364,6 @@ Object.prototype.setBackgroundColor = function(color)
     if (this.backgroundElement)
         this.backgroundElement.style.backgroundColor = color.toHex();
     this.setBackgroundOpacity(color.alpha);
-    
 }
 
 Object.prototype.setColor = function (color)
@@ -730,22 +729,25 @@ belle.utils.extend(Image, Character);
 function TextBox(info)
 {
     Object.call(this, info);
-    this.textLeftPadding = 0;
-    this.textTopPadding = 0;
+    this.textLeftPadding = [];
+    this.textTopPadding = [];
     this.textAlignment = [];
+    this.textParts = [];
     this.textElement = document.createElement("div");
     belle.utils.initElement(this.textElement, info);
     this.textElement.style.display = "block";
     this.element.appendChild(this.textElement);
     this.font = belle.game.font;
+    this.prevText = "";
+    this.displayedText = "";
+    this.textHeight = 0;
     
-    if ("font" in info) {
+    if ("font" in info) 
         this.font = info["font"];
-        this.textElement.style.font = this.font;
-    }
+    this.textElement.style.font = this.font;
         
     if ("text" in info)
-        this.text = info["text"];
+        this.setText(info["text"]);
     
     if ("textColor" in info)
         this.setTextColor(info["textColor"]);
@@ -757,14 +759,7 @@ function TextBox(info)
         }*/
     }
     
-    this.prevText = "";
-    this.textParts = [];
-    this.displayedText = "";
-    this.textHeight = 0;
-    this.textWidth = belle.utils.textWidth(this.displayedText, this.font);
-    this.alignText();
-    var textNode = document.createTextNode(belle.replaceVariables(this.text));
-    this.textElement.appendChild(textNode);
+    //this.textWidth = belle.utils.textWidth(this.displayedText, this.font);
 }
 
 belle.utils.extend(Object, TextBox);
@@ -794,12 +789,11 @@ TextBox.prototype.paint = function(context)
     
     var text = belle.replaceVariables(this.text);
     if (text != this.displayedText)
-      this.textParts = belle.utils.splitText(context.font, text, width);
+        this.alignText();
     this.displayedText = text;
 
     for (var i=this.textParts.length-1; i !== -1; --i) {
-        this.alignText(this.textParts[i]);
-        context.fillText(this.textParts[i], x+this.textLeftPadding, y+this.textTopPadding+this.heightOffset*(i+1), this.width);
+        context.fillText(this.textParts[i], x+this.textLeftPadding[i], y+this.textTopPadding[i], this.width);
     }
     
     context.restore();
@@ -811,46 +805,72 @@ TextBox.prototype.paint = function(context)
 
 TextBox.prototype.alignText = function(text, size)
 {
+    if (! text && ! this.text)
+        return;
     if (! text)
-        text = this.text;
-    if (! size)
-        size = belle.utils.textSize(text, this.font);
+        text = belle.replaceVariables(this.text);
     
-    var width = size[0];
-    var height = size[1];
-    
-    this.heightOffset = height / 1.2;
-    
-    if (text && this.textAlignment) {
-        if (width < this.width) {
-            if (this.textAlignment.contains("HCenter")) {
-                this.textLeftPadding = (this.width - width) / 2;
-                if (this.textElement)
-                    this.textElement.style.textAlign = 'center'; 
-            }
-            else if (this.textAlignment.contains("Right")) {
-                this.textLeftPadding = (this.width - width);
-                if (this.textElement)
-                    this.textElement.style.textAlign = 'right';                
-            }
-            else
-                this.textLeftPadding = 0;
-        }
+    if (belle.display.usingDOM && this.textElement) {
+        text = text.replace("\n", "<br/>");
+        if (this.textAlignment.contains("HCenter"))
+            this.textElement.style.textAlign = "center";
+        else if (this.textAlignment.contains("Right"))
+            this.textElement.style.textAlign = "right";  
+        else
+            this.textElement.style.textAlign = "left"; 
+        
+        var size = belle.utils.textSize(text, this.font);
+        var height = size[1];
         
         if (height < this.height) {
-            if (this.textAlignment.contains("VCenter")) {
-                this.textTopPadding = (this.height - height) / 2;
-                if (this.textElement)
-                    this.textElement.style.marginTop = this.textTopPadding + "px";
-                
+            var topOffset = 0;
+            if (this.textAlignment.contains("VCenter"))
+                topOffset = (this.height - height) / 2;
+            else if (this.textAlignment.contains("Bottom"))
+                topOffset = this.height - height;
+            topOffset = topOffset > 0 ? Math.round(topOffset) : 0;
+            
+            this.textElement.style.top = topOffset + "px";
+        }
+    }
+    else {    
+        this.textParts = belle.utils.splitText(text, this.font, this.width);
+        this.textLeftPadding.length = 0;
+        this.textTopPadding.length = 0;
+        var sumHeight = 0;
+        
+        for (var i=0; i < this.textParts.length; i++) {
+            var size = belle.utils.textSize(this.textParts[i], this.font);
+            var width = size[0];
+            var height = size[1] / 1.2;
+            var leftPadding = 0;
+            sumHeight += height;
+            this.textTopPadding.push(sumHeight);
+
+            if (this.textAlignment) {
+                if (width < this.width) {
+                    if (this.textAlignment.contains("HCenter")) {
+                        leftPadding = (this.width - width) / 2;
+                    }
+                    else if (this.textAlignment.contains("Right")) {
+                        leftPadding = this.width - width;
+                    }
+                }
             }
-            else if (this.textAlignment.contains("Bottom")) {
-                this.textTopPadding = (this.height - height);
-                if (this.textElement)
-                    this.textElement.style.marginTop = this.textTopPadding + "px";
-            }
-            else
-                this.textTopPadding = 0;
+            
+            this.textLeftPadding.push(leftPadding);
+        }
+        
+        if (sumHeight < this.height) {
+            var topOffset = 0;
+            if (this.textAlignment.contains("VCenter")) 
+                topOffset = (this.height - sumHeight) / 2;
+            else if (this.textAlignment.contains("Bottom"))
+                topOffset = this.height - sumHeight;
+            topOffset = topOffset > 0 ? topOffset : 0;
+            
+            for(var i=0; i < this.textTopPadding.length; i++)
+                this.textTopPadding[i] += topOffset;
         }
     }
 }
@@ -887,7 +907,8 @@ TextBox.prototype.setText = function(text)
 {
     if (this.text != text) {
         this.text = text;
-        this.element.childNodes[1].childNodes[0].nodeValue = belle.replaceVariables(text.replace("\n", "<br/>"));
+        this.textElement.innerHTML = belle.replaceVariables(text.replace("\n", "<br/>"));
+        this.alignText();
         this.redraw = true;
     }
 }
@@ -941,13 +962,13 @@ function ObjectGroup(data)
             var elemTop = parseInt(obj.element.style.top);
             obj.y = elemTop - top;
             
-            if (belle.display.usingDOM) {
+            //if (belle.display.usingDOM) {
                 obj.element.style.display = "block";
                 obj.element.style.left = obj.x + "px";
                 //temporary hack in DOM mode to fix top/y value
                 obj.element.style.top = obj.y + "px";
                 this.element.appendChild(obj.element);
-            }
+            //}
             
             this.objects.push(obj);
         }
