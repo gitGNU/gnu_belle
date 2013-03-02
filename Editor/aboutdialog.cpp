@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 Carlos Pais 
+/* Copyright (C) 2012, 2013 Carlos Pais 
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,9 @@ AboutDialog::AboutDialog(QWidget *parent) :
 {
     mUi.setupUi(this);
 
-    QString desc = tr("Belle is a cross-platform Visual Novel maker, using Qt4 for the editor and HTML5 for the engine.");
+    QString desc = tr("Belle is a cross-platform visual novel maker, using Qt4 for the editor and HTML5 for the engine.");
     QString copyright = "Copyright &copy; 2012 Carlos Pais";
-    QString version = "Belle 0.2 alpha";
+    QString version = "Belle 0.3 alpha";
 
     QString fullDesc = QString("<p><b>%1</b></p><p>%2</p><p>%3</p>").arg(version).arg(desc).arg(copyright);
 
@@ -59,8 +59,8 @@ AboutDialog::AboutDialog(QWidget *parent) :
                 << "Carlos Pais <freemind@lavabit.com>"
                 << ""
                 << "Thanks to:"
-                << "Qt4 Libraries <http://qt.nokia.com/products/>"
-                << "Eeli Reilin, Luis Gustavo S., Stephen Kockentiedt <https://github.com/jmullen/qt-json>";
+                << "Qt4 Libraries <http://qt-project.org/>"
+                << "Eeli Reilin, Luis Gustavo S., Stephen Kockentiedt <https://github.com/ereilin/qt-json>";
 
     mUi.creditsEdit->setText(thanksTo.join("\n"));
 
