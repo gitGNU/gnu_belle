@@ -89,6 +89,7 @@ class DrawingSurfaceWidget : public QWidget
         void onEditObjectTriggered();
         void onCancelEditObjectTriggered();
         void onResize(const QResizeEvent&);
+        void onObjectDestroyed();
 
    private:
         void performOperation(Clipboard::Operation);

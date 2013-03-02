@@ -135,10 +135,14 @@ void DrawingSurfaceWidget::paintObject(QPaintDevice * paintDevice)
 
 void DrawingSurfaceWidget::setObject(Object* obj)
 {
+    if (mObject)
+        mObject->disconnect(this);
+
     mObject = obj;
     if (mObject) {
         adjustSize();
         update();
+        connect(mObject, SIGNAL(destroyed()), this, SLOT(onObjectDestroyed()));
     }
     else {
         setFixedSize(QSize(Scene::width(), Scene::height()));
@@ -507,4 +511,10 @@ Object* DrawingSurfaceWidget::selectedObject()
     else if (mSceneManager && mSceneManager->currentScene())
        return mSceneManager->currentScene()->selectedObject();
     return 0;
+}
+
+void DrawingSurfaceWidget::onObjectDestroyed()
+{
+    mObject = 0;
+    setObject(0);
 }
