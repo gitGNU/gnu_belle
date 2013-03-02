@@ -206,12 +206,11 @@ void DrawingSurfaceWidget::mousePressEvent ( QMouseEvent * event )
         object = mSceneManager->currentScene()->selectedObject();
     }
 
-    if (mCanMove) {
+    if (mCanResize)
+        mResizing = true;
+    else if (mCanMove) {
         setCursor(Qt::ClosedHandCursor);
         mMoving = true;
-    }
-    else if (mCanResize) {
-        mResizing = true;
     }
 
     emit selectionChanged(object);
@@ -253,8 +252,9 @@ void DrawingSurfaceWidget::mouseMoveEvent( QMouseEvent * event)
 
     //if moving or resizing an object
     if (object && (mResizing || mMoving)) {
-        if (mResizing)
+        if (mResizing) {
             object->resize(x, y);
+        }
         else if (mMoving)
             object->dragMove(x, y);
         update();
