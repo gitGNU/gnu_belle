@@ -37,6 +37,8 @@ StopSound::StopSound(const QVariantMap& data,QObject *parent) :
 
     if (data.contains("sound") && data.value("sound").type() == QVariant::String)
         setSound(data.value("sound").toString());
+    if (data.contains("fadeTime") && data.value("fadeTime").type() == QVariant::Double)
+        setFadeTime(data.value("fadeTime").toDouble());
 }
 
 void StopSound::init()
@@ -65,7 +67,7 @@ ActionEditorWidget* StopSound::editorWidget()
 
 void StopSound::setSound(const QString & name)
 {
-    Scene* scene = SceneManager::currentScene();
+    Scene* scene = this->scene();
     if (! scene)
         return;
 
