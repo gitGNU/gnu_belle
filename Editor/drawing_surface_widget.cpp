@@ -267,12 +267,12 @@ void DrawingSurfaceWidget::mouseMoveEvent( QMouseEvent * event)
 
     //get hovered object at x, y, if any
     object = objectAt(x, y);
+    mCanMove = false;
+    mCanResize = false;
 
     if (! object) {
         if (cursor().shape() != Qt::ArrowCursor)
             setCursor(Qt::ArrowCursor);
-        mCanMove = false;
-        mCanResize = false;
         return;
     }
 
