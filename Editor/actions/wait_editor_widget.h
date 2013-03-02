@@ -47,6 +47,7 @@ public slots:
 private slots:
     void onCurrentIndexChanged(int);
     void onTimeChanged(double);
+    void onSkipBoxClicked(bool);
 
 private:
     void updateWidgets(int);

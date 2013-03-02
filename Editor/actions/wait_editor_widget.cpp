@@ -44,7 +44,7 @@ WaitEditorWidget::WaitEditorWidget(QWidget *parent) :
 
     connect(mWaitTypeWidget, SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentIndexChanged(int)));
     connect(mTimeSpin, SIGNAL(valueChanged(double)), this, SLOT(onTimeChanged(double)));
-
+    connect(mSkipBox, SIGNAL(clicked(bool)), this, SLOT(onSkipBoxClicked(bool)));
 }
 
 void WaitEditorWidget::updateData(Action * action)
@@ -89,4 +89,10 @@ void WaitEditorWidget::updateWidgets(int index)
 
     mSkipBox->setEnabled(enabled);
     mTimeSpin->setEnabled(enabled);
+}
+
+void WaitEditorWidget::onSkipBoxClicked(bool clicked)
+{
+    if (mCurrentAction)
+        mCurrentAction->setAllowSkipping(clicked);
 }

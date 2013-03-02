@@ -111,6 +111,11 @@ bool Action::allowSkipping() const
     return mAllowSkipping;
 }
 
+void Action::setAllowSkipping(bool skip)
+{
+    mAllowSkipping = skip;
+}
+
 Action* Action::newAction(QObject *parent)
 {
     return new Action(parent);
