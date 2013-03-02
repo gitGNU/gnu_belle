@@ -55,8 +55,18 @@ void ChooseFileButton::onClick()
 {
     if (! mFilePath.isEmpty()) {
         QMessageBox msgBox(QMessageBox::NoIcon, tr("What do you want to do?"), "");
-        QPushButton * chooseButton = new QPushButton(tr("Choose new image"), &msgBox);
-        QPushButton * removeButton = new QPushButton(tr("Remove current image"), &msgBox);
+        QPushButton * chooseButton;
+        QPushButton * removeButton;
+
+        if (mActiveFilter == ImageFilter) {
+            chooseButton = new QPushButton(tr("Choose new image"), &msgBox);
+            removeButton = new QPushButton(tr("Remove current image"), &msgBox);
+        }
+        else {
+            chooseButton = new QPushButton(tr("Choose new sound"), &msgBox);
+            removeButton = new QPushButton(tr("Remove current sound"), &msgBox);
+        }
+
         msgBox.addButton(chooseButton, QMessageBox::AcceptRole);
         msgBox.addButton(removeButton, QMessageBox::ResetRole);
         msgBox.addButton(QMessageBox::Cancel);
@@ -112,7 +122,6 @@ void ChooseFileButton::setFilePath(const QString & path)
     if (mActiveFilter == ImageFilter) {
         setIcon(QIcon(mFilePath));
     }
-
 }
 
 bool ChooseFileButton::hasValidFile()
