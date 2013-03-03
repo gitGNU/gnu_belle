@@ -281,18 +281,20 @@ void Scene::fillWidth()
 void Scene::setBackgroundImage(const QString & path)
 {
     AnimationImage* image = ResourceManager::newImage(path);
-    QPixmap* pixmap = image->pixmap();
 
     if (mBackgroundImage != image) {
         if (mBackgroundImage && mBackgroundImage->movie())
             mBackgroundImage->movie()->disconnect(this);
         ResourceManager::decrementReference(mBackgroundImage);
 
-        if (pixmap)
-            *pixmap = pixmap->scaled(Scene::size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        if (image->movie()) {
-            connect(image->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
-            image->movie()->start();
+        if (image) {
+            QPixmap* pixmap = image->pixmap();
+            if (pixmap)
+                *pixmap = pixmap->scaled(Scene::size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+            if (image->movie()) {
+                connect(image->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
+                image->movie()->start();
+            }
         }
 
         mBackgroundImage = image;
