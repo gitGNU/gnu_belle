@@ -74,9 +74,7 @@ void ChooseFileButton::onClick()
         msgBox.exec();
 
         if (msgBox.clickedButton() == removeButton) {
-            mFilePath = "";
-            setIcon(QIcon());
-            setText(tr("No file selected"));
+            setFilePath("");
             emit fileSelected("");
         }
 
@@ -84,20 +82,19 @@ void ChooseFileButton::onClick()
             return;
     }
 
-    mFilePath = QFileDialog::getOpenFileName(this, tr("Choose File"),
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Choose File"),
                                        QDir::currentPath(),
                                        mFilters);
 
-    if (! mFilePath.isEmpty()) {
-        QFileInfo info(mFilePath);
+    if (! filePath.isEmpty()) {
+        QFileInfo info(filePath);
         if (mActiveFilter == ImageFilter && mImageExtensions.contains(info.suffix())) {
-            //setToolTip(QString("<img src=\"%1\"></img>").arg(mFilePath));
-            emit fileSelected(mFilePath);
-            setFilePath(mFilePath);
+            emit fileSelected(filePath);
+            setFilePath(filePath);
         }
         else if (mActiveFilter == SoundFilter && mSoundExtensions.contains(info.suffix())) {
-            emit fileSelected(mFilePath);
-            setFilePath(mFilePath);
+            emit fileSelected(filePath);
+            setFilePath(filePath);
         }
     }
 }
@@ -115,12 +112,14 @@ void ChooseFileButton::setFilePath(const QString & path)
     mFilePath = path;
     QFileInfo file(mFilePath);
 
-    if (file.exists())
+    if (file.exists()) {
         setText(file.fileName());
-    else
+        if (mActiveFilter == ImageFilter)
+            setIcon(QIcon(mFilePath));
+    }
+    else {
         setText(tr("No File Selected"));
-    if (mActiveFilter == ImageFilter) {
-        setIcon(QIcon(mFilePath));
+        setIcon(QIcon());
     }
 }
 
