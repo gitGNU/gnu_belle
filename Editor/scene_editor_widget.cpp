@@ -37,12 +37,13 @@ SceneEditorWidget::SceneEditorWidget(QWidget *parent) :
 
 void SceneEditorWidget::updateData(Scene * scene)
 {
-    mCurrentScene = scene;
-    if (! mCurrentScene)
+    if (mCurrentScene == scene || ! scene)
         return;
 
+    mCurrentScene = 0;
     mChooseBackgroundButton->setFilePath(scene->backgroundPath());
     mChooseBackgroundColorButton->setColor(scene->backgroundColor());
+    mCurrentScene = scene;
 }
 
 void SceneEditorWidget::onBackgroundSelected(const QString & path)
