@@ -20,7 +20,7 @@
 
 #include "utils.h"
 
-static QSize mSize;
+static QSize mSceneSize;
 static int mCurrentSceneIndex = -1;
 static QList<Scene*> mScenes = QList<Scene*>();
 static Clipboard *mClipboard = 0;
@@ -244,20 +244,29 @@ SceneManager* SceneManager::instance()
 
 void SceneManager::setSceneWidth(int width)
 {
-    emit resized(QResizeEvent(QSize(width, mSize.height()), mSize));
     Scene::setWidth(width);
-    mSize.setWidth(width);
+    mSceneSize.setWidth(width);
+    int height = Scene::height();
+    for(int i=0; i < mScenes.size(); i++) {
+        mScenes[i]->resize(width, height);
+    }
+    emit resized(QResizeEvent(QSize(width, mSceneSize.height()), mSceneSize));
 }
 
 void SceneManager::setSceneHeight(int height)
 {
-    emit resized(QResizeEvent(QSize(mSize.width(), height), mSize));
     Scene::setHeight(height);
-    mSize.setHeight(height);
+    mSceneSize.setHeight(height);
+    int width = Scene::width();
+    for(int i=0; i < mScenes.size(); i++)
+        mScenes[i]->resize(width, height);
+    emit resized(QResizeEvent(QSize(mSceneSize.width(), height), mSceneSize));
 }
 
 void SceneManager::setSceneSize(const QSize& size)
 {
-    emit resized(QResizeEvent(size, mSize));
-    mSize = size;
+    mSceneSize = size;
+    for(int i=0; i < mScenes.size(); i++)
+        mScenes[i]->resize(size.width(), size.height());
+    emit resized(QResizeEvent(size, mSceneSize));
 }

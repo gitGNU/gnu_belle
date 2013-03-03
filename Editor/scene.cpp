@@ -660,3 +660,12 @@ void Scene::paint(QPainter & painter)
     }
 }
 
+void Scene::resize(int w, int h)
+{
+    if (mBackgroundImage && mBackgroundImage->pixmap()) {
+        QPixmap* pixmap = mBackgroundImage->pixmap();
+        if (pixmap)
+            *pixmap = pixmap->scaled(w, h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
+}
+

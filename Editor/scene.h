@@ -91,6 +91,7 @@ class Scene : public QObject
         Scene * copy();
         bool isValidObjectName(const QString&);
         QString newObjectName(QString);
+        void resize(int, int);
 
         void insertAction(int, Action*);
         void setActions(const QList<Action*>&);
