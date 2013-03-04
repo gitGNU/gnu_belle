@@ -32,7 +32,6 @@ SimpleHttpServer::SimpleHttpServer(const QString& address, int port, const QStri
     mMimetypes.insert("svg", "image/svg+xml");
     mMimetypes.insert("tiff", "image/tiff");
 
-
     connect(this, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
 }
 
@@ -85,11 +84,10 @@ void SimpleHttpServer::readClient()
             socket->write(header.join("").toAscii());
             if (data.size())
                 socket->write(data);
-            socket->close();
+            socket->disconnectFromHost();
 
-            if (socket->state() == QTcpSocket::UnconnectedState) {
-                delete socket;
-            }
+            if (socket->state() == QTcpSocket::UnconnectedState)
+                socket->deleteLater();
         }
     }
 }
