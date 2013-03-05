@@ -175,7 +175,6 @@ Belle::Belle(QWidget *widget)
 
 
     //connect actions' signals with the respective slots
-    connect(mUi.exportGameFileAction, SIGNAL(triggered()), this, SLOT(exportGameFile()));
     connect(mUi.openProjectAction, SIGNAL(triggered()), this, SLOT(openFileOrProject()));
     connect(mUi.aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
     connect(mUi.exportProject, SIGNAL(triggered()), this, SLOT(exportProject()));

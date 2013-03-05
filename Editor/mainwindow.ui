@@ -36,7 +36,6 @@
      <string>File</string>
     </property>
     <addaction name="openProjectAction"/>
-    <addaction name="exportGameFileAction"/>
     <addaction name="exportProject"/>
     <addaction name="quitAction"/>
    </widget>
@@ -325,15 +324,6 @@
    </attribute>
    <addaction name="runAction"/>
   </widget>
-  <action name="exportGameFileAction">
-   <property name="icon">
-    <iconset resource="media.qrc">
-     <normaloff>:/media/document_export.png</normaloff>:/media/document_export.png</iconset>
-   </property>
-   <property name="text">
-    <string>Export Game File</string>
-   </property>
-  </action>
   <action name="runAction">
    <property name="icon">
     <iconset resource="media.qrc">
@@ -349,7 +339,7 @@
      <normaloff>:/media/document_open.png</normaloff>:/media/document_open.png</iconset>
    </property>
    <property name="text">
-    <string>Open Game File</string>
+    <string>Open Project</string>
    </property>
   </action>
   <action name="propertiesAction">
