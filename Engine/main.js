@@ -219,7 +219,10 @@ function initializeData(data)
     
     game.textDelay = 1000 / game.textSpeed;
     document.title = "Belle - " + game.title;
-
+    
+    if ("display" in data && data["display"] == "DOM")
+        belle.display.usingDOM = true;
+    
     //init resources
     if (data["resources"]) {
         var resources = data["resources"];
