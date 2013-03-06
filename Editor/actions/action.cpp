@@ -71,7 +71,7 @@ void Action::init()
 {
     mObject = 0;
     mActive = false;
-    mAllowSkipping = false;
+    mAllowSkipping = true;
     mMouseClickOnFinish = false;
     mSupportedEvents = Interaction::None;
     setType(Info.type);
@@ -228,7 +228,7 @@ QVariantMap Action::toJsonObject()
         action.insert("name", objectName());
 
     action.insert("type", mType);
-    if (mAllowSkipping)
+    if (! mAllowSkipping) //this property is true by default
         action.insert("skippable", mAllowSkipping);
     if (mMouseClickOnFinish) {
         Wait wait;
