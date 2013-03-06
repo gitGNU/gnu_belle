@@ -783,6 +783,9 @@ void Belle::exportGameFile(const QString& path)
     jsonFile.insert("font", font);
     jsonFile.remove("fontSize");
     jsonFile.remove("fontFamily");
+    QString display = ResourceManager::display();
+    if (display == "DOM")
+        jsonFile.insert("display", ResourceManager::display());
 
     QVariantMap res;
     for (int i=0; i < ResourceManager::instance()->resources().size(); i++) {

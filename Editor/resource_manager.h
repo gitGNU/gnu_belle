@@ -69,6 +69,7 @@ public:
     static QString mediaName(const QString&);
     static QString absolutePath(const QString&);
     static void importResources(const QVariantMap&);
+    static QString display();
 
     static void incrementReference(AnimationImage*);
     static void decrementReference(AnimationImage*);

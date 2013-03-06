@@ -479,6 +479,20 @@ void ResourceManager::importResources(const QVariantMap& data)
     }
 }
 
+QString ResourceManager::display()
+{
+    QString display = "canvas";
+    foreach(const QString& path, mImageCache.keys()) {
+        AnimationImage* image = mImageCache[path];
+        if (image && image->movie()) {
+            display = "DOM";
+            break;
+        }
+    }
+
+    return display;
+}
+
 int ResourceManager::customFontsCount()
 {
     return mFontsPaths.keys().size();
