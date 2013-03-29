@@ -15,7 +15,8 @@ QT += network
 FORMS += mainwindow.ui\
     novel_properties_dialog.ui \
     about.ui \
-    add_character.ui
+    add_character.ui \
+    save_project_dialog.ui
 
 HEADERS      += belle.h\
                 scene_manager.h\
@@ -105,7 +106,8 @@ HEADERS      += belle.h\
     add_character_dialog.h \
     animationimage.h \
     choosefontwidget.h \
-    simple_http_server.h
+    simple_http_server.h \
+    save_project_dialog.h
                 
 
 SOURCES      += main.cpp\
@@ -195,6 +197,7 @@ SOURCES      += main.cpp\
     add_character_dialog.cpp \
     animationimage.cpp \
     choosefontwidget.cpp \
-    simple_http_server.cpp
+    simple_http_server.cpp \
+    save_project_dialog.cpp
 
 RESOURCES += media.qrc

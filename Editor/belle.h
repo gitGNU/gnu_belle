@@ -48,6 +48,7 @@ class Belle : public QMainWindow
     QList <QIcon> mIcons;
     QSettings *mSettings;
     SimpleHttpServer mHttpServer;
+    QString mSavePath;
     
     public:
         explicit Belle(QWidget *widget=0);
@@ -84,6 +85,7 @@ class Belle : public QMainWindow
         void onPropertiesTriggered();
         void onSceneRemoved(int);
         QString exportProject(const QString& path="", bool toRun=false);
+        void saveProject();
 
 private:
         Ui::MainWindow mUi;

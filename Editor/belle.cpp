@@ -55,6 +55,7 @@
 #include "utils.h"
 #include "engine.h"
 #include "simple_http_server.h"
+#include "save_project_dialog.h"
 
 Belle::Belle(QWidget *widget)
     : QMainWindow(widget)
@@ -177,6 +178,7 @@ Belle::Belle(QWidget *widget)
     //connect actions' signals with the respective slots
     connect(mUi.openProjectAction, SIGNAL(triggered()), this, SLOT(openFileOrProject()));
     connect(mUi.aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
+    connect(mUi.saveProjectAction, SIGNAL(triggered()), this, SLOT(saveProject()));
     connect(mUi.exportProject, SIGNAL(triggered()), this, SLOT(exportProject()));
 
     //scene's buttons
@@ -694,6 +696,30 @@ QString Belle::exportProject(const QString& _path, bool toRun)
     //Utils::safeCopy(QDir::current().absoluteFilePath(fileName), projectDir.absoluteFilePath(fileName));
 }
 
+void Belle::saveProject()
+{
+    if (mSavePath.isEmpty()) {
+        SaveProjectDialog saveProjectDialog(mNovelData.value("title").toString(), this);
+        int res = saveProjectDialog.exec();
+        if (res == QDialog::Accepted) {
+            mSavePath = saveProjectDialog.projectPath();
+            QDir parentDir = saveProjectDialog.projectParentDirectory();
+            parentDir.mkdir(saveProjectDialog.projectName());
+            changeProjectTitle(saveProjectDialog.projectName());
+        }
+        else
+            return;
+    }
+
+    if (QFile::exists(mSavePath)) {
+        QDir projectDir(mSavePath);
+        //copy images and fonts in use
+        ResourceManager::exportResources(projectDir);
+        //export gameFile
+        exportGameFile(projectDir.absoluteFilePath(GAME_FILENAME));
+    }
+}
+
 void Belle::openFileOrProject()
 {
     QString filters(tr("JSON Files(*.json)"));
@@ -940,7 +966,10 @@ void Belle::onPropertiesTriggered()
 
 void Belle::changeProjectTitle(const QString & name)
 {
-     setWindowTitle("Belle - " + name);
+    if (name == mNovelData.value("title").toString())
+        return;
+    mNovelData.insert("title", name);
+    setWindowTitle("Belle - " + name);
 }
 
 
@@ -974,7 +1003,6 @@ void Belle::setNovelProperties(const QVariantMap& _data)
 
     if (data.contains("title") && data.value("title").type() == QVariant::String) {
         changeProjectTitle(data.value("title").toString());
-        mNovelData.insert("title", data.value("title").toString());
     }
 
     if (data.contains("width") && data.value("width").canConvert(QVariant::Int)) {
@@ -1012,3 +1040,4 @@ void Belle::setNovelProperties(const QVariantMap& _data)
         mNovelData.insert("fontFamily", data.value("fontFamily").toString());
     }
 }
+
