@@ -57,6 +57,7 @@ Image::~Image()
 
 void Image::init()
 {
+    setKeepAspectRatio(true);
     mImage = 0;
     setType("Image");
     mMovie = 0;

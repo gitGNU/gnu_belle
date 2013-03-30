@@ -140,6 +140,8 @@ class Object : public QObject
         Object* resource();
 
         bool hasObjectAsParent();
+        bool keepAspectRatio();
+        void setKeepAspectRatio(bool);
 
         static QString defaultFontFamily();
         static void setDefaultFontFamily(const QString&);
@@ -192,9 +194,12 @@ class Object : public QObject
         QList<QRect> mResizeRects;
         bool mVisible;
         int mOriginalResizePointIndex;
+        float mAspectRatio;
+        int mOriginalWidth;
         int mBorderWidth;
         QColor mBorderColor;
         Object* mSelectedObject;
+        bool mKeepAspectRatio;
 
 private slots:
         void onResourceDestroyed();

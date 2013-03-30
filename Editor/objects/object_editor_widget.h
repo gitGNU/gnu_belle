@@ -66,6 +66,7 @@ private slots:
     void onYChanged(int);
     void onObjectDataChanged(const QVariantMap&);
     void onCurrentObjectDestroyed();
+    void onKeepAspectRatioToggled(bool);
 
 private:
     ColorPushButton* mColorButton;
@@ -88,6 +89,7 @@ private:
     QLineEdit* mHeightEditor;
     QSpinBox* mBorderWidthSpinBox;
     ColorPushButton* mBorderColorButton;
+    QCheckBox* mKeepAspectRatioCheckbox;
 };
 
 #endif // SCENE_OBJECT_PROPERTIES_WIDGET_H

@@ -20,6 +20,7 @@
 #include <QFile>
 #include <QColor>
 #include <QFont>
+#include <math.h>
 
 #include "scene.h"
 #include "utils.h"
@@ -60,6 +61,8 @@ void Object::init(const QString& name)
     mBorderWidth = 0;
     mBorderColor = QColor();
     mSelectedObject = 0;
+    mKeepAspectRatio = false;
+    mAspectRatio = 1;
 
     //check if name is valid
     if (objectName().isEmpty()) {
@@ -597,7 +600,23 @@ void Object::resize(int x, int y)
     if (mOriginalResizePointIndex == -1)
         return;
 
+    int w = width();
+    int h = height();
+
     movePoint(mOriginalResizePointIndex, QPoint(x, y));
+
+    if (mKeepAspectRatio) {
+        int w2 = width();
+
+        if (w != w2)
+            setHeight(round(w2/mAspectRatio) );
+        else {
+            int h2 = height();
+            if (h != h2)
+                setWidth(round(mAspectRatio*h2));
+        }
+    }
+
     updateResizeRects();
     QVariantMap data;
     data.insert("width", width());
@@ -731,6 +750,8 @@ void Object::setHoveredResizeRect(int i)
     mOriginalResizePointIndex = i;
     if (i < 0 || i >= mResizeRects.size())
         mOriginalResizePointIndex = -1;
+    if (mKeepAspectRatio)
+        mAspectRatio = (float) width() / height();
 }
 
 void Object::stopResizing()
@@ -1097,6 +1118,16 @@ void Object::hide()
 {
     if (mBackgroundImage && mBackgroundImage->movie())
         mBackgroundImage->movie()->stop();
+}
+
+bool Object::keepAspectRatio()
+{
+    return mKeepAspectRatio;
+}
+
+void Object::setKeepAspectRatio(bool keep)
+{
+    mKeepAspectRatio = keep;
 }
 
 /*void Object::setEditorWidgetFilters(const QStringList& filters)

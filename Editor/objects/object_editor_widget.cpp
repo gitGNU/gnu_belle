@@ -51,6 +51,7 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     mHeightEditor = new QLineEdit(this);
     mHeightEditor->setValidator(validator);
     mHeightEditor->setObjectName("heightEditor");
+    mKeepAspectRatioCheckbox = new QCheckBox(this);
 
     //connect(mChooseObjectComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentWorkingObjectChanged(int)));
     connect(mNameEdit, SIGNAL(textEdited(const QString &)), this, SLOT(onNameChanged(const QString&)));
@@ -59,6 +60,7 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     connect(mYSpin, SIGNAL(valueChanged(int)), this, SLOT(onYChanged(int)));
     connect(mWidthEditor, SIGNAL(textEdited(const QString &)), this, SLOT(onSizeEdited(const QString&)));
     connect(mHeightEditor, SIGNAL(textEdited(const QString &)), this, SLOT(onSizeEdited(const QString&)));
+    connect(mKeepAspectRatioCheckbox, SIGNAL(toggled(bool)), this, SLOT(onKeepAspectRatioToggled(bool)));
 
     this->beginGroup(tr("Object"), "Object");
     //this->appendRow(tr("Current"), mChooseObjectComboBox);
@@ -68,6 +70,7 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     this->appendRow("y", mYSpin);
     this->appendRow(tr("Width"), mWidthEditor);
     this->appendRow(tr("Height"), mHeightEditor);
+    this->appendRow(tr("Keep aspect ratio"), mKeepAspectRatioCheckbox);
     this->endGroup();
 
     this->beginGroup(tr("Bounding Rect"));
@@ -185,88 +188,85 @@ void ObjectEditorWidget::onColorChosen(const QColor & color)
         mCurrentObject->setBackgroundColor(color);
 }
 
-void ObjectEditorWidget::updateData(Object *obj)
+void ObjectEditorWidget::updateData(Object *currObj)
 {
-    if (obj == mCurrentObject)
+    if (currObj == mCurrentObject)
         return;
 
     if (mCurrentObject)
         mCurrentObject->disconnect(this);
 
-    mCurrentObject = obj;
-    if (! mCurrentObject)
+    mCurrentObject = 0;
+
+    if (! currObj)
         return;
 
-    connect(mCurrentObject, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(onObjectDataChanged(const QVariantMap&)));
-    connect(mCurrentObject, SIGNAL(destroyed()), this, SLOT(onCurrentObjectDestroyed()));
-
-    mBorderColorButton->blockSignals(true);
+    connect(currObj, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(onObjectDataChanged(const QVariantMap&)));
+    connect(currObj, SIGNAL(destroyed()), this, SLOT(onCurrentObjectDestroyed()));
 
     ////mChooseObjectComboBox->clear();
     mObjectsHierarchy.clear();
 
-    if (mCurrentObject->resource()) {
-        //mChooseObjectComboBox->addItem(mCurrentObject->resource()->objectName() + tr("(resource)"));
-        mObjectsHierarchy.append(mCurrentObject->resource());
+    if (currObj->resource()) {
+        //mChooseObjectComboBox->addItem(currObj->resource()->objectName() + tr("(resource)"));
+        mObjectsHierarchy.append(currObj->resource());
     }
 
-    //mChooseObjectComboBox->addItem(mCurrentObject->objectName() + tr("(copy)"));
-    mObjectsHierarchy.append(mCurrentObject);
-
-    mBorderWidthSpinBox->setValue(mCurrentObject->borderWidth());
-    mBorderColorButton->setColor(mCurrentObject->borderColor());
-    mColorButton->setText(obj->backgroundColor().name());
-    mColorButton->setColor(obj->backgroundColor());
-    mOpacitySlider->setValue(obj->backgroundOpacity());
-    mNameEdit->setText(mCurrentObject->objectName());
+    //mChooseObjectComboBox->addItem(currObj->objectName() + tr("(copy)"));
+    mObjectsHierarchy.append(currObj);
+    mBorderWidthSpinBox->setValue(currObj->borderWidth());
+    mBorderColorButton->setColor(currObj->borderColor());
+    mColorButton->setText(currObj->backgroundColor().name());
+    mColorButton->setColor(currObj->backgroundColor());
+    mOpacitySlider->setValue(currObj->backgroundOpacity());
+    mNameEdit->setText(currObj->objectName());
     mNameEdit->setStyleSheet("");
-    mNameEdit->setEnabled(mCurrentObject->editableName());
-    mXSpin->setRange(-mCurrentObject->width(), Scene::width());
-    mXSpin->setValue(mCurrentObject->x());
-    mYSpin->setRange(-mCurrentObject->height(), Scene::height());
-    mYSpin->setValue(mCurrentObject->y());
-    if (mCurrentObject->percentWidth())
-        mWidthEditor->setText(QString::number(mCurrentObject->percentWidth()));
+    mNameEdit->setEnabled(currObj->editableName());
+    mXSpin->setRange(-currObj->width(), Scene::width());
+    mXSpin->setValue(currObj->x());
+    mYSpin->setRange(-currObj->height(), Scene::height());
+    mYSpin->setValue(currObj->y());
+    if (currObj->percentWidth())
+        mWidthEditor->setText(QString::number(currObj->percentWidth()));
     else
-        mWidthEditor->setText(QString::number(mCurrentObject->width()));
-    if (mCurrentObject->percentWidth())
-        mHeightEditor->setText(QString::number(mCurrentObject->percentHeight()));
+        mWidthEditor->setText(QString::number(currObj->width()));
+    if (currObj->percentWidth())
+        mHeightEditor->setText(QString::number(currObj->percentHeight()));
     else
-        mHeightEditor->setText(QString::number(mCurrentObject->height()));
+        mHeightEditor->setText(QString::number(currObj->height()));
 
 
     QList<Action*> actions;
     QObject *object;
 
     mMousePressComboBox->clear();
-    actions = mCurrentObject->actionsForEvent(Interaction::MousePress);
+    actions = currObj->actionsForEvent(Interaction::MousePress);
     for(int i=0; i < actions.size(); i++) {
         object = actions[i];
         mMousePressComboBox->addItem(actions[i]->icon(), actions[i]->toString(), qVariantFromValue(object));
     }
 
     mMouseReleaseComboBox->clear();
-    actions = mCurrentObject->actionsForEvent(Interaction::MouseRelease);
+    actions = currObj->actionsForEvent(Interaction::MouseRelease);
     for(int i=0; i < actions.size(); i++) {
         object = actions[i];
         mMouseReleaseComboBox->addItem(actions[i]->icon(), actions[i]->toString(), qVariantFromValue(object));
     }
 
     mMouseMoveComboBox->clear();
-    actions = mCurrentObject->actionsForEvent(Interaction::MouseMove);
+    actions = currObj->actionsForEvent(Interaction::MouseMove);
     for(int i=0; i < actions.size(); i++) {
         object = actions[i];
         mMouseMoveComboBox->addItem(actions[i]->icon(), actions[i]->toString(), qVariantFromValue(object));
     }
 
-    mRoundedRectCheckBox->setChecked(mCurrentObject->roundedRect());
-    mXRadiusSpinBox->setValue(mCurrentObject->xRadius());
-    mYRadiusSpinBox->setValue(mCurrentObject->yRadius());
+    mRoundedRectCheckBox->setChecked(currObj->roundedRect());
+    mXRadiusSpinBox->setValue(currObj->xRadius());
+    mYRadiusSpinBox->setValue(currObj->yRadius());
+    mVisibleCheckbox->setChecked(currObj->visible());
+    mKeepAspectRatioCheckbox->setChecked(currObj->keepAspectRatio());
 
-    mVisibleCheckbox->setChecked(mCurrentObject->visible());
-
-    mBorderColorButton->blockSignals(false);
-
+    mCurrentObject = currObj;
 }
 
 void ObjectEditorWidget::onAddItemActivated()
@@ -452,4 +452,10 @@ void ObjectEditorWidget::setObjectSize(int w, int h)
 void ObjectEditorWidget::onCurrentObjectDestroyed()
 {
     mCurrentObject = 0;
+}
+
+void ObjectEditorWidget::onKeepAspectRatioToggled(bool keep)
+{
+    if (mCurrentObject)
+        mCurrentObject->setKeepAspectRatio(keep);
 }
