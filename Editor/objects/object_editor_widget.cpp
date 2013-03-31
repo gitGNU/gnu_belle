@@ -296,10 +296,9 @@ void ObjectEditorWidget::onNameChanged(const QString & name)
     if (! mCurrentObject)
         return;
 
-    if (mCurrentObject->isValidName(name)) {
+    if (mCurrentObject->setName(name)){
         mNameEdit->setStyleSheet("background: rgba(0, 200, 0, 100);");
         mNameEdit->setToolTip("");
-        mCurrentObject->setObjectName(name);
     }
     else {
         mNameEdit->setStyleSheet("background: rgba(200, 0, 0, 100);");

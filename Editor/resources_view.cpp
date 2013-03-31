@@ -19,6 +19,7 @@
 #include <QDebug>
 #include <QAction>
 #include <QStandardItemModel>
+#include <QModelIndex>
 
 #include "scene_manager.h"
 
@@ -32,6 +33,11 @@ ResourcesView::ResourcesView(QWidget *parent) :
     connect(mEditResourceAction, SIGNAL(triggered()), this, SLOT(onEditResource()));
     addAction(mEditResourceAction);
 
+    //rename action
+    QAction* renameAction = new QAction(QIcon(":/media/edit-clear.png"), tr("Rename"), this);
+    connect(renameAction, SIGNAL(triggered()), this, SLOT(onRenameActionTriggered()));
+    addAction(renameAction);
+
     //remove action
     QAction* removeAction = new QAction(QIcon(":/media/delete.png"), tr("Remove"), this);
     connect(removeAction, SIGNAL(triggered()), this, SLOT(onRemoveResource()));
@@ -41,6 +47,7 @@ ResourcesView::ResourcesView(QWidget *parent) :
     //connect(this, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(onItemDoubleClicked(const QModelIndex&)));
     connect(ResourceManager::instance(), SIGNAL(resourceAdded(Object*)), this, SLOT(addObject(Object*)));
     connect(ResourceManager::instance(), SIGNAL(resourceRemoved(Object*)), this, SLOT(onResourceRemoved(Object*)));
+    this->setEditTriggers(QAbstractItemView::EditKeyPressed | QAbstractItemView::SelectedClicked);
 }
 
 void ResourcesView::addObject(Object * object)
@@ -61,7 +68,9 @@ void ResourcesView::addObject(Object * object)
     QStandardItem* item = lastItem();
     int rowCount = item->rowCount() ? item->rowCount()-1 : 0;
     item = item->child(rowCount);
+    item->setEditable(true);
     mItemToObject.insert(item, object);
+    connect(object, SIGNAL(dataChanged(const QVariantMap&)), this, SLOT(onObjectDataChanged(const QVariantMap&)));
 }
 
 void ResourcesView::select(const QString& name)
@@ -87,16 +96,8 @@ void ResourcesView::removeItem(Object * object, bool del)
     if (! object)
         return;
 
-    QHashIterator<QStandardItem*, Object*> it(mItemToObject);
     QStandardItem *item = 0, *parentItem = 0;
-
-    while(it.hasNext()) {
-        it.next();
-        if (it.value() == object) {
-            item = it.key();
-            break;
-        }
-    }
+    item = itemFromObject(object);
 
     if (item) {
         mItemToObject.remove(item);
@@ -113,8 +114,6 @@ void ResourcesView::removeItem(Object * object, bool del)
 
 void ResourcesView::removeObject(Object * object, bool del)
 {
-    removeItem(object, del);
-
     if (ResourceManager::instance())
         ResourceManager::instance()->removeResource(object, del);
 }
@@ -136,6 +135,14 @@ void ResourcesView::removeObject(Object * object, bool del)
     Object* obj = mItemToObject.value(item);
     scene->addCopyOfObject(obj);
 }*/
+
+void ResourcesView::onRenameActionTriggered()
+{
+    QModelIndexList indexes = selectedIndexes();
+
+    if (! indexes.isEmpty())
+        this->edit(indexes.first());
+}
 
 void ResourcesView::onResourceRemoved(Object* resource)
 {
@@ -172,4 +179,50 @@ Object* ResourcesView::object(const QModelIndex & index)
         return 0;
 
     return mItemToObject.value(model->itemFromIndex(index), 0);
+}
+
+QStandardItem* ResourcesView::itemFromObject(Object* object)
+{
+    if (! object)
+        return 0;
+
+    QHashIterator<QStandardItem*, Object*> it(mItemToObject);
+    QStandardItem *item = 0;
+
+    while(it.hasNext()) {
+        it.next();
+        if (it.value() == object) {
+            item = it.key();
+            break;
+        }
+    }
+
+    return item;
+}
+
+
+void ResourcesView::dataChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight)
+{
+    Object* obj = object(topLeft);
+
+    if (obj && obj->objectName() != topLeft.data().toString()) {
+        bool changed = obj->setName(topLeft.data().toString());
+        if (! changed) {
+            this->model()->setData(topLeft, obj->name(), Qt::DisplayRole);
+            if (topLeft == bottomRight)
+                this->model()->setData(bottomRight, obj->name(), Qt::DisplayRole);
+        }
+    }
+
+    PropertiesWidget::dataChanged(topLeft, bottomRight);
+}
+
+void ResourcesView::onObjectDataChanged(const QVariantMap & data)
+{
+    Object *obj = qobject_cast<Object*>(sender());
+    if (obj) {
+        QStandardItem* item = itemFromObject(obj);
+        if (item && data.contains("name"))
+            item->setData(data.value("name").toString(), Qt::DisplayRole);
+    }
 }

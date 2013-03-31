@@ -1084,6 +1084,9 @@ Scene* Object::scene()
 
 bool Object::isValidName(const QString& name)
 {
+    if (name.isEmpty())
+        return false;
+
     //check if parent is the scene
     Scene* scene = qobject_cast<Scene*>(parent());
     if (scene)
@@ -1128,6 +1131,24 @@ bool Object::keepAspectRatio()
 void Object::setKeepAspectRatio(bool keep)
 {
     mKeepAspectRatio = keep;
+}
+
+bool Object::setName(const QString & name)
+{
+    if (this->isValidName(name)){
+        setObjectName(name);
+        QVariantMap data;
+        data.insert("name", name);
+        emit dataChanged(data);
+        return true;
+    }
+
+   return false;
+}
+
+QString Object::name()
+{
+    return objectName();
 }
 
 /*void Object::setEditorWidgetFilters(const QStringList& filters)

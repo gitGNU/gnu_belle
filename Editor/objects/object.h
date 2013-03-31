@@ -139,6 +139,9 @@ class Object : public QObject
         void setResource(Object*);
         Object* resource();
 
+        bool setName(const QString&);
+        QString name();
+
         bool hasObjectAsParent();
         bool keepAspectRatio();
         void setKeepAspectRatio(bool);

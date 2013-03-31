@@ -146,7 +146,7 @@ void ResourceManager::removeResource(Object *object, bool del)
     if (mResources.contains(object)) {
         mResources.removeOne(object);
         object->disconnect(this);
-
+        emit resourceRemoved(object);
         if (del && object)
             object->deleteLater();
     }
@@ -199,11 +199,8 @@ bool ResourceManager::contains(const QString & name)
 
 void  ResourceManager::removeResources(bool del)
 {
-    for(int i=mResources.size()-1; i >= 0; i--) {
-        emit resourceRemoved(mResources[i]);
-        if (del)
-            mResources[i]->deleteLater();
-    }
+    for(int i=mResources.size()-1; i >= 0; i--)
+        removeResource(mResources[i], del);
 
     mResources.clear();
 

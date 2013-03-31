@@ -59,7 +59,7 @@ public:
 
 protected:
     void drawRow(QPainter *painter, const QStyleOptionViewItem &options, const QModelIndex &index) const;
-    bool edit ( const QModelIndex & index, EditTrigger trigger, QEvent * event );
+    //bool edit ( const QModelIndex & index, EditTrigger trigger, QEvent * event );
 
 protected slots:
     virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);

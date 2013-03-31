@@ -32,6 +32,9 @@ public:
     explicit ResourcesView(QWidget *parent = 0);
     void select(const QString&);
     Object* object(const QModelIndex&);
+protected:
+    virtual void dataChanged(const QModelIndex &, const QModelIndex &);
+    QStandardItem* itemFromObject(Object*);
 
 signals:
     void editResource(Object*);
@@ -39,9 +42,11 @@ signals:
 public slots:
     void addObject(Object*);
     void onRemoveResource();
+    void onRenameActionTriggered();
     void onEditResource();
     //void onItemDoubleClicked(const QModelIndex&);
     void onResourceRemoved(Object*);
+    void onObjectDataChanged(const QVariantMap&);
 
 private:
     void removeObject(Object*, bool del=false);

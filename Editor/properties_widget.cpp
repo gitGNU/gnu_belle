@@ -158,15 +158,14 @@ void PropertiesWidget::drawRow(QPainter *painter, const QStyleOptionViewItem &op
     QTreeView::drawRow(painter, options2, index);
 }
 
-bool PropertiesWidget::edit (const QModelIndex & index, EditTrigger trigger, QEvent * event)
+/*bool PropertiesWidget::edit (const QModelIndex & index, EditTrigger trigger, QEvent * event)
 {
     if (index.column() > 0 && index.parent().isValid()) {
         return QTreeView::edit(index, trigger, event);
     }
 
-
-    return false;
-}
+    return QTreeView::edit(index, trigger, event);;
+}*/
 
 void PropertiesWidget::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
 {
