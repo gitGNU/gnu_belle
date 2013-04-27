@@ -23,6 +23,8 @@
 
 static QString mPath = "";
 static QString mBrowserPath = "";
+static bool mUseBuiltinBrowser = true;
+static bool mPathChanged = false;
 
 bool Engine::isValidPath(const QString & path)
 {
@@ -49,7 +51,16 @@ bool Engine::isValidPath(const QString & path)
 
 void Engine::setPath(const QString & path)
 {
+    if (path != mPath)
+        mPathChanged = true;
     mPath = path;
+}
+
+bool Engine::pathChanged()
+{
+    bool changed = mPathChanged;
+    mPathChanged = false;
+    return changed;
 }
 
 QString Engine::path()
@@ -85,4 +96,14 @@ QString Engine::browserPath()
 void Engine::setBrowserPath(const QString& path)
 {
     mBrowserPath = path;
+}
+
+bool Engine::useBuiltinBrowser()
+{
+    return mUseBuiltinBrowser;
+}
+
+void Engine::setUseBuiltinBrowser(bool use)
+{
+    mUseBuiltinBrowser = use;
 }

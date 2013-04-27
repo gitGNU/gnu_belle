@@ -27,9 +27,12 @@ public:
     static bool isValid();
     static QString path();
     static void setPath(const QString&);
+    static bool pathChanged();
     static void guessPath();
     static QString browserPath();
     static void setBrowserPath(const QString&);
+    static void setUseBuiltinBrowser(bool);
+    static bool useBuiltinBrowser();
 };
 
 #endif // ENGINE_H

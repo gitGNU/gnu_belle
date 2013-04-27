@@ -62,6 +62,11 @@ Belle::Belle(QWidget *widget)
 {
     mUi.setupUi( this );
 
+    //init webview
+    mWebView = new QWebView(this);
+    mWebView->setWindowFlags(mWebView->windowFlags() | Qt::Window);
+    mWebView->setWindowModality(Qt::WindowModal);
+
     mHttpServer.setServerPort(8000);
     mDisableClick = false;
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
@@ -227,6 +232,7 @@ void Belle::saveSettings()
         mSettings->setValue("enginePath", Engine::path());
     if (! Engine::browserPath().isEmpty())
         mSettings->setValue("browser", Engine::browserPath());
+    mSettings->setValue("useBuiltinBrowser", Engine::useBuiltinBrowser());
     mSettings->endGroup();
 }
 
@@ -243,6 +249,8 @@ void Belle::restoreSettings()
         Engine::setPath(mSettings->value("Project/enginePath").toString());
     if (mSettings->contains("Project/browser"))
         Engine::setBrowserPath(mSettings->value("Project/browser").toString());
+    if (mSettings->contains("Project/useBuiltinBrowser"))
+        Engine::setUseBuiltinBrowser(mSettings->value("Project/useBuiltinBrowser").toBool());
 }
 
 bool Belle::eventFilter(QObject *obj, QEvent *ev)
@@ -639,12 +647,18 @@ void Belle::onRunTriggered()
             return;
         }
 
-        //Get browser specified by the user
-        QString browserPath = Engine::browserPath();
-        if (! browserPath.isEmpty())
-            QProcess::startDetached(browserPath, QStringList() << mHttpServer.serverUrl());
-        else //open file (html) with default application
-            QDesktopServices::openUrl(QUrl(mHttpServer.serverUrl()));
+        if (Engine::useBuiltinBrowser()) {
+            mWebView->setUrl(mHttpServer.serverUrl());
+            mWebView->show();
+        }
+        else {
+            //Get browser specified by the user
+            QString browserPath = Engine::browserPath();
+            if (! browserPath.isEmpty())
+                QProcess::startDetached(browserPath, QStringList() << mHttpServer.serverUrl());
+            else //open file (html) with default application
+                QDesktopServices::openUrl(QUrl(mHttpServer.serverUrl()));
+        }
     }
 }
 
@@ -685,7 +699,10 @@ QString Belle::exportProject(const QString& _path, bool toRun)
 
     //copy all engine files
     QStringList fileNames = engineDir.entryList(QStringList() << "*.js" << "*.html" << "*.css", QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+    bool pathChanged = Engine::pathChanged();
     foreach(const QString&fileName, fileNames) {
+        if (pathChanged && QFile::exists(projectDir.absoluteFilePath(fileName)))
+            QFile::remove(projectDir.absoluteFilePath(fileName));
         QFile::copy(engineDir.absoluteFilePath(fileName), projectDir.absoluteFilePath(fileName));
     }
 
@@ -961,6 +978,7 @@ void Belle::onPropertiesTriggered()
 
         Engine::setPath(dialog.enginePath());
         Engine::setBrowserPath(dialog.browserPath());
+        Engine::setUseBuiltinBrowser(dialog.useBuiltinBrowser());
     }
 }
 
@@ -1007,12 +1025,14 @@ void Belle::setNovelProperties(const QVariantMap& _data)
 
     if (data.contains("width") && data.value("width").canConvert(QVariant::Int)) {
         mNovelData.insert("width", data.value("width").toInt());
+        mWebView->resize(data.value("width").toInt(), mWebView->height());
         if (SceneManager::instance())
             SceneManager::instance()->setSceneWidth(data.value("width").toInt());
     }
 
     if (data.contains("height") && data.value("height").canConvert(QVariant::Int)) {
         mNovelData.insert("height", data.value("height").toInt());
+        mWebView->resize(mWebView->width(), data.value("height").toInt());
         if (SceneManager::instance())
             SceneManager::instance()->setSceneHeight(data.value("height").toInt());
     }

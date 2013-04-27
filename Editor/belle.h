@@ -20,6 +20,7 @@
 #include <QMainWindow>
 #include <QVariant>
 #include <QSettings>
+#include <QWebView>
 
 #include "scene_manager.h"
 #include "ui_mainwindow.h"
@@ -49,6 +50,7 @@ class Belle : public QMainWindow
     QSettings *mSettings;
     SimpleHttpServer mHttpServer;
     QString mSavePath;
+    QWebView *mWebView;
     
     public:
         explicit Belle(QWidget *widget=0);

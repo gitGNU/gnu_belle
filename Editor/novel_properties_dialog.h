@@ -32,6 +32,7 @@ public:
     QVariantMap novelData();
     QString enginePath();
     QString browserPath();
+    bool useBuiltinBrowser();
     void setEnginePath(const QString&);
 
 signals:

@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -252,6 +252,13 @@
         </layout>
        </item>
        <item>
+        <widget class="QCheckBox" name="checkBuiltinBrowser">
+         <property name="text">
+          <string>Use built-in browser</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
           <widget class="QLabel" name="browserLabel">
@@ -350,6 +357,38 @@
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBuiltinBrowser</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>browserEdit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>199</x>
+     <y>74</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>200</x>
+     <y>102</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBuiltinBrowser</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>browserButton</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>199</x>
+     <y>74</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>363</x>
+     <y>102</y>
     </hint>
    </hints>
   </connection>

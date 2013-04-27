@@ -41,6 +41,7 @@ NovelPropertiesDialog::NovelPropertiesDialog(QVariantMap& data, QWidget *parent)
     mUi.textSpeedValueLabel->setText(data.value("textSpeed").toString());
     mUi.browserEdit->setText(Engine::browserPath());
     mUi.browserEdit->setPlaceholderText("Default");
+    mUi.checkBuiltinBrowser->setChecked(Engine::useBuiltinBrowser());
 
     connect(mUi.widthCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(onWidthChanged(int)));
     connect(mUi.widthCombo, SIGNAL(editTextChanged(const QString&)), this, SLOT(onSizeEdited(const QString&)));
@@ -154,6 +155,11 @@ void NovelPropertiesDialog::onBrowserSelect()
 
     QString path = QFileDialog::getOpenFileName(this, tr("Select your preferred browser"), startPath, filter);
     mUi.browserEdit->setText(path);
+}
+
+bool NovelPropertiesDialog::useBuiltinBrowser()
+{
+    return mUi.checkBuiltinBrowser->isChecked();
 }
 
 QString NovelPropertiesDialog::enginePath()
