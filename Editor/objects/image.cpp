@@ -90,6 +90,8 @@ void Image::setImage(AnimationImage* image)
         mSceneRect.setWidth(mImage->width());
         mSceneRect.setHeight(mImage->height());
     }
+
+    updateAspectRatio();
 }
 
 AnimationImage* Image::image() const

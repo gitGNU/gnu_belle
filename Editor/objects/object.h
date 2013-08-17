@@ -74,6 +74,8 @@ class Object : public QObject
         virtual void show();
         virtual void hide();
 
+        void fixPoint(int, int, int);
+
         /*int backgroundColorOpacity() const;
         void setBackgroundColorOpacity(int);
 
@@ -167,7 +169,7 @@ class Object : public QObject
         //void init(const QString &, int, int, QObject*);
         void init(const QString&);
         void updateResizeRects();
-        void movePoint(int, const QPoint&);
+        void movePoint(int, QPoint&);
         int parentWidth() const;
         int parentHeight() const;
 
@@ -191,6 +193,7 @@ class Object : public QObject
         bool mEditableName;
         Object* mResource;
         void notify(const QString&, const QVariant&, const QVariant&);
+        void updateAspectRatio();
 
     private: //variables
         QString mType;

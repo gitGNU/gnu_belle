@@ -600,21 +600,13 @@ void Object::resize(int x, int y)
     if (mOriginalResizePointIndex == -1)
         return;
 
-    int w = width();
-    int h = height();
-
-    movePoint(mOriginalResizePointIndex, QPoint(x, y));
+    QPoint point (x, y);
+    movePoint(mOriginalResizePointIndex, point);
 
     if (mKeepAspectRatio) {
         int w2 = width();
-
-        if (w != w2)
-            setHeight(round(w2/mAspectRatio) );
-        else {
-            int h2 = height();
-            if (h != h2)
-                setWidth(round(mAspectRatio*h2));
-        }
+        int h2 = round(w2/mAspectRatio);
+        fixPoint(mOriginalResizePointIndex, w2, h2);
     }
 
     updateResizeRects();
@@ -624,38 +616,102 @@ void Object::resize(int x, int y)
     emit dataChanged(data);
 }
 
-
-void Object::movePoint(int which, const QPoint& point)
+void Object::fixPoint(int pindex, int w, int h)
 {
+    QPoint point;
+    int x, y;
+
+    switch (pindex){
+        case 0:
+            point = mSceneRect.bottomRight();
+            x = point.x() - w;
+            y = point.y() - h;
+            mSceneRect.setTopLeft(QPoint(x, y));
+            break;
+        case 2:
+            point = mSceneRect.bottomLeft();
+            y = point.y() - h;
+            x = point.x() + w;
+            mSceneRect.setTopRight(QPoint(x, y));
+            break;
+
+        case 4:
+            point = mSceneRect.topLeft();
+            y = point.y() + h;
+            x = point.x() + w;
+            mSceneRect.setBottomRight(QPoint(x, y));
+            break;
+
+        case 6:
+            point = mSceneRect.topRight();
+            y = point.y() + h;
+            x = point.x() - w;
+            mSceneRect.setBottomLeft(QPoint(x, y));
+            break;
+    }
+}
+
+void Object::movePoint(int which, QPoint& point)
+{
+    QPoint point2;
+
     switch(which)
     {
     case 0:
+        point2 = mSceneRect.bottomRight();
+        if (point.x() > point2.x())
+            point.setX(point2.x());
+        if (point.y() > point2.y())
+            point.setY(point2.y());
         mSceneRect.setTopLeft(point);
         updateResizeRect(0, mSceneRect.topLeft());
         break;
     case 1:
-         mSceneRect.setY(point.y());
+         point2 = mSceneRect.bottomLeft();
+         if (point.y() < point2.y())
+            mSceneRect.setY(point.y());
          break;
     case 2:
+        point2 = mSceneRect.bottomLeft();
+        if (point.x() < point2.x())
+            point.setX(point2.x());
+        if (point.y() > point2.y())
+            point.setY(point2.y());
         mSceneRect.setTopRight(point);
         updateResizeRect(2, mSceneRect.topRight());
         break;
     case 3:
-        mSceneRect.setWidth(point.x()-mSceneRect.x());
+        point2 = mSceneRect.bottomLeft();
+        if (point.x() > point2.x())
+            mSceneRect.setWidth(point.x()-mSceneRect.x());
         break;
     case 4:
+        point2 = mSceneRect.topLeft();
+        if (point.x() < point2.x())
+            point.setX(point2.x());
+        if (point.y() < point2.y())
+            point.setY(point2.y());
         mSceneRect.setBottomRight(point);
         updateResizeRect(4, mSceneRect.bottomRight());
         break;
     case 5:
-        mSceneRect.setHeight(point.y()-mSceneRect.y());
+        point2 = mSceneRect.topRight();
+        if (point.y() > point2.y())
+            mSceneRect.setHeight(point.y()-mSceneRect.y());
         break;
     case 6:
+        point2 = mSceneRect.topRight();
+        if (point.x() > point2.x())
+            point.setX(point2.x());
+        if (point.y() < point2.y())
+            point.setY(point2.y());
         mSceneRect.setBottomLeft(point);
         updateResizeRect(6, mSceneRect.bottomLeft());
         break;
     case 7:
-        mSceneRect.setX(point.x());
+        point2 = mSceneRect.topRight();
+        if (point.x() < point2.x())
+            mSceneRect.setX(point.x());
         break;
     }
 }
@@ -750,8 +806,6 @@ void Object::setHoveredResizeRect(int i)
     mOriginalResizePointIndex = i;
     if (i < 0 || i >= mResizeRects.size())
         mOriginalResizePointIndex = -1;
-    if (mKeepAspectRatio)
-        mAspectRatio = (float) width() / height();
 }
 
 void Object::stopResizing()
@@ -1131,6 +1185,12 @@ bool Object::keepAspectRatio()
 void Object::setKeepAspectRatio(bool keep)
 {
     mKeepAspectRatio = keep;
+    if (mKeepAspectRatio && mAspectRatio != 1) {
+        int w = width();
+        int h = round(w/mAspectRatio);
+        mSceneRect.setHeight(h);
+        updateResizeRects();
+    }
 }
 
 bool Object::setName(const QString & name)
@@ -1149,6 +1209,11 @@ bool Object::setName(const QString & name)
 QString Object::name()
 {
     return objectName();
+}
+
+void Object::updateAspectRatio()
+{
+    mAspectRatio = (float) width() / height();
 }
 
 /*void Object::setEditorWidgetFilters(const QStringList& filters)
