@@ -369,7 +369,7 @@ function importgameData(path) {
     
     xobj.onreadystatechange = function() {
         if(xobj.readyState == 4){
-            var gameData = JSON.parse(xobj.responseText);
+            var gameData = jQuery.parseJSON(xobj.responseText);
             log("Game data loaded!");
             initializeData(gameData);
         }
