@@ -24,6 +24,7 @@
 #include "gotolabel.h"
 #include "action_info_manager.h"
 #include "scene_manager.h"
+#include "belle.h"
 
 AddActionDialog::AddActionDialog(Interaction::InputEvent event, QWidget *parent) :
     QDialog(parent)
@@ -203,7 +204,7 @@ void AddActionDialog::onNewAction(Action * action)
         action = _action;
     }
     else {
-        action->setParent(SceneManager::currentScene());
+        action->setParent(Belle::instance()->currentScene());
         mActionsCatalog.append(action);
         //mActionsCatalog.insert(action, action->editorWidget()->copy());
     }

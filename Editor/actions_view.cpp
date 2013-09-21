@@ -30,6 +30,7 @@
 #include "scene_manager.h"
 #include "actions_model.h"
 #include "action.h"
+#include "belle.h"
 
 ActionsViewDelegate::ActionsViewDelegate(QObject* parent) :
     QStyledItemDelegate(parent)
@@ -223,7 +224,8 @@ void ActionsView::onContextMenuRequested(const QPoint & point)
 
 void ActionsView::onDeleteAction()
 {
-    Scene* scene = SceneManager::currentScene();
+    Belle * belle = qobject_cast<Belle*>(parent());
+    Scene* scene = belle->currentScene();
     if (scene) {
         QModelIndexList indexes = selectedIndexes();
         ActionsModel* model = qobject_cast<ActionsModel*>(this->model());

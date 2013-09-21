@@ -21,6 +21,7 @@
 #include "scene_manager.h"
 #include "action.h"
 #include "mimedata.h"
+#include "belle.h"
 
 ActionsModel::ActionsModel(QObject *parent) :
     QStandardItemModel(parent)
@@ -43,7 +44,7 @@ void ActionsModel::insertAction(int row, Action* action)
 
 bool ActionsModel::removeRow(int row, const QModelIndex &parent)
 {
-    Scene* scene = SceneManager::currentScene();
+    Scene* scene = Belle::instance()->currentScene();
     if (scene) {
         QList<Action*> actions = scene->actions();
         if (row >= 0 && row < actions.size()) {
@@ -58,7 +59,7 @@ bool ActionsModel::removeRow(int row, const QModelIndex &parent)
 
 Action* ActionsModel::actionForIndex(const QModelIndex & index) const
 {
-    Scene* scene = SceneManager::currentScene();
+    Scene* scene = Belle::instance()->currentScene();
     if (! scene)
         return 0;
 
@@ -74,7 +75,7 @@ void ActionsModel::updateView()
     if (! action)
         return;
 
-    Scene* scene = SceneManager::currentScene();
+    Scene* scene = Belle::instance()->currentScene();
     if (! scene)
         return;
 
@@ -108,7 +109,7 @@ bool ActionsModel::dropMimeData (const QMimeData * data, Qt::DropAction action, 
     if (! mimeData)
         return true;
 
-    Scene* scene = SceneManager::currentScene();
+    Scene* scene = Belle::instance()->currentScene();
     if (! scene)
         return false;
 
@@ -159,7 +160,7 @@ QMimeData* ActionsModel::mimeData ( const QModelIndexList & indexes ) const
 {
     MimeData * mimeData = new MimeData;
 
-    Scene* scene = SceneManager::currentScene();
+    Scene* scene = Belle::instance()->currentScene();
     if (! scene)
         return 0;
 
