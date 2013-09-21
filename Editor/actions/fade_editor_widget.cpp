@@ -59,7 +59,7 @@ void FadeEditorWidget::updateData(Action * action)
         objects.append(mCurrentAction->sceneObject());
     }
 
-    Scene* scene = SceneManager::currentScene();
+    Scene* scene = mCurrentAction->scene();
     if (scene) {
         QList<Object*> objs = scene->objects();
         for (int i=0; i < objs.size(); i++) {

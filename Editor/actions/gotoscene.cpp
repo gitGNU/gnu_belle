@@ -66,7 +66,10 @@ ActionEditorWidget* GoToScene::editorWidget()
 
 void GoToScene::setTargetSceneName(const QString & name)
 {
-    QList<Scene*> scenes = SceneManager::scenes();
+    QList<Scene*> scenes;
+    if (this->scene() && this->scene()->sceneManager())
+        scenes = scene()->sceneManager()->scenes();
+
     for(int i=0; i < scenes.size(); i++) {
         if (scenes[i] && scenes[i]->objectName() == name) {
             mTargetSceneName = name;

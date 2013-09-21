@@ -92,14 +92,14 @@ QVariantMap ShowMenu::toJsonObject()
 
 void ShowMenu::focusIn()
 {
-    if (sceneObject() && SceneManager::currentScene())
-        SceneManager::currentScene()->appendObject(sceneObject(), true, true);
+    if (sceneObject() && this->scene())
+        this->scene()->appendObject(sceneObject(), true, true);
 }
 
 void ShowMenu::focusOut()
 {
-    if (sceneObject() && SceneManager::currentScene()) {
-        SceneManager::currentScene()->removeObject(sceneObject(), false, true);
+    if (sceneObject() && this->scene()) {
+        this->scene()->removeObject(sceneObject(), false, true);
     }
 }
 

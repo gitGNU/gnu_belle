@@ -263,7 +263,7 @@ Scene* Action::scene()
 {
     //shouldn't happen, but just in case
     if (! this->parent())
-        return SceneManager::currentScene();
+        return 0;
 
     //usual case - action's parent is the scene
     if (qobject_cast<Scene*>(this->parent()))
@@ -277,7 +277,7 @@ Scene* Action::scene()
     }
 
     //shouldn't happen either, but just in case
-    return SceneManager::currentScene();
+    return 0;
 }
 
 bool Action::isActive()

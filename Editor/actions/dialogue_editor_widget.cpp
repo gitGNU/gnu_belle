@@ -92,7 +92,7 @@ void DialogueEditorWidget::updateData(Action * action)
         }
     }
 
-    Scene * scene = SceneManager::currentScene();
+    Scene * scene = dialogueAction->scene();
     if (! scene)
         return;
     QList<Object*> objects = scene->objects();
@@ -179,34 +179,38 @@ void DialogueEditorWidget::onCharacterNameChanged(const QString & name)
 
 void DialogueEditorWidget::onTextBoxHighlighted(int index)
 {
-    if (index >= 0 && index < mOutputBoxes.size()) {
-        SceneManager::currentScene()->highlightObject(mOutputBoxes[index]);
+    if (index >= 0 && index < mOutputBoxes.size() && mCurrentAction && mCurrentAction->scene()) {
+        mCurrentAction->scene()->highlightObject(mOutputBoxes[index]);
     }
 }
 
 void DialogueEditorWidget::onCharacterHighlighted(int index)
 {
-    if (index >= 0 && index < mCharacters.size()) {
-        SceneManager::currentScene()->highlightObject(mCharacters[index]);
+    if (index >= 0 && index < mCharacters.size() && mCurrentAction && mCurrentAction->scene()) {
+        mCurrentAction->scene()->highlightObject(mCharacters[index]);
     }
 }
 
 
 bool DialogueEditorWidget::eventFilter(QObject *obj, QEvent *event)
 {
+    Scene* scene = 0;
+    if (mCurrentAction)
+        scene = mCurrentAction->scene();
+
     if ((obj == mChooseTextBoxWidget->view() || obj == mChooseCharacterWidget->view()) && event->type() == QEvent::Hide) {
-       if ( SceneManager::currentScene())
-           SceneManager::currentScene()->highlightObject(0);
+       if ( scene)
+           scene->highlightObject(0);
        return false;
     }
 
-    if (obj == mChooseTextBoxWidget->view() && event->type() == QEvent::Show && SceneManager::currentScene()) {
+    if (obj == mChooseTextBoxWidget->view() && event->type() == QEvent::Show && scene) {
         if (mChooseTextBoxWidget->count() == 1 && ! mOutputBoxes.isEmpty())
-            SceneManager::currentScene()->highlightObject(mOutputBoxes.first());
+            scene->highlightObject(mOutputBoxes.first());
     }
-    else if (obj == mChooseCharacterWidget->view() && event->type() == QEvent::Show && SceneManager::currentScene()) {
+    else if (obj == mChooseCharacterWidget->view() && event->type() == QEvent::Show && scene) {
       if (mChooseCharacterWidget->count() == 1 && ! mCharacters.isEmpty())
-           SceneManager::currentScene()->highlightObject(mCharacters.first());
+           scene->highlightObject(mCharacters.first());
     }
 
 

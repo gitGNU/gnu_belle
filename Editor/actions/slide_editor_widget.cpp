@@ -91,7 +91,7 @@ void SlideEditorWidget::updateData(Action * action)
     }*/
 
     mCurrentSlide = qobject_cast<Slide*>(action);
-    if (! mCurrentSlide || ! SceneManager::currentScene())
+    if (! mCurrentSlide || ! mCurrentSlide->scene())
         return;
 
     mStartXSlider->setValue(mCurrentSlide->startX());
@@ -113,7 +113,7 @@ void SlideEditorWidget::updateData(Action * action)
         objects.append(currObj);
     }
 
-    QList<Object*> objs = SceneManager::currentScene()->objects();
+    QList<Object*> objs = mCurrentSlide->scene()->objects();
     for (int i=0; i < objs.size(); i++) {
         if (objs[i] && objs[i] != currObj) {
             mObjectChooser->addItem(objs[i]->objectName());
