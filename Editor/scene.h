@@ -28,7 +28,9 @@
 #include "action.h"
 #include "scene_editor_widget.h"
 #include "animationimage.h"
+#include "scene_manager.h"
 
+class SceneManager;
 class SceneEditorWidget;
 
 class Scene : public QObject
@@ -49,6 +51,7 @@ class Scene : public QObject
         explicit Scene(QObject *parent = 0, const QString& name="");
         Scene(const QVariantMap& data, QObject *parent = 0);
         ~Scene();
+        SceneManager* sceneManager();
         QList<Object*> objects();
         QList<Object*> temporaryObjects();
         Object* objectAt (qreal, qreal);

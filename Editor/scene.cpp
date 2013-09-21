@@ -39,9 +39,10 @@ Scene::Scene(const QVariantMap& data, QObject *parent):
     QObject(parent)
 {
     init("");
+    SceneManager *sceneManager = this->sceneManager();
 
     if (data.contains("name") && data.value("name").type() == QVariant::String)
-        setObjectName(SceneManager::validSceneName(data.value("name").toString()));
+        setObjectName(sceneManager->validSceneName(data.value("name").toString()));
 
     if (data.contains("backgroundImage") && data.value("backgroundImage").type() == QVariant::String)
         setBackgroundImage(data.value("backgroundImage").toString());
@@ -96,8 +97,16 @@ void Scene::init(const QString& name)
     //mScenePixmap = new QPixmap(Scene::width(), Scene::height());
     //mScenePixmap->fill(Qt::gray);
 
-    this->setObjectName(SceneManager::validSceneName(name));
+    this->setObjectName(sceneManager()->validSceneName(name));
 }
+
+SceneManager* Scene::sceneManager()
+{
+    if (this->parent())
+        return qobject_cast<SceneManager*>(parent());
+    return 0;
+}
+
 
 void Scene::setEditorWidget(SceneEditorWidget* editor)
 {
@@ -537,7 +546,7 @@ QVariantMap Scene::toJsonObject()
 Scene* Scene::copy()
 {
     Scene* scene = new Scene(this->toJsonObject(), this->parent());
-    scene->setObjectName(SceneManager::validSceneName(objectName()+"_1"));
+    scene->setObjectName(sceneManager()->validSceneName(objectName()+"_1"));
     return scene;
 }
 
