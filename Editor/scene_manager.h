@@ -24,18 +24,22 @@
 #include "scene.h"
 #include "clipboard.h"
 
+class Scene;
+class Clipboard;
 
 class SceneManager : public QObject
 {
     Q_OBJECT
 
     QList<Scene*> mScenesTrash;
+    QList<Scene*> mScenes;
+    int mCurrentSceneIndex;
     //QList<Object*> mObjectsClipboard;
     Scene* mSrcScene;
     
     public:
-        explicit SceneManager(QObject * parent=0);
-        explicit SceneManager(int width, int height, QObject * parent=0);
+        explicit SceneManager(QObject * parent=0, const QString& name="SceneManager");
+        explicit SceneManager(int width, int height, QObject * parent=0, const QString& name="SceneManager");
         ~SceneManager();
         Scene* createNewScene(const QString& name="");
         void addScene(Scene*) ;
@@ -58,24 +62,19 @@ class SceneManager : public QObject
         void removeScene(Scene*, bool del=false);
         void removeSceneAt(int, bool del=false);
         void insertScene(int, Scene*);
-        void setSceneWidth(int);
-        void setSceneHeight(int);
-        void setSceneSize(const QSize&);
+        QList<Scene*> scenes();
+        int count();
+        int size();
+        Scene* scene(int);
+        int currentSceneIndex();
+        Scene * currentScene();
+        QString validSceneName(QString name="");
+        bool contains(const QString& name);
+        bool isValidSceneName(const QString& name);
+        int indexOf(Scene*);
 
-        static int count();
-        static Scene* scene(int);
-        static int size();
-        static int indexOf(Scene*);
         static void setClipboard(Clipboard*);
         static Clipboard* clipboard();
-        static Scene * currentScene();
-        static int currentSceneIndex();
-        static QList<Scene*> scenes();
-        static QString validSceneName(QString name="");
-        static bool contains(const QString& name);
-        static bool isValidSceneName(const QString& name);
-        static void setInstance(SceneManager*);
-        static SceneManager* instance();
         
     signals:
         void resized(const QResizeEvent&);

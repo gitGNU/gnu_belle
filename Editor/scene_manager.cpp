@@ -21,25 +21,25 @@
 #include "utils.h"
 
 static QSize mSceneSize;
-static int mCurrentSceneIndex = -1;
-static QList<Scene*> mScenes = QList<Scene*>();
 static Clipboard *mClipboard = 0;
-static SceneManager* mInstance = 0;
 
-SceneManager::SceneManager(QObject * parent) :
+SceneManager::SceneManager(QObject * parent, const QString& name) :
     QObject(parent)
 {
     mSrcScene = 0;
+    mCurrentSceneIndex = -1;
     connect(this, SIGNAL(currentSceneChanged()), this, SLOT(onCurrentSceneChanged()));
+    setObjectName(name);
 }
 
-SceneManager::SceneManager(int width, int height, QObject * parent) :
+SceneManager::SceneManager(int width, int height, QObject * parent, const QString& name) :
     QObject(parent)
 {
     Scene::setWidth(width);
     Scene::setHeight(height);
     mCurrentSceneIndex = -1;
     connect(this, SIGNAL(currentSceneChanged()), this, SLOT(onCurrentSceneChanged()));
+    setObjectName(name);
 }
 
 
@@ -230,43 +230,4 @@ QString SceneManager::validSceneName(QString name)
 QList<Scene*> SceneManager::scenes()
 {
     return mScenes;
-}
-
-void SceneManager::setInstance(SceneManager * instance)
-{
-    mInstance = instance;
-}
-
-SceneManager* SceneManager::instance()
-{
-    return mInstance;
-}
-
-void SceneManager::setSceneWidth(int width)
-{
-    Scene::setWidth(width);
-    mSceneSize.setWidth(width);
-    int height = Scene::height();
-    for(int i=0; i < mScenes.size(); i++) {
-        mScenes[i]->resize(width, height);
-    }
-    emit resized(QResizeEvent(QSize(width, mSceneSize.height()), mSceneSize));
-}
-
-void SceneManager::setSceneHeight(int height)
-{
-    Scene::setHeight(height);
-    mSceneSize.setHeight(height);
-    int width = Scene::width();
-    for(int i=0; i < mScenes.size(); i++)
-        mScenes[i]->resize(width, height);
-    emit resized(QResizeEvent(QSize(mSceneSize.width(), height), mSceneSize));
-}
-
-void SceneManager::setSceneSize(const QSize& size)
-{
-    mSceneSize = size;
-    for(int i=0; i < mScenes.size(); i++)
-        mScenes[i]->resize(size.width(), size.height());
-    emit resized(QResizeEvent(size, mSceneSize));
 }
