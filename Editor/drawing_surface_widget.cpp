@@ -518,3 +518,8 @@ void DrawingSurfaceWidget::onObjectDestroyed()
     mObject = 0;
     setObject(0);
 }
+
+void DrawingSurfaceWidget::setSceneManager(SceneManager* sceneManager)
+{
+    mSceneManager = sceneManager;
+}

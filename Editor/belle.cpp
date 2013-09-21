@@ -57,10 +57,14 @@
 #include "simple_http_server.h"
 #include "save_project_dialog.h"
 
+static Belle* mInstance = 0;
+
 Belle::Belle(QWidget *widget)
     : QMainWindow(widget)
 {
     mUi.setupUi( this );
+
+    mInstance = this;
 
     //init webview
     mWebView = new QWebView(this);
@@ -74,10 +78,25 @@ Belle::Belle(QWidget *widget)
     //setup scenes
     Scene::setEditorWidget(new SceneEditorWidget);
     //init scene manager instance
-    SceneManager::setInstance(new SceneManager(WIDTH, HEIGHT, this));
+    mDefaultSceneManager = new SceneManager(WIDTH, HEIGHT, this, "DefaultSceneManager");
+    mPauseSceneManager = new SceneManager(WIDTH, HEIGHT, this, "PauseSceneManager");
+    mCurrentSceneManager = mDefaultSceneManager;
     //connect(SceneManager::instance(), SIGNAL(selectionChanged(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
-    connect(SceneManager::instance(), SIGNAL(sceneRemoved(int)), this, SLOT(onSceneRemoved(int)));
-    SceneManager::setClipboard(new Clipboard(SceneManager::instance()));
+    connect(mDefaultSceneManager, SIGNAL(sceneRemoved(int)), this, SLOT(onSceneRemoved(int)));
+    connect(mPauseSceneManager, SIGNAL(sceneRemoved(int)), this, SLOT(onSceneRemoved(int)));
+    mDefaultSceneManager->setClipboard(new Clipboard(this));
+    mPauseSceneManager->setClipboard(new Clipboard(this));
+
+    //init drawing widget
+    QLayout *vLayout = centralWidget()->layout();
+    QScrollArea * scrollArea = new QScrollArea(mUi.centralwidget);
+    mDrawingSurfaceWidget = new DrawingSurfaceWidget(mDefaultSceneManager);
+    connect(mDrawingSurfaceWidget, SIGNAL(selectionChanged(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
+    scrollArea->setWidget(mDrawingSurfaceWidget);
+    scrollArea->setContentsMargins(0, 0, 0, 0);
+    scrollArea->viewport()->installEventFilter(mDrawingSurfaceWidget);
+    scrollArea->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    vLayout->addWidget(scrollArea);
 
     //setup default data
     QVariantMap data;
@@ -91,6 +110,7 @@ Belle::Belle(QWidget *widget)
     Engine::guessPath();
 
     mUi.scenesWidget->setIconSize(QSize(64, 48));
+    mUi.pauseScenesWidget->setIconSize(QSize(64, 48));
 
     //create editors
     Object::setObjectEditorWidget(new ObjectEditorWidget());
@@ -105,16 +125,6 @@ Belle::Belle(QWidget *widget)
 
     if (layout)
         layout->addWidget(mActionsView);
-
-    QLayout *vLayout = centralWidget()->layout();
-    QScrollArea * scrollArea = new QScrollArea(mUi.centralwidget);
-    mDrawingSurfaceWidget = new DrawingSurfaceWidget(SceneManager::instance());
-    connect(mDrawingSurfaceWidget, SIGNAL(selectionChanged(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
-    scrollArea->setWidget(mDrawingSurfaceWidget);
-    scrollArea->setContentsMargins(0, 0, 0, 0);
-    scrollArea->viewport()->installEventFilter(mDrawingSurfaceWidget);
-    scrollArea->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    vLayout->addWidget(scrollArea);
 
     //connect(mDrawingSurfaceWidget, SIGNAL(paintFinished()), this, SLOT(updateSceneIcon()));
     connect(mActionsView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(onActionsViewClicked(const QModelIndex&)));
@@ -135,14 +145,23 @@ Belle::Belle(QWidget *widget)
     mUi.twObjects->topLevelItem(3)->setIcon(0, QIcon(":/media/talk-baloon.png"));
     mUi.twObjects->topLevelItem(4)->setIcon(0, QIcon(":/media/button.png"));
 
+    //scenes' widget
     //connect(mUi.scenesWidget, SIGNAL(itemDoubleClicked (QTreeWidgetItem *, int)), this, SLOT(onmUi.scenesWidgetDoubleClicked(QTreeWidgetItem *, int)));
     connect(mUi.scenesWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(onScenesWidgetItemChanged(QTreeWidgetItem*,int)));
     connect(mUi.scenesWidget, SIGNAL(itemClicked (QTreeWidgetItem *, int)), this, SLOT(onSceneItemClicked(QTreeWidgetItem*, int)));
     connect(mUi.scenesWidget, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onScenesWidgetCustomContextMenuRequested(const QPoint&)));
+    //pause scenes widget
+    connect(mUi.pauseScenesWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(onScenesWidgetItemChanged(QTreeWidgetItem*,int)));
+    connect(mUi.pauseScenesWidget, SIGNAL(itemClicked (QTreeWidgetItem *, int)), this, SLOT(onSceneItemClicked(QTreeWidgetItem*, int)));
+    connect(mUi.pauseScenesWidget, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onScenesWidgetCustomContextMenuRequested(const QPoint&)));
+
     connect(mUi.addSceneBtn, SIGNAL(clicked()), this, SLOT(addScene()));
     connect(mUi.delSceneBtn, SIGNAL(clicked()), this, SLOT(deleteScene()));
     connect(mUi.twObjects, SIGNAL(itemDoubleClicked (QTreeWidgetItem *, int)), this, SLOT(onTwObjectsDoubleClicked(QTreeWidgetItem *, int)));
     connect(mUi.runAction, SIGNAL(triggered()), this, SLOT(onRunTriggered()));
+    connect(mUi.addPauseSceneBtn, SIGNAL(clicked()), this, SLOT(addScene()));
+    connect(mUi.delPauseSceneBtn, SIGNAL(clicked()), this, SLOT(deleteScene()));
+
 
     //resources viewer
     mUi.resourcesTabWidget->setCurrentIndex(1);
@@ -222,11 +241,9 @@ void Belle::saveSettings()
 {
     //save settings
     mSettings->beginGroup("Window");
-    qDebug() << mUi.showActionsAction->isChecked();
     mSettings->setValue("Geometry", this->saveGeometry());
     mSettings->setValue("State", this->saveState());
     mSettings->endGroup();
-    qDebug() << mUi.showActionsAction->isChecked();
     mSettings->beginGroup("Project");
     if (Engine::isValid())
         mSettings->setValue("enginePath", Engine::path());
@@ -322,15 +339,13 @@ void Belle::onEditResource(Object* object)
 
 void Belle::onResourcesDoubleClicked(const QModelIndex& index)
 {
-    if (! SceneManager::currentScene())
+    Scene* scene = mCurrentSceneManager->currentScene();
+
+    if (! scene)
         return;
 
     const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(index.model());
     if (! model)
-        return;
-
-    Scene* scene = SceneManager::currentScene();
-    if (! scene)
         return;
 
     Object* resource = mResourcesView->object(index);
@@ -351,13 +366,14 @@ void Belle::onActionCatalogClicked(const QModelIndex& index)
 
 void Belle::onScenesWidgetItemChanged(QTreeWidgetItem* item, int column)
 {
-    int index = mUi.scenesWidget->indexOfTopLevelItem(item);
-    Scene* currScene = SceneManager::scene(index);
+    int index = item->treeWidget()->indexOfTopLevelItem(item);
+    SceneManager* sceneManager = this->sceneManager(item->treeWidget()->objectName());
+    Scene* currScene = sceneManager->scene(index);
 
     if (! currScene)
         return;
 
-    if (SceneManager::isValidSceneName(item->text(0)))
+    if (sceneManager->isValidSceneName(item->text(0)))
         currScene->setObjectName(item->text(0));
     else
         item->setText(0, currScene->objectName());
@@ -365,81 +381,105 @@ void Belle::onScenesWidgetItemChanged(QTreeWidgetItem* item, int column)
 
 void Belle::updateActions()
 {
-    if (SceneManager::instance()->currentScene()) {
+    if (currentScene()) {
         ActionsModel *model = qobject_cast<ActionsModel*> (mActionsView->model());
         if (model) {
-            model->setActions(SceneManager::instance()->currentScene()->actions());
+            model->setActions(currentScene()->actions());
         }
     }
 }
 
-void Belle::addScene(Scene* scene)
+void Belle::addScene(Scene* scene, SceneManager* sceneManager)
 {
-    //update previous scene icon
-    if (SceneManager::currentScene())
-        updateSceneIcon();
-    if (! scene)
-        scene = SceneManager::instance()->createNewScene();
-    else
-        SceneManager::instance()->addScene(scene);
+    if (! sceneManager) {
+        if (sender())
+            sceneManager = this->sceneManager(sender()->objectName());
+        else
+            sceneManager = mCurrentSceneManager;
+    }
 
-    createSceneTreeItem(scene);
-    updateSceneEditorWidget();
+    if (! sceneManager)
+        return;
+
+    //update previous scene icon
+    if (sceneManager->currentScene())
+        updateSceneIcon(sceneManager->currentScene());
+
+    bool edit = false;
+    if (! scene) {
+        edit = true; //edit name after adding
+        scene = sceneManager->createNewScene();
+    }
+    else
+        sceneManager->addScene(scene);
+
+    createSceneTreeItem(scenesWidget(sceneManager), scene, edit);
+    updateSceneEditorWidget(scene);
     updateActions();
     mDrawingSurfaceWidget->update();
 }
 
-QTreeWidgetItem* Belle::createSceneTreeItem(Scene* scene)
+QTreeWidgetItem* Belle::createSceneTreeItem(QTreeWidget* widget, Scene* scene, bool edit)
 {
-    QTreeWidgetItem * item = new QTreeWidgetItem(mUi.scenesWidget, QStringList() << scene->objectName());
-    mUi.scenesWidget->blockSignals(true);
+    QTreeWidgetItem * item = new QTreeWidgetItem(widget, QStringList() << scene->objectName());
+    widget->blockSignals(true);
     item->setFlags(item->flags() | Qt::ItemIsEditable);
     item->setIcon(0, scene->icon());
-    mUi.scenesWidget->blockSignals(false);
-    mUi.scenesWidget->setCurrentItem(item);
-    mUi.scenesWidget->editItem(item);
+    widget->blockSignals(false);
+    widget->setCurrentItem(item);
+    if (edit)
+        widget->editItem(item);
 
     return item;
 }
 
 void Belle::onSceneRemoved(int index)
 {
-    if (index >= 0 && index < mUi.scenesWidget->topLevelItemCount())
-        mUi.scenesWidget->takeTopLevelItem(index);
+    QTreeWidget * scenesWidget = this->scenesWidget(sender()->objectName());
+    if (index >= 0 && index < scenesWidget->topLevelItemCount())
+        scenesWidget->takeTopLevelItem(index);
 }
 
 void Belle::deleteScene()
 {
-    if (SceneManager::instance()->count() == 1)
+    if (mCurrentSceneManager->count() == 1)
         return;
 
-    int index = mUi.scenesWidget->indexOfTopLevelItem(mUi.scenesWidget->currentItem());
+    QTreeWidget * scenesWidget = this->scenesWidget(sender()->objectName());
+    int index = scenesWidget->indexOfTopLevelItem(scenesWidget->currentItem());
 
     if (index != -1)
-        SceneManager::instance()->removeSceneAt(index, true);
+        mCurrentSceneManager->removeSceneAt(index, true);
 }
 
 void Belle::onSceneItemClicked(QTreeWidgetItem *item, int column)
 {
+    QTreeWidget *widget = item->treeWidget();
+    SceneManager * currSceneManager = this->sceneManager(widget->objectName());
+    int prevIndex = currSceneManager->currentSceneIndex();
+    int currIndex = widget->indexOfTopLevelItem(item);
+
     mDrawingSurfaceWidget->setObject(0);
-    updateSceneIcon(); //update current scene icon
-    int prevIndex = SceneManager::currentSceneIndex();
-    SceneManager::instance()->setCurrentSceneIndex(mUi.scenesWidget->indexOfTopLevelItem(item));
-    if (SceneManager::currentScene())
-        SceneManager::currentScene()->show();
-    updateSceneEditorWidget();
-    if (prevIndex != SceneManager::currentSceneIndex())
+
+    if (currSceneManager != mCurrentSceneManager || prevIndex != currIndex) {
+        updateSceneIcon(mCurrentSceneManager->currentScene()); //update current scene icon
+
+        mCurrentSceneManager = currSceneManager;
+        if (mCurrentSceneManager->currentScene())
+            mCurrentSceneManager->currentScene()->show();
+        updateSceneEditorWidget(mCurrentSceneManager->currentScene());
         updateActions();
-    mDrawingSurfaceWidget->update();
+        mDrawingSurfaceWidget->setSceneManager(currSceneManager);
+        mDrawingSurfaceWidget->update();
+    }
 }
 
 void Belle::updateSceneIcon(Scene* scene)
 {
-    scene =  scene ? scene : SceneManager::currentScene();
     //update previous icon
     if (scene) {
         scene->hide(); //focus out first to update pixmap
-        QTreeWidgetItem *prevItem = mUi.scenesWidget->topLevelItem(SceneManager::indexOf(scene));
+        QTreeWidgetItem *prevItem = scenesWidget(mCurrentSceneManager)->topLevelItem(mCurrentSceneManager->indexOf(scene));
         if (prevItem)
             prevItem->setIcon(0, scene->icon());
     }
@@ -447,8 +487,6 @@ void Belle::updateSceneIcon(Scene* scene)
 
 void Belle::updateSceneEditorWidget(Scene* scene)
 {
-    scene =  scene ? scene : SceneManager::currentScene();
-
     if (scene) {
         switchWidgetInPropertiesWidget(Scene::editorWidget());
         if (Scene::editorWidget()) {
@@ -459,7 +497,7 @@ void Belle::updateSceneEditorWidget(Scene* scene)
 
 void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
 {
-    Scene *scene = SceneManager::instance()->currentScene();
+    Scene *scene = currentScene();
     if (! scene)
         return;
 
@@ -575,8 +613,8 @@ void Belle::onActionsViewClicked(const QModelIndex& index)
 
 void Belle::onNewAction(Action * action)
 {
-    if (SceneManager::instance()->currentScene()) {
-        SceneManager::instance()->currentScene()->appendAction(action);
+    if (currentScene()) {
+        currentScene()->appendAction(action);
         ActionsModel * actionsModel = qobject_cast<ActionsModel*> (mActionsView->model());
         if (actionsModel)
             actionsModel->appendAction(action);
@@ -764,7 +802,8 @@ void Belle::openFileOrProject()
     if (data.type() != QVariant::Map)
         return;
 
-    SceneManager::instance()->removeScenes(true);
+    mDefaultSceneManager->removeScenes(true);
+    mPauseSceneManager->removeScenes(true);
     ResourceManager::instance()->removeResources(true);
     ResourceManager::setRelativePath(QFileInfo(fileName).absolutePath());
     mCurrentRunDirectory = "";
@@ -773,20 +812,38 @@ void Belle::openFileOrProject()
     setNovelProperties(object);
     ResourceManager::importResources(object);
 
+    //pause screen import
+    if (object.contains("pauseScreen") && object.value("pauseScreen").type() == QVariant::Map) {
+        QVariantMap pauseScreen = object.value("pauseScreen").toMap();
+        if (pauseScreen.contains("scenes") && pauseScreen.value("scenes").type() == QVariant::List) {
+            QVariantList scenes = pauseScreen.value("scenes").toList();
+            mCurrentSceneManager = mPauseSceneManager;
+            importScenes(scenes, mPauseSceneManager);
+            mPauseSceneManager->setCurrentSceneIndex(0);
+            //scenesWidget(mPauseSceneManager)->setE
+        }
+    }
+
     if (object.contains("scenes") && object.value("scenes").type() == QVariant::List) {
         QVariantList scenes = object.value("scenes").toList();
-        Scene *scene = 0;
-
-        for(int i=0; i < scenes.size(); i++) {
-            if (scenes[i].type() == QVariant::Map) {
-                scene = new Scene(scenes[i].toMap(), SceneManager::instance());
-                addScene(scene);
-            }
-        }
-
-        SceneManager::instance()->setCurrentSceneIndex(0);
+        mCurrentSceneManager = mDefaultSceneManager;
+        importScenes(scenes, mDefaultSceneManager);
+        mDefaultSceneManager->setCurrentSceneIndex(0);
         ResourceManager::setRelativePath("");
         updateActions();
+    }
+
+}
+
+void Belle::importScenes(const QVariantList& scenes, SceneManager* sceneManager)
+{
+    Scene *scene = 0;
+
+    for(int i=0; i < scenes.size(); i++) {
+        if (scenes[i].type() == QVariant::Map) {
+            scene = new Scene(scenes[i].toMap(), sceneManager);
+            addScene(scene, sceneManager);
+        }
     }
 }
 
@@ -837,11 +894,21 @@ void Belle::exportGameFile(const QString& path)
     jsonFile.insert("resources", res);
 
     QVariantList scenes;
-    for (int i=0; i < SceneManager::instance()->size(); i++) {
-        scenes.append(SceneManager::instance()->scene(i)->toJsonObject());
+    for (int i=0; i < mDefaultSceneManager->size(); i++) {
+        scenes.append(mDefaultSceneManager->scene(i)->toJsonObject());
     }
 
     jsonFile.insert("scenes", scenes);
+
+    //export pause screen scenes
+    scenes.clear();
+    for (int i=0; i < mPauseSceneManager->size(); i++) {
+        scenes.append(mPauseSceneManager->scene(i)->toJsonObject());
+    }
+
+    QVariantMap pauseScreen;
+    pauseScreen.insert("scenes", scenes);
+    jsonFile.insert("pauseScreen", pauseScreen);
 
     file.write(QtJson::Json::serialize(jsonFile));
     file.close();
@@ -858,15 +925,18 @@ void Belle::onScenesWidgetCustomContextMenuRequested(const QPoint& point)
 {
     QMenu menu;
 
+    SceneManager * sceneManager = this->sceneManager(sender()->objectName());
+    mCurrentSceneManager = sceneManager;
+
     if (mUi.scenesWidget->itemAt(point)) {
         menu.addAction(mCopyScene);
         menu.addAction(mCutScene);
     }
 
-    if (SceneManager::clipboard()->hasScenes())
+    if (sceneManager->clipboard()->hasScenes())
         menu.addAction(mPasteScene);
 
-    if (SceneManager::scenes().count() > 1)
+    if (sceneManager->scenes().count() > 1)
         menu.addAction(mDeleteScene);
 
     menu.exec(mUi.scenesWidget->mapToGlobal(point));
@@ -880,36 +950,37 @@ void Belle::copyScene()
 
     foreach(QTreeWidgetItem* item , mUi.scenesWidget->selectedItems()) {
         index = mUi.scenesWidget->indexOfTopLevelItem(item);
-        scene = SceneManager::scene(index);
+        scene = mCurrentSceneManager->scene(index);
         if (scene)
             scenes.append(scene);
     }
 
-    SceneManager::instance()->clipboard()->add(scenes, Clipboard::Copy);
+    mCurrentSceneManager->clipboard()->add(scenes, Clipboard::Copy);
 }
 
 void Belle::cutScene()
 {
-    SceneManager::instance()->clipboard()->add(SceneManager::currentScene(), Clipboard::Cut);
+    mCurrentSceneManager->clipboard()->add(mCurrentSceneManager->currentScene(), Clipboard::Cut);
 }
 
 void Belle::pasteScene()
 {
-    Clipboard::Operation op = SceneManager::clipboard()->operation();
-    QList<Scene*> scenes = SceneManager::clipboard()->scenes();
+    Clipboard::Operation op = mCurrentSceneManager->clipboard()->operation();
+    QList<Scene*> scenes = mCurrentSceneManager->clipboard()->scenes();
 
     if (scenes.isEmpty())
         return;
 
-    int index = mUi.scenesWidget->indexOfTopLevelItem(mUi.scenesWidget->currentItem());
+    QTreeWidget* widget = this->scenesWidget(mCurrentSceneManager->objectName());
+    int index = widget->indexOfTopLevelItem(widget->currentItem());
 
     foreach(Scene* scene, scenes) {
 
         if (op == Clipboard::Copy) {
-            SceneManager::instance()->insertScene(index, scene->copy());
+            mCurrentSceneManager->insertScene(index, scene->copy());
         }
         else if (op == Clipboard::Cut) {
-            SceneManager::instance()->insertScene(index, scene);
+            mCurrentSceneManager->insertScene(index, scene);
         }
         else
             continue;
@@ -917,53 +988,54 @@ void Belle::pasteScene()
         index += 1;
     }
 
-    updateScenesWidget(index-1, true, true);
+    updateScenesWidget(widget, index-1, true, true);
     SceneManager::clipboard()->clear();
 }
 
 
 void Belle::onSceneUpped()
 {
-    Scene * scene = SceneManager::currentScene();
-    int currIndex = SceneManager::currentSceneIndex();
+    SceneManager* sceneManager = this->sceneManager(sender()->objectName());
+    Scene * scene = sceneManager->currentScene();
+    int currIndex = sceneManager->currentSceneIndex();
 
     if (! scene || currIndex == 0)
         return;
 
-    SceneManager::instance()->insertScene(currIndex-1, scene);
+    sceneManager->insertScene(currIndex-1, scene);
 
-    updateScenesWidget(currIndex-1, true);
+    updateScenesWidget(this->scenesWidget(sceneManager->objectName()), currIndex-1, true);
 }
 
 void Belle::onSceneDowned()
 {
-    Scene * scene = SceneManager::currentScene();
-    int currIndex = SceneManager::currentSceneIndex();
-    if (! scene || currIndex == SceneManager::size()-1)
+    SceneManager* sceneManager = this->sceneManager(sender()->objectName());
+    Scene * scene = sceneManager->currentScene();
+    int currIndex = sceneManager->currentSceneIndex();
+    if (! scene || currIndex == sceneManager->size()-1)
         return;
 
-    SceneManager::instance()->insertScene(currIndex+1, scene);
+    sceneManager->insertScene(currIndex+1, scene);
 
-    updateScenesWidget(currIndex+1, true);
+    updateScenesWidget(this->scenesWidget(sceneManager->objectName()), currIndex+1, true);
 }
 
-void Belle::updateScenesWidget(int currIndex, bool select, bool edit)
+void Belle::updateScenesWidget(QTreeWidget* widget, int currIndex, bool select, bool edit)
 {
-    mUi.scenesWidget->clear();
-    QList<Scene*> scenes = SceneManager::scenes();
+    widget->clear();
+    QList<Scene*> scenes = this->sceneManager(widget->objectName())->scenes();
 
     for(int i=0; i < scenes.size(); i++) {
-       createSceneTreeItem(scenes[i]);
+       createSceneTreeItem(widget, scenes[i]);
     }
 
     if (currIndex >= 0 && currIndex < scenes.size()) {
         QTreeWidgetItem* item = mUi.scenesWidget->topLevelItem(currIndex);
         if (select)
-            mUi.scenesWidget->setCurrentItem(item);
+            widget->setCurrentItem(item);
         if (edit)
-            mUi.scenesWidget->editItem(item);
+            widget->editItem(item);
     }
-
 }
 
 void Belle::onPropertiesTriggered()
@@ -1024,17 +1096,21 @@ void Belle::setNovelProperties(const QVariantMap& _data)
     }
 
     if (data.contains("width") && data.value("width").canConvert(QVariant::Int)) {
-        mNovelData.insert("width", data.value("width").toInt());
-        mWebView->resize(data.value("width").toInt(), mWebView->height());
-        if (SceneManager::instance())
-            SceneManager::instance()->setSceneWidth(data.value("width").toInt());
+        int width = data.value("width").toInt();
+        mNovelData.insert("width", width);
+        mWebView->resize(width, mWebView->height());
+        Scene::setWidth(width);
+        //SceneManager::setSceneWidth(width);
+        mDrawingSurfaceWidget->setFixedWidth(width);
     }
 
     if (data.contains("height") && data.value("height").canConvert(QVariant::Int)) {
-        mNovelData.insert("height", data.value("height").toInt());
-        mWebView->resize(mWebView->width(), data.value("height").toInt());
-        if (SceneManager::instance())
-            SceneManager::instance()->setSceneHeight(data.value("height").toInt());
+        int height = data.value("height").toInt();
+        mNovelData.insert("height", height);
+        mWebView->resize(mWebView->width(), height);
+        Scene::setHeight(height);
+        //SceneManager::setSceneHeight(height);
+        mDrawingSurfaceWidget->setFixedHeight(height);
     }
 
     if (data.contains("textSpeed") && data.value("textSpeed").canConvert(QVariant::Int)) {
@@ -1061,3 +1137,33 @@ void Belle::setNovelProperties(const QVariantMap& _data)
     }
 }
 
+Scene* Belle::currentScene()
+{
+    if (mCurrentSceneManager)
+        return mCurrentSceneManager->currentScene();
+    return 0;
+}
+
+SceneManager* Belle::sceneManager(const QString& name)
+{
+    if (name.contains("pause", Qt::CaseInsensitive))
+        return mPauseSceneManager;
+    return mDefaultSceneManager;
+}
+
+QTreeWidget* Belle::scenesWidget(const QString& name)
+{
+    if (name.contains("pause", Qt::CaseInsensitive))
+        return mUi.pauseScenesWidget;
+    return mUi.scenesWidget;
+}
+
+QTreeWidget* Belle::scenesWidget(SceneManager* sceneManager)
+{
+    return this->scenesWidget(sceneManager->objectName());
+}
+
+Belle* Belle::instance()
+{
+    return mInstance;
+}

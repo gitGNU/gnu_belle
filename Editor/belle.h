@@ -51,11 +51,16 @@ class Belle : public QMainWindow
     SimpleHttpServer mHttpServer;
     QString mSavePath;
     QWebView *mWebView;
+    SceneManager* mCurrentSceneManager;
+    SceneManager* mDefaultSceneManager;
+    SceneManager* mPauseSceneManager;
     
     public:
         explicit Belle(QWidget *widget=0);
         ~Belle();
         bool eventFilter(QObject *, QEvent *);
+        Scene* currentScene();
+        static Belle* instance();
 
     signals:
         void newAction(Action*);
@@ -65,7 +70,7 @@ class Belle : public QMainWindow
         void onScenesWidgetItemChanged(QTreeWidgetItem*, int);
         void onTwObjectsDoubleClicked(QTreeWidgetItem *, int);
         void onTwObjectsClicked(QTreeWidgetItem *, int);
-        void addScene(Scene* scene=0);
+        void addScene(Scene* scene=0, SceneManager*sceneManager=0);
         void deleteScene();
         void onSelectedObjectChanged(Object*);
         void onActionCatalogClicked(const QModelIndex&);
@@ -100,15 +105,19 @@ private:
         void switchWidgetInPropertiesWidget(QWidget*);
         void removeWidgetsInPropertiesWidget();
         void addWidgetToPropertiesWidget(QWidget*);
-        QTreeWidgetItem* createSceneTreeItem(Scene*);
-        void updateScenesWidget(int currIndex=-1, bool select=false, bool edit=false);
+        QTreeWidgetItem* createSceneTreeItem(QTreeWidget*, Scene*, bool edit=false);
+        void updateScenesWidget(QTreeWidget* widget, int currIndex=-1, bool select=false, bool edit=false);
         void changeProjectTitle(const QString&);
         bool checkEnginePath();
         void setNovelProperties(const QVariantMap&);
-        void updateSceneIcon(Scene* scene=0);
-        void updateSceneEditorWidget(Scene* scene=0);
+        void updateSceneIcon(Scene* scene);
+        void updateSceneEditorWidget(Scene* scene);
         void restoreSettings();
         void saveSettings();
+        void importScenes(const QVariantList&, SceneManager*);
+        QTreeWidget* scenesWidget(const QString&);
+        QTreeWidget* scenesWidget(SceneManager*);
+        SceneManager* sceneManager(const QString&);
 
 };
 
