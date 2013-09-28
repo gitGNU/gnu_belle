@@ -120,14 +120,14 @@ void ResourcesView::removeObject(Object * object, bool del)
 
 /*void ResourcesView::onItemDoubleClicked(const QModelIndex & index)
 {
-    if (! SceneManager::currentScene())
+    if (! SceneManagercurrentScene())
         return;
 
     const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(index.model());
     if (! model)
         return;
 
-    Scene* scene = SceneManager::currentScene();
+    Scene* scene = SceneManagercurrentScene();
     if (! scene)
         return;
 

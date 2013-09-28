@@ -99,6 +99,40 @@ QVariantMap Object::fillWithResourceData(QVariantMap data)
     return data;
 }
 
+Scene * Object::scene()
+{
+    Object* object = this;
+
+    while(object->parent()) {
+        Scene* scene = qobject_cast<Scene*>(object->parent());
+        if (scene)
+            return scene;
+        object = qobject_cast<Object*>(object->parent());
+        if (! object)
+            break;
+    }
+
+    return 0;
+}
+
+bool Object::isValidName(const QString& name)
+{
+    if (name.isEmpty())
+        return false;
+
+    //check if parent is the scene
+    Scene* scene = this->scene();
+    if (scene)
+        return scene->isValidObjectName(name);
+
+    //check if parent is the resource manager
+    ResourceManager* resourceManager = qobject_cast<ResourceManager*>(parent());
+    if (resourceManager)
+        return resourceManager->isValidName(name);
+
+    return true;
+}
+
 bool Object::contains(qreal x, qreal y)
 {
     if (mSceneRect.contains(x, y) || containsResizeRectAt(x, y))
@@ -1113,45 +1147,6 @@ void Object::setDefaultFont(const QFont& font)
 QFont Object::defaultFont()
 {
     return mDefaultFont;
-}
-
-Scene* Object::scene()
-{
-    //shouldn't happen, but just in case
-    if (! this->parent())
-        return SceneManager::currentScene();
-
-    //usual case - object's parent is the scene
-    if (qobject_cast<Scene*>(this->parent()))
-        return qobject_cast<Scene*>(this->parent());
-
-    //in case this object is inside another object
-    if (qobject_cast<Object*>(this->parent())) {
-        Object* object = qobject_cast<Object*>(this->parent());
-        if (object->scene())
-            return object->scene();
-    }
-
-    //shouldn't happen either, but just in case
-    return SceneManager::currentScene();
-}
-
-bool Object::isValidName(const QString& name)
-{
-    if (name.isEmpty())
-        return false;
-
-    //check if parent is the scene
-    Scene* scene = qobject_cast<Scene*>(parent());
-    if (scene)
-        return scene->isValidObjectName(name);
-
-    //check if parent is the resource manager
-    ResourceManager* resourceManager = qobject_cast<ResourceManager*>(parent());
-    if (resourceManager)
-        return resourceManager->isValidName(name);
-
-    return true;
 }
 
 void Object::onResourceChanged(const QVariantMap & data)
