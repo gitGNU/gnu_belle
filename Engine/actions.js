@@ -1376,6 +1376,26 @@ ChangeGameVariable.prototype.execute = function()
     this.setFinished(true);
 }
 
+/************* Run Script *****************/
+
+function RunScript(data)
+{
+    Action.call(this, data);
+    
+    this.code = "";
+    
+    if ("script" in data)
+        this.code = data["script"];
+}
+
+belle.utils.extend(Action, RunScript);
+
+RunScript.prototype.execute = function()
+{   
+    eval(this.code);
+    this.setFinished(true);
+}
+
 //Expose objects
 actions.Fade = Fade;
 actions.Slide = Slide;
@@ -1394,6 +1414,7 @@ actions.StopSound = StopSound;
 actions.ShowMenu = ShowMenu;
 actions.GetUserInput = GetUserInput;
 actions.ChangeGameVariable = ChangeGameVariable;
+actions.RunScript = RunScript;
 
 }(belle.actions));
 
