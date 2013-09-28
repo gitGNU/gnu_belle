@@ -107,7 +107,9 @@ HEADERS      += belle.h\
     animationimage.h \
     choosefontwidget.h \
     simple_http_server.h \
-    save_project_dialog.h
+    save_project_dialog.h \
+    actions/runscript.h \
+    actions/runscript_editorwidget.h
                 
 
 SOURCES      += main.cpp\
@@ -198,6 +200,8 @@ SOURCES      += main.cpp\
     animationimage.cpp \
     choosefontwidget.cpp \
     simple_http_server.cpp \
-    save_project_dialog.cpp
+    save_project_dialog.cpp \
+    actions/runscript.cpp \
+    actions/runscript_editorwidget.cpp
 
 RESOURCES += media.qrc

@@ -36,6 +36,7 @@
 #include "end_novel.h"
 #include "change_game_variable.h"
 #include "change_background.h"
+#include "runscript.h"
 
 ActionCatalogWidget::ActionCatalogWidget(QWidget *parent) :
     PropertiesWidget(parent, 1)
@@ -70,6 +71,7 @@ ActionCatalogWidget::ActionCatalogWidget(QWidget *parent) :
     beginGroup(tr("Scripting"));
     appendRow(GetUserInput::Info.icon, GetUserInput::Info.name);
     appendRow(ChangeGameVariable::Info.icon, ChangeGameVariable::Info.name);
+    appendRow(RunScript::Info.icon, RunScript::Info.name);
     endGroup();
 
     setIconSize(QSize(22, 22));
@@ -116,6 +118,7 @@ void ActionCatalogWidget::onDoubleClick(const QModelIndex & index)
     case Actions::EndNovel: action = new EndNovel(); break;
     case Actions::GetUserInput: action = new GetUserInput(); break;
     case Actions::ChangeGameVariable: action = new ChangeGameVariable(); break;
+    case Actions::RunScript: action = new RunScript(); break;
     }
 
     if (action)

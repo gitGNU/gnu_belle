@@ -39,7 +39,8 @@ namespace Actions {
         PlaySound,
         StopSound,
         GetUserInput,
-        ChangeGameVariable
+        ChangeGameVariable,
+        RunScript
     };
 }
 

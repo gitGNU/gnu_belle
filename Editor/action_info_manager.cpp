@@ -36,6 +36,7 @@
 #include "change_game_variable.h"
 #include "change_background.h"
 #include "end_novel.h"
+#include "runscript.h"
 
 QList<Action*> mActionsCatalog = QList<Action*>();
 QHash<QString, QIcon> mTypeToIcon;
@@ -66,7 +67,7 @@ void ActionInfoManager::initEditorWidgets()
     StopSound::setStopSoundEditorWidget(new StopSoundEditorWidget());
     ChangeGameVariable::setChangeGameVariableEditorWidget(new ChangeGameVariableEditorWidget);
     ChangeBackground::setChangeBackgroundEditorWidget(new ChangeBackgroundEditorWidget);
-
+    RunScript::setRunScriptEditorWidget(new RunScriptEditorWidget);
 }
 
 void ActionInfoManager::init()
@@ -100,6 +101,7 @@ void ActionInfoManager::init()
     ChangeGameVariable::Info = ActionInfo(QIcon(":/media/script.png"), "ChangeGameVariable", tr("Change Game Variable"));
     ChangeBackground::Info = ActionInfo(QIcon(":/media/image.png"), "ChangeBackground", tr("Change Background"));
     EndNovel::Info = ActionInfo(QIcon(":/media/end-novel.png"), "EndNovel", tr("End Novel"));
+    RunScript::Info = ActionInfo(QIcon(":/media/script.png"), "RunScript", tr("Run Script"));
 
     mTypeToIcon.insert("Action", QIcon());
     mTypeToIcon.insert("Branch", QIcon(":/media/branch.png"));
@@ -117,6 +119,7 @@ void ActionInfoManager::init()
     mTypeToIcon.insert("ShowMenu", QIcon(":/media/menu.png"));
     mTypeToIcon.insert("PlaySound", QIcon(":/media/sound.png"));
     mTypeToIcon.insert("StopSound", QIcon(":/media/no-sound.png"));
+    mTypeToIcon.insert("RunScript", QIcon(":/media/script.png"));
 
     initEditorWidgets();
 
@@ -197,6 +200,8 @@ Action* ActionInfoManager::typeToAction(const QVariant& data, QObject* parent)
         return new StopSound(actionMap, parent);
     else if (type == "ChangeGameVariable")
         return new ChangeGameVariable(actionMap, parent);
+    else if (type == "RunScript")
+        return new RunScript(actionMap, parent);
 
     return 0;
 }
@@ -256,6 +261,9 @@ void ActionInfoManager::destroy()
 
     if (ChangeBackground::changeBackgroundEditorWidget())
         ChangeBackground::changeBackgroundEditorWidget()->deleteLater();
+
+    if (RunScript::runScriptEditorWidget())
+        RunScript::runScriptEditorWidget()->deleteLater();
 
     for(int i=0; i < mActionsCatalog.size(); i++)
         mActionsCatalog[i]->deleteLater();
