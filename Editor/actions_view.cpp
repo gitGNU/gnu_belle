@@ -224,8 +224,7 @@ void ActionsView::onContextMenuRequested(const QPoint & point)
 
 void ActionsView::onDeleteAction()
 {
-    Belle * belle = qobject_cast<Belle*>(parent());
-    Scene* scene = belle->currentScene();
+    Scene* scene = Belle::instance()->currentScene();
     if (scene) {
         QModelIndexList indexes = selectedIndexes();
         ActionsModel* model = qobject_cast<ActionsModel*>(this->model());
