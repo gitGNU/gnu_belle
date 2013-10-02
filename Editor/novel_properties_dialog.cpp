@@ -20,6 +20,7 @@
 #include <QDebug>
 #include <QDesktopServices>
 #include <QFontDatabase>
+#include <QMessageBox>
 
 #include "engine.h"
 
@@ -112,13 +113,19 @@ void NovelPropertiesDialog::onEnginePathChangeRequest()
 
 void NovelPropertiesDialog::setEnginePath(const QString & path)
 {
+    if (path.isEmpty())
+        return;
+
     mUi.engineDirectoryEdit->setText(path);
 
     if (Engine::isValidPath(path)) {
+        mUi.buttonBox->button(QDialogButtonBox::Ok)->setDisabled(false);
         mUi.engineDirectoryEdit->setStyleSheet("background-color: rgba(0, 255, 0, 100);");
         mUi.engineDirectoryEdit->setToolTip(tr("Valid engine folder"));
     }
     else {
+        QMessageBox::critical(this, tr("Invalid engine directory"), tr("The directory you choose doesn't seem to be a valid engine directory."));
+        mUi.buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
         mUi.engineDirectoryEdit->setToolTip(tr("Not a valid engine folder"));
         mUi.engineDirectoryEdit->setStyleSheet("background-color: rgba(255, 0, 0, 100);");
     }
