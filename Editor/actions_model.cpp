@@ -204,4 +204,12 @@ void ActionsModel::setCurrentAction(const QModelIndex & index)
         action->focusIn();
 
     mCurrentAction = action;
+
+    if (mCurrentAction)
+        connect(mCurrentAction, SIGNAL(destroyed()), this, SLOT(onCurrentActionDestroyed()));
+}
+
+void ActionsModel::onCurrentActionDestroyed()
+{
+    mCurrentAction = 0;
 }

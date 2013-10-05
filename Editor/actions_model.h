@@ -41,6 +41,7 @@ signals:
 public slots:
     void appendAction(Action*);
     void setCurrentAction(const QModelIndex&);
+    void onCurrentActionDestroyed();
 
 private slots:
     void updateView();
