@@ -753,7 +753,7 @@ QString Belle::exportProject(const QString& _path, bool toRun)
 
 void Belle::saveProject()
 {
-    if (mSavePath.isEmpty()) {
+    if (mSavePath.isEmpty() || ! QFile::exists(mSavePath)) {
         SaveProjectDialog saveProjectDialog(mNovelData.value("title").toString(), this);
         int res = saveProjectDialog.exec();
         if (res == QDialog::Accepted) {
@@ -806,6 +806,7 @@ void Belle::openFileOrProject()
     mPauseSceneManager->removeScenes(true);
     ResourceManager::instance()->removeResources(true);
     ResourceManager::setRelativePath(QFileInfo(fileName).absolutePath());
+    mSavePath = QFileInfo(fileName).absolutePath();
     mCurrentRunDirectory = "";
 
     QVariantMap object = data.toMap();
