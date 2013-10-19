@@ -207,7 +207,12 @@ function Object(info)
     this.borderColor = this.color;
     this.parent = parent ? parent : null;
     this.type = info["type"];
-
+    this.eventListeners = {
+        "mousepress" : [],
+        "mouserelease" : [],
+        "mousemove" : []
+    };
+    
     var actions;
     var action;
     var actionObject;
@@ -484,6 +489,16 @@ Object.prototype.mouseLeaveEvent = function(event)
         actions[i].reset();
  }
 
+Object.prototype.addEventListener = function(event, listener)
+{
+    if (event == "mousepress")
+        this.eventListeners["mousepress"].push(listener);
+    else if (event == "mouserelease")
+        this.eventListeners["mouserelease"].push(listener);
+    else if (event == "mousemove")
+        this.eventListeners["mousemove"].push(listener);        
+}
+ 
 Object.prototype.processEvent = function(event)
 {
     var x = event.canvasX;
@@ -493,23 +508,30 @@ Object.prototype.processEvent = function(event)
         return false;
     
     var actions = [];
+    var listeners = [];
 
-    if (event.type == "mousemove")
+    if (event.type == "mousemove") {
         actions = this.mouseMoveActions;
+        listeners = this.eventListeners["mousemove"];
+    }
     else if (event.type == "mouseup") {
         actions = this.mouseReleaseActions;
+        listeners = this.eventListeners["mouserelease"];
     }
-    else if (event.type == "mousedown")
+    else if (event.type == "mousedown") {
         actions = this.mousePressActions;
+        listeners = this.eventListeners["mousepress"];
+    }
+        
     
     for(var i =0; i !== actions.length; i++) 
         actions[i].execute();
+    for (var i=0; i !== listeners.length; i++)
+        listeners[i](this);
     
     this.notify(event);
     
-    if (actions.length)
-        return true;
-    return false;
+    return true;
 }
 
 Object.prototype.moveTo = function(x, y) 
