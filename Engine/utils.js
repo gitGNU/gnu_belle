@@ -322,6 +322,31 @@ utils.getFontName = function(font)
     return font;
 }
 
+utils.getNewName = function(name) {
+    
+    var re = /^.*\([ ]*([0-9]+)[ ]*\)[ ]*$/i;
+    
+    for (var i=name.length; i >= 0; --i) {
+        if (parseInt(name[i]) === NaN)
+            break;
+    }
+    
+    var matches = name.match(re);
+    if (matches.length >= 2) {	
+		var start = name.lastIndexOf("(");
+		var end = name.lastIndexOf(")");
+		var num = matches[1];
+		if (start != -1 && end != -1) {
+			name = name.substring(0, start+1) + num + name.substring(end, name.length);  
+		}
+    }
+    else {
+		name = name + " (2)";
+	}
+      
+    return name;
+}
+
 }(belle.utils));
 
 log("Utils module loaded!");
