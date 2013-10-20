@@ -23,27 +23,9 @@ var timeout = 50; //50 ms
 var display = belle.display;
 var objects = belle.objects;
 var actions = belle.actions;
+var stateMachine = belle.stateMachine;
+var game = belle.game;
 var loaded = false;
-var game = {
-    "resources" : {},
-    "actions": [],
-    "customFonts" : [],
-    "currentScene" : null,
-    "nextScene" : 0,
-    "scenes" : [],
-    "ready" : false,
-    "nextAction" : 0,
-    "width": 640,
-    "height" : 480,
-    "currentWidth": 640,
-    "currentHeight": 480,
-    "variables" : {},
-    "end" : false,
-    "textSpeed" : 10,
-    "textDelay" : 100,
-    "filename" : "game.json",
-    "directory" : ""
-}
 
 var addObject = function (object)
 {
@@ -200,6 +182,56 @@ window.onload = function () {
     //load();
 }
 
+function loadScenes(scenes)
+{
+    var scene;
+    var _scenes = [];
+    
+    for(var i=0; i < scenes.length; i++) {
+        scene = scenes[i];
+        
+        if (! belle.objects[scene.type]) {
+            log("Invalid Scene type: " + scene.type);
+            continue;
+        }
+        
+        var sceneObject = new belle.objects[scene.type](scene);
+        sceneObject.objects = [];
+        sceneObject.actions = [];
+        
+        //instanciate objects
+        if (scene.objects && scene.objects.length > 0) {
+            for(var j=0; j !== scene.objects.length; j++) {
+                var object = scene.objects[j];
+                object.__parent = sceneObject;
+                obj = createObject(object);
+                if (obj) 
+                    sceneObject.objects.push(obj);
+            }
+        }
+        
+        //instanciate actions
+        if (scene.actions && scene.actions.length > 0) {
+            var actions = scene.actions;
+            for (var j=0; j < actions.length; j++) {
+                if (! belle.actions[actions[j].type]) {
+                    log("Invalid Action type: " + actions[j].type);
+                    continue;
+                }
+                
+                actions[j].__scene = sceneObject;
+                var actionObject = new belle.actions[actions[j].type](actions[j]);
+                sceneObject.actions.push(actionObject);
+            }
+        }
+        
+        
+        _scenes.push(sceneObject);
+    }
+    
+    return _scenes;
+}
+
 function initializeData(data)
 {
     var obj;
@@ -247,50 +279,16 @@ function initializeData(data)
     }*/
 
     //init scenes
-    if (data["scenes"]) {
-        var scenes = data["scenes"];
-        var scene;
-        
-        for(var i=0; i < scenes.length; i++) {
-            scene = scenes[i];
-            
-            if (! belle.objects[scene.type]) {
-                log("Invalid Scene type: " + scene.type);
-                continue;
-            }
-            
-            var sceneObject = new belle.objects[scene.type](scene);
-            sceneObject.objects = [];
-            sceneObject.actions = [];
-            
-            //instanciate objects
-            if (scene.objects && scene.objects.length > 0) {
-                for(var j=0; j !== scene.objects.length; j++) {
-                    var object = scene.objects[j];
-                    object.__parent = sceneObject;
-                    obj = createObject(object);
-                    if (obj) 
-                        sceneObject.objects.push(obj);
-                }
-            }
-            
-            //instanciate actions
-            if (scene.actions && scene.actions.length > 0) {
-                var actions = scene.actions;
-                for (var j=0; j < actions.length; j++) {
-                    if (! belle.actions[actions[j].type]) {
-                        log("Invalid Action type: " + actions[j].type);
-                        continue;
-                    }
-                    
-                    actions[j].__scene = sceneObject;
-                    var actionObject = new belle.actions[actions[j].type](actions[j]);
-                    sceneObject.actions.push(actionObject);
-                }
-            }
-            
-            game.scenes.push(sceneObject);
-        }
+    if ("scenes" in data) {
+        game.scenes = loadScenes(data["scenes"]);
+    }
+    
+    if ("pauseScreen" in data && "scenes" in data["pauseScreen"]) {
+        game.pauseScreen.scenes = loadScenes(data.pauseScreen["scenes"]);
+        game.pauseScreen.currentScene = game.pauseScreen.scenes[0];
+        game.pauseScreen.actions = game.pauseScreen.currentScene.actions;
+        game.pauseScreen.nextScene = 1;
+        game.pauseScreen.nextAction = 0; //first action
     }
     
     if (game.scenes && game.scenes.length > 0 ) {
@@ -382,43 +380,50 @@ function importgameData(path) {
 //game's main loop
 function gameLoop ()
 {   
-   
-    if (game.end) {
+    var _game = belle.game;
+    
+    if (_game.end) {
         alert("The End");
         return;
     }
+   
+   if (_game.paused) {
+      _game = _game.pauseScreen;
+      if (_game.end)
+        _game = belle.game;
+    }
     
-    if (game.currentAction == null || game.currentAction.isFinished()) {
-      
-        if (game.currentAction && game.currentAction.wait) {
-            game.currentAction = game.currentAction.wait;
-            game.currentAction.execute();
+    if (_game.currentAction == null || _game.currentAction.isFinished()) {
+             
+        if (_game.currentAction && _game.currentAction.wait) {
+            _game.currentAction = _game.currentAction.wait;
+            _game.currentAction.execute();
         }
-        else if (game.nextAction >= game.actions.length) {
-            if (game.nextScene >= game.scenes.length) {
-                alert("The End");
-                return;
+        else if (_game.nextAction >= _game.actions.length) {
+            if (_game.nextScene >= _game.scenes.length) {
+                _game.end = true;
             }
-            
-            display.removeObjects(game.currentScene);
-            game.currentScene = game.scenes[game.nextScene];
-            display.addObjects(game.currentScene);
+            else {
+                display.removeObjects(_game.currentScene);
+                _game.currentScene = _game.scenes[_game.nextScene];
+                display.addObjects(_game.currentScene);
 
-            if (! display.usingDOM) {
-                display.clear();
-                if (game.currentScene)
-                    game.currentScene.paint(display.bgContext);
+                if (! display.usingDOM) {
+                    display.clear();
+                    if (_game.currentScene)
+                        _game.currentScene.paint(display.bgContext);
+                }
+                
+                _game.actions = _game.currentScene.actions;
+                _game.nextScene++;
+                _game.nextAction = 0;
+                _game.currentAction = null;
             }
-            
-            game.actions = game.currentScene.actions;
-            game.nextScene++;
-            game.nextAction = 0;
-            game.currentAction = null;
         }
         else {
-            game.currentAction = game.currentScene.actions[game.nextAction];
-            game.currentAction.execute();
-            game.nextAction++;
+            _game.currentAction = _game.currentScene.actions[_game.nextAction];
+            _game.currentAction.execute();
+            _game.nextAction++;
         }
     }
     
@@ -428,6 +433,26 @@ function gameLoop ()
     
     setTimeout(gameLoop, timeout);
 }
+
+function pause()
+{
+    if (game.paused) {
+        display.hidePauseScreen();
+    }
+    else {
+        display.showPauseScreen();
+    }
+    
+    game.paused = ! game.paused;
+}
+
+function getGame()
+{
+    if (game.paused)
+        return game.pauseScreen;
+    return game;
+}
+
 
 //Expose public properties
 belle.setGameFile = setGameFile;
@@ -444,5 +469,7 @@ belle.insertVariable = insertVariable;
 belle.game = game;
 belle.getObjectPrototype = getObjectPrototype;
 belle.getActionPrototype = getActionPrototype;
+belle.pause = pause;
+belle.getGame = getGame;
 
 }(belle));

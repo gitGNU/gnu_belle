@@ -70,17 +70,17 @@ var scaleFont = function(font, scale)
     }
 }
 
-var scaleAll = function(scaleWidth, scaleHeight, reset)
+var scaleAll = function(container, scaleWidth, scaleHeight, reset)
 {
     var game = belle.game;
     var width = game.width;
     var height = game.height;
-    var container = document.getElementById('belle');
+    var canvas, bgCanvas, bgContext, context;
     if (! display.usingDOM) {
-        display.canvas = display.canvas ? display.canvas : document.getElementById('canvas');
-        display.bgCanvas = display.bgCanvas ? display.bgCanvas : document.getElementById('backgroundCanvas');      
-        display.bgContext = display.bgContext ? display.bgContext : display.bgCanvas.getContext('2d');
-        display.context = display.context ? display.context : display.canvas.getContext('2d');
+        canvas = $(container).find("#canvas")[0];
+        bgCanvas = $(container).find("#backgroundCanvas")[0];
+        bgContext = bgCanvas.getContext('2d');
+        context = canvas.getContext('2d');
     }
 
     scaleWidthFactor = scaleWidth;
@@ -111,32 +111,30 @@ var scaleAll = function(scaleWidth, scaleHeight, reset)
     game.width = width;
     game.height = height;
     if (! display.usingDOM) {
-        display.bgCanvas.width = width; 
-        display.bgCanvas.height = height;
-        display.canvas.width = width;
-        display.canvas.height = height;
+        bgCanvas.width = width; 
+        bgCanvas.height = height;
+        canvas.width = width;
+        canvas.height = height;
     }
     container.style.width = width + "px";
     container.style.height = height + "px";
 }
 
 
-var init = function()
-{       
-    if (! isCanvasSupported())
-      display.usingDOM = true;
-
+var _init = function(container)
+{
     var game = belle.game;
     var width = game.width;
     var height = game.height;
     var paddingTop = 0;
     var paddingLeft = 0;
-    var container = document.getElementById('belle');
+    var canvas, bgCanvas, bgContext, context;
+    
     if (! display.usingDOM) {
-        display.canvas = display.canvas ? display.canvas : document.getElementById('canvas');
-        display.bgCanvas = display.bgCanvas ? display.bgCanvas : document.getElementById('backgroundCanvas');      
-        display.bgContext = display.bgContext ? display.bgContext : display.bgCanvas.getContext('2d');
-        display.context = display.context ? display.context : display.canvas.getContext('2d');
+        canvas = $(container).find("#canvas")[0];
+        bgCanvas = $(container).find("#backgroundCanvas")[0];
+        bgContext = bgCanvas.getContext('2d');
+        context = canvas.getContext('2d');
     }
 
     var _windowWidth = $(container).parent().width();
@@ -150,7 +148,7 @@ var init = function()
     if (scaleWidthFactor != 1 && scaleHeightFactor != 1) {
       scaleWidth = 10 / (scaleWidth * 10);
       scaleHeight = 10 / (scaleHeight * 10);
-      scaleAll(scaleWidth, scaleHeight);
+      scaleAll(container, scaleWidth, scaleHeight);
       scaleWidthFactor = 1;
       scaleHeightFactor = 1;
     }
@@ -168,7 +166,7 @@ var init = function()
         scaleHeight = scaleWidth;
        
     //scale all objects if necessary
-    scaleAll(scaleWidth, scaleHeight);
+    scaleAll(container, scaleWidth, scaleHeight);
     
     //if canvas size is smaller than screen, center it, otherwise no padding is added
     if (game.width < _windowWidth )
@@ -177,8 +175,8 @@ var init = function()
     if (game.height < _windowHeight)
         paddingTop = (_windowHeight - game.height) / 2;
     
-    container.style.top = paddingTop + "px";
-    container.style.left = paddingLeft + "px";
+    $(container).css("top", paddingTop + "px");
+    $(container).css("left", paddingLeft + "px");
 
     width = game.width;
     height = game.height;
@@ -187,15 +185,53 @@ var init = function()
     container.style.height = height + "px";
     
     if (! display.usingDOM) {
-        display.canvas.width = width;
-        display.canvas.height = height;
-        display.bgCanvas.width = width;
-        display.bgCanvas.height = height;
-        display.context.font = game.font;
+        canvas.width = width;
+        canvas.height = height;
+        bgCanvas.width = width;
+        bgCanvas.height = height;
+        context.font = game.font;
     }
       
     _windowWidth += "px";
     _windowHeight += "px";
+}
+
+var hidePauseScreen = function()
+{
+    var container = "#belle #game";
+    if (! display.usingDOM) {
+        canvas = $(container).find("#canvas")[0];
+        bgCanvas = $(container).find("#backgroundCanvas")[0];
+        display.bgContext = bgCanvas.getContext('2d');
+        display.context = canvas.getContext('2d');
+    }
+    
+    $("#belle #pauseScreen").css("display", "none");
+}
+
+var showPauseScreen = function()
+{
+    var container = "#belle #pauseScreen";
+    if (! display.usingDOM) {
+        canvas = $(container).find("#canvas")[0];
+        bgCanvas = $(container).find("#backgroundCanvas")[0];
+        display.bgContext = bgCanvas.getContext('2d');
+        display.context = canvas.getContext('2d');
+    }
+    
+    $("#belle #pauseScreen").css("display", "block");
+}
+
+var init = function()
+{       
+    if (! isCanvasSupported())
+      display.usingDOM = true;
+    
+    var game = belle.game;
+    
+    _init(document.getElementById('game'));
+    _init(document.getElementById('pauseScreen'));
+    hidePauseScreen();
     
     if (game.currentScene) {
         game.currentScene.redrawBackground = true;
@@ -210,6 +246,8 @@ var redraw = function()
 {
     drawing = true;
     var game = belle.game;
+    if (belle.game.paused)
+        game = belle.game.pauseScreen;
     var objectsToDraw = game.currentScene.objects;
     var rect = null;
     var obj = null;
@@ -272,6 +310,8 @@ var draw = function()
 var needsRedraw = function() 
 {
     var game = belle.game;
+    if (game.paused)
+        game = game.pauseScreen;
     if (forceRedraw) {
         forceRedraw = false;
         return true;
@@ -468,6 +508,8 @@ display.addObjects = addObjects;
 display.display = display;
 display.windowWidth = windowWidth;
 display.windowHeight = windowHeight;
+display.showPauseScreen = showPauseScreen;
+display.hidePauseScreen = hidePauseScreen;
 
 }(belle.display));
 

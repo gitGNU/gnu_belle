@@ -77,7 +77,7 @@ document.onmousemove = function(event)
 {
     if (! belle)
         return;
-    var game = belle.game || {};
+    var game = belle.getGame();
     if (! game.currentScene)
       return;
 
@@ -105,7 +105,7 @@ document.onmouseup = function(event)
 {
     var ev = event || window.event || window.Event;
     var processed = false;
-    var game = belle.game;
+    var game = belle.getGame();
     if (! mapToDisplay(ev))
         return;
     
@@ -140,10 +140,12 @@ document.onkeyup = function(event)
         case 32: //SPACE
             if (game.currentAction)
                 game.currentAction.skip();
+        break;
+        case 27:
+            belle.pause();
+            break;
     }
 }
-if (document.body)
-document.body.onkeyup = document.onkeyup;
 
 
 }(EventDispatcher));

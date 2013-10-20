@@ -18,6 +18,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta name = "viewport" content = "user-scalable=no, initial-scale=1.0, maximum-scale=1.0, width=device-width" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
     <title>Belle Engine</title>
     <link rel="stylesheet" type="text/css" href="style.css"/>
     <link rel="stylesheet" type="text/css" href="fontfaces.css"/>
@@ -33,13 +35,16 @@
     </script>
   </head>
   <body>
-    <meta name = "viewport" content = "user-scalable=no,
-          initial-scale=1.0, maximum-scale=1.0, width=device-width" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
     <div id="belle">
         <noscript><p id="noscript">Please, enable JavaScript on your browser.</p></noscript>
-        <canvas id="backgroundCanvas" width="300" height="200"></canvas>
-        <canvas id="canvas" width="300" height="200" ></canvas>
+        <div id="game">
+            <canvas id="backgroundCanvas" width="300" height="200"></canvas>
+            <canvas id="canvas" width="300" height="200" ></canvas>
+        </div>
+        <div id="pauseScreen">
+            <canvas id="backgroundCanvas" width="300" height="200"></canvas>
+            <canvas id="canvas" width="300" height="200" ></canvas>
+        </div>
         <div id="fps">FPS: </div>
         <div id="dummy">dummy</div>
         <div id="loader">
@@ -49,10 +54,12 @@
         </div>
     </div>
 
+    <script type="text/javascript" src="init.js"></script>
     <script type="text/javascript" src="consolelog.js"></script>
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="buzz.js"> </script>
     <script type="text/javascript" src="utils.js"> </script>
+    <script type="text/javascript" src="state_machine.js"> </script>
     <script type="text/javascript" src="objects.js"> </script>
     <script type="text/javascript" src="actions.js"> </script>
     <script type="text/javascript" src="display.js"> </script>

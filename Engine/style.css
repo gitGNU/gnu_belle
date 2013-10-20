@@ -34,17 +34,24 @@ body, html
   height: 100%;
 }
 
+#belle #game,
+#belle #pauseScreen,
+#belle canvas
+{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
 #belle #backgroundCanvas 
 {
-    position: absolute; 
-    margin: 0 auto;
     z-index: 0;
 }
 
 #belle #canvas 
 {
-    position: absolute; 
-    margin: 0 auto;
     z-index: 1;
 }
 
