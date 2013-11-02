@@ -14,9 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var belle = belle || {};
-belle.display = {};
-
 (function(display) {
 
 //private variables
@@ -38,11 +35,13 @@ var container = null;
 
 //public variables
 display.view = "portrait";
-display.usingDOM = false;
+display.DOM = false;
 display.context = null;
 display.bgContext = null;
 display.canvas = null;
 display.bgCanvas = null;
+display.scaledWidthFactor = 1;
+display.scaledHeightFactor = 1;
 
 var requestAnimationFrame = (function(){
   return  window.requestAnimationFrame       || 
@@ -70,24 +69,19 @@ var scaleFont = function(font, scale)
     }
 }
 
-var scaleAll = function(container, scaleWidth, scaleHeight, reset)
+var scaleScene = function(size)
 {
     var game = belle.game;
-    var width = game.width;
-    var height = game.height;
-    var canvas, bgCanvas, bgContext, context;
-    if (! display.usingDOM) {
-        canvas = $(container).find("#canvas")[0];
-        bgCanvas = $(container).find("#backgroundCanvas")[0];
-        bgContext = bgCanvas.getContext('2d');
-        context = canvas.getContext('2d');
-    }
-
-    scaleWidthFactor = scaleWidth;
-    scaleHeightFactor = scaleHeight;
-
+    var widthFactor = size.widthFactor;
+    var heightFactor = size.heightFactor;
+    var reverseWidthFactor = Math.round(10 / (scaleWidthFactor * 10));
+    var reverseHeightFactor = Math.round(10 / (scaleHeightFactor * 10));
+    
+    widthFactor *= reverseWidthFactor;
+    heightFactor *= reverseHeightFactor;
+    
     //scale font before all objects in case some of the objects use text
-    scaleFont(game.font, scaleWidth);
+    scaleFont(game.font, widthFactor);
     
     //scale all objects if necessary
     var scene = null;
@@ -96,112 +90,106 @@ var scaleAll = function(container, scaleWidth, scaleHeight, reset)
       scene.scale(scaleWidth, scaleHeight);
       for (var j=0; j < scene.objects.length; j++) {
           object = scene.objects[j];
-          object.scale(scaleWidth, scaleHeight);
+          object.scale(widthFactor, heightFactor);
       }
       
       //special case for ShowMenu action, which has an object that isn't added to the scene
       for (var j=0; j < scene.actions.length; j++) {
           action = scene.actions[j];
-          action.scale(scaleWidth, scaleHeight);
+          action.scale(widthFactor, heightFactor);
       }
     }
-
-    width *= scaleWidth;
-    height *= scaleHeight;
-    game.width = width;
-    game.height = height;
-    if (! display.usingDOM) {
-        bgCanvas.width = width; 
-        bgCanvas.height = height;
-        canvas.width = width;
-        canvas.height = height;
-    }
-    container.style.width = width + "px";
-    container.style.height = height + "px";
 }
 
-
-var _init = function(container)
+function resize()
 {
     var game = belle.game;
     var width = game.width;
     var height = game.height;
-    var paddingTop = 0;
-    var paddingLeft = 0;
-    var canvas, bgCanvas, bgContext, context;
+    var $belle = $('#belle');
+    var top = 0;
+    var left = 0;
     
-    if (! display.usingDOM) {
-        canvas = $(container).find("#canvas")[0];
-        bgCanvas = $(container).find("#backgroundCanvas")[0];
-        bgContext = bgCanvas.getContext('2d');
-        context = canvas.getContext('2d');
-    }
+    var screenWidth = $belle.parent().width();
+    screenWidth = screenWidth ? screenWidth : game.width;
+    var screenHeight = $belle.parent().height();
+    screenHeight = screenHeight ? screenHeight : game.height;
+    var widthFactor = 1;
+    var heightFactor = 1;
+    
+    //if game screen size is bigger than screen, scale it
+    if (game.width > screenWidth)
+        widthFactor = screenWidth / game.width;
+    
+    if (game.height > screenHeight)
+        heightFactor = screenHeight / game.height;
 
-    var _windowWidth = $(container).parent().width();
-    _windowWidth = _windowWidth ? _windowWidth : game.width;
-    var _windowHeight = $(container).parent().height();
-    _windowHeight = _windowHeight ? _windowHeight : game.height;
-    var scaleWidth = scaleWidthFactor;
-    var scaleHeight = scaleHeightFactor;
-    
-    //reset any previous scaling
-    if (scaleWidthFactor != 1 && scaleHeightFactor != 1) {
-      scaleWidth = 10 / (scaleWidth * 10);
-      scaleHeight = 10 / (scaleHeight * 10);
-      scaleAll(container, scaleWidth, scaleHeight);
-      scaleWidthFactor = 1;
-      scaleHeightFactor = 1;
-    }
-
-    //if canvas size is bigger than screen, scale it
-    if (game.width > _windowWidth)
-        scaleWidth = _windowWidth / game.width;
-    
-    if (game.height > _windowHeight)
-        scaleHeight = _windowHeight / game.height;
-    
-    if (scaleHeight < scaleWidth)
-        scaleWidth = scaleHeight;
+    if (heightFactor < widthFactor)
+        widthFactor = heightFactor;
     else
-        scaleHeight = scaleWidth;
-       
-    //scale all objects if necessary
-    scaleAll(container, scaleWidth, scaleHeight);
+        heightFactor = widthFactor;
     
-    //if canvas size is smaller than screen, center it, otherwise no padding is added
-    if (game.width < _windowWidth )
-        paddingLeft = (_windowWidth - game.width) / 2;
-    
-    if (game.height < _windowHeight)
-        paddingTop = (_windowHeight - game.height) / 2;
-    
-    $(container).css("top", paddingTop + "px");
-    $(container).css("left", paddingLeft + "px");
+    display.scaledWidthFactor = widthFactor;
+    display.scaledHeightFactor = heightFactor;
 
-    width = game.width;
-    height = game.height;
+    width *= widthFactor;
+    height *= heightFactor;
+
+    //if game sreen size is smaller than screen, center it, otherwise no padding is added
+    if (width < screenWidth )
+      left = (screenWidth - width) / 2;
     
-    container.style.width = width + "px";
-    container.style.height = height + "px";
+    if (height < screenHeight)
+      top = (screenHeight - height) / 2;
+       
+    $container.css("top", top + "px");
+    $container.css("left", left + "px");
+    $container.width(width);
+    $container.height(height);
     
-    if (! display.usingDOM) {
+    scaleFont(game.font, widthFactor);
+}
+
+
+function initCanvas(width, height)
+{
+  if (! display.DOM) {
+    $('#belle canvas').each(function(index, canvas){
         canvas.width = width;
         canvas.height = height;
-        bgCanvas.width = width;
-        bgCanvas.height = height;
-        context.font = game.font;
+    });
+  }
+}
+
+var init = function()
+{       
+    if (! isCanvasSupported())
+      display.DOM = true;
+    
+    display.canvas = $("#belle #game").find("#canvas")[0];
+    display.bgCanvas = $("#belle #game").find("#backgroundCanvas")[0];
+    display.bgContext = display.bgCanvas.getContext('2d');
+    display.context = display.canvas.getContext('2d');
+    
+    var game = belle.game;
+    resize(); 
+    initCanvas(game.width, game.height);
+     
+    if ($progress && $progress.attr("running"))
+      stopLoading();
+        
+    if (game.currentScene) {
+        game.currentScene.redrawBackground = true;
+        addObjects(game.currentScene);
     }
-      
-    _windowWidth += "px";
-    _windowHeight += "px";
 }
 
 var hidePauseScreen = function()
 {
     var container = "#belle #game";
-    if (! display.usingDOM) {
-        canvas = $(container).find("#canvas")[0];
-        bgCanvas = $(container).find("#backgroundCanvas")[0];
+    if (! display.DOM) {
+        canvas = $container.find("#canvas")[0];
+        bgCanvas = $container.find("#backgroundCanvas")[0];
         display.bgContext = bgCanvas.getContext('2d');
         display.context = canvas.getContext('2d');
     }
@@ -212,34 +200,14 @@ var hidePauseScreen = function()
 var showPauseScreen = function()
 {
     var container = "#belle #pauseScreen";
-    if (! display.usingDOM) {
-        canvas = $(container).find("#canvas")[0];
-        bgCanvas = $(container).find("#backgroundCanvas")[0];
+    if (! display.DOM) {
+        canvas = $container.find("#canvas")[0];
+        bgCanvas = $container.find("#backgroundCanvas")[0];
         display.bgContext = bgCanvas.getContext('2d');
         display.context = canvas.getContext('2d');
     }
     
     $("#belle #pauseScreen").css("display", "block");
-}
-
-var init = function()
-{       
-    if (! isCanvasSupported())
-      display.usingDOM = true;
-    
-    var game = belle.game;
-    
-    _init(document.getElementById('game'));
-    _init(document.getElementById('pauseScreen'));
-    hidePauseScreen();
-    
-    if (game.currentScene) {
-        game.currentScene.redrawBackground = true;
-        addObjects(game.currentScene);
-    }
-    
-    if (loader && loader.running)
-        stopLoading();
 }
 
 var redraw = function()
@@ -359,7 +327,7 @@ var drawFPS = function()
 
 var removeObjects = function(scene)
 {
-    if (! display.usingDOM)
+    if (! display.DOM)
         return;
     
     var container = document.getElementById("belle"); 
@@ -375,7 +343,7 @@ var removeObjects = function(scene)
 var addObjects = function(scene)
 {
     
-    if (! display.usingDOM)
+    if (! display.DOM)
         return;
     var container = document.getElementById("belle");
     var objects = scene.objects;
@@ -388,7 +356,7 @@ var addObjects = function(scene)
 
 var addObject = function(object, container)
 {
-    if (! display.usingDOM)
+    if (! display.DOM)
         return;
     
     if (! container)
@@ -419,80 +387,51 @@ var clear = function()
     display.context.clearRect(0, 0, display.canvas.width, display.canvas.height);
 }
 
-var updateLoading = function()
+var updateLoading = function($progress)
 {
-    if (! loader)
+    if (! $progress)
         return;
   
-    var cwidth = container.width();
-    var cheight = container.height();
-    var width = loader.width();
+    var pwidth = $progress.parent().width();
+    var width = $progress.width();
     
-    if (cwidth != loader.containerWidth || cheight != loader.containerHeight) {
-        var height = loader.height();
-        loader.css("left", parseInt((cwidth - width) / 2));
-        loader.css("top",parseInt((cheight - height) / 2)); 
-    }
-    
-    var left = parseInt(progress.css("left"));
-    var staticBarWidth = loader.staticBarWidth;
-  
-    progress.width(staticBarWidth);
-    if (left >= width)
-        left = -staticBarWidth;
-
-    left += 20;
-    progress.css("left", left);
-  
-  if (loader.running)
-    setTimeout(updateLoading, 50);
+    $progress.animate( {
+        "left" : pwidth,
+        "easing" : "linear"
+      },
+      2000,
+      function(){
+        if ($progress.attr("running")) {
+          $progress.css("left", -width);
+          setTimeout(function(){updateLoading($progress); }, 10);
+        }
+        else
+          $progress.parent().css("display", "none");
+      }
+    );
 }
 
 var loading = function()
 {
-    loader = loader || $("#belle #loader");
-    progress = progress || $("#belle #loader #progress");
-    
-    if (! loader.length) {
-        loader = $('<div id="loader"></div>');
-        loader.css("text-align", "center");
-        loader.css("border", "1px solid");
-        progress = $('<div id="progress"></div>');
-        loader.append(progress);
-        $("#belle").append(loader);
-    }
-    
-    container = container || $("#belle");
-    var cwidth = container.width();
-    var cheight = container.height();
-    var barWidth = parseInt(cwidth * 0.4);
-    var barHeight = parseInt(cheight * 0.05);
-    
-    loader.css("left", parseInt((cwidth - barWidth) / 2));
-    loader.css("top",parseInt((cheight - barHeight) / 2)); 
-    loader.width("40%");
-    loader.height("5%");
-    loader.staticBarWidth = barWidth / 3;
-    progress.width(loader.staticBarWidth);
-    loader.running = true;
-    loader.containerWidth = cwidth;
-    loader.containerHeight = cheight;    
-    loader.css("display", "block");
-   
-    updateLoading();
+    $loader = $("#belle #loader");
+    $progress = $("#belle #loader #progress");
+    $container = $("#belle");
+    $loader.css("top",parseInt($container.height()/2 - $loader.height()/2));  
+    $loader.css("display", "block");
+    $progress.attr("running", true);
+    updateLoading($progress);
 }
 
 var stopLoading = function()
 {
-    if (loader.running) {
-        loader.running = false;
-        $("#loader").css("display", "none");
+    if ($progress.attr("running")) {
+        $progress.attr("running", false);
+        $loader.css("display", "none");
     }
 }
 
 //Expose public functions
 display.scaleFont = scaleFont;
-display.scaleAll = scaleAll;
 display.draw = draw;
 display.clear = clear;
 display.isCanvasSupported = isCanvasSupported;
@@ -510,6 +449,7 @@ display.windowWidth = windowWidth;
 display.windowHeight = windowHeight;
 display.showPauseScreen = showPauseScreen;
 display.hidePauseScreen = hidePauseScreen;
+display.resize = resize;
 
 }(belle.display));
 

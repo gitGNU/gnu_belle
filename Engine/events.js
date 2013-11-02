@@ -31,7 +31,7 @@ function resize()
         
     if (display.view != _view) {
         display.view = _view;    
-        display.init();
+        display.resize();
     }
 }
 
