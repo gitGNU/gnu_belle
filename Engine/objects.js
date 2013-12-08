@@ -347,7 +347,7 @@ Object.prototype.contains = function(px, py)
         x += this.parent.x;
         y += this.parent.y;        
     }
-
+    
     if ( px >= x && px <=  x+this.width && py >= y && py <= y+this.height)
         return true;
     return false;
@@ -503,7 +503,7 @@ Object.prototype.processEvent = function(event)
 {
     var x = event.canvasX;
     var y = event.canvasY;
-    
+
     if (! this.visible || ! this.contains(x, y))
         return false;
     
@@ -522,7 +522,6 @@ Object.prototype.processEvent = function(event)
         actions = this.mousePressActions;
         listeners = this.eventListeners["mousepress"];
     }
-        
     
     for(var i =0; i !== actions.length; i++) 
         actions[i].execute();
@@ -780,8 +779,6 @@ function TextBox(info)
         for (var i=0; i !== properties.length; i++) {
         }*/
     }
-    
-    //this.textWidth = belle.utils.textWidth(this.displayedText, this.font);
 }
 
 belle.utils.extend(Object, TextBox);
@@ -902,17 +899,12 @@ TextBox.prototype.needsRedraw = function()
     if (this.redraw)
         return true;
     
+    if (! this.visible)
+        return false;
+    
     var displayText = belle.replaceVariables(this.text);
     
     if (displayText != this.displayedText) {
-        this.redraw = true;
-        return true;
-    }
-    
-    var width = belle.utils.textWidth(displayText, this.font);
-    
-    if (this.textWidth != width) {
-        this.textWidth = width;
         this.redraw = true;
         return true;
     }
