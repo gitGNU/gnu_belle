@@ -253,7 +253,7 @@ function initializeData(data)
     document.title = "Belle - " + game.title;
     
     if ("display" in data && data["display"] == "DOM")
-        belle.display.usingDOM = true;
+        belle.display.DOM = true;
     
     //init resources
     if (data["resources"]) {
@@ -408,7 +408,7 @@ function gameLoop ()
                 _game.currentScene = _game.scenes[_game.nextScene];
                 display.addObjects(_game.currentScene);
 
-                if (! display.usingDOM) {
+                if (! display.DOM) {
                     display.clear();
                     if (_game.currentScene)
                         _game.currentScene.paint(display.bgContext);
@@ -427,7 +427,7 @@ function gameLoop ()
         }
     }
     
-    if (! display.usingDOM && display.needsRedraw()) {  
+    if (! display.DOM && display.needsRedraw()) {  
         display.draw();
     }
     

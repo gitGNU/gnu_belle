@@ -37,7 +37,7 @@ function AnimationImage(imageData, parent)
     if (typeof imageData === "object" && "src" in imageData) {
         //activate DOM mode if game contains animated image
         if ("animated" in imageData && imageData["animated"])
-            belle.display.usingDOM = true;
+            belle.display.DOM = true;
         imageData = imageData["src"];
     }
     
@@ -829,7 +829,7 @@ TextBox.prototype.alignText = function(text, size)
     if (! text)
         text = belle.replaceVariables(this.text);
     
-    if (belle.display.usingDOM && this.textElement) {
+    if (belle.display.DOM && this.textElement) {
         text = text.replace("\n", "<br/>");
         if (this.textAlignment.contains("HCenter"))
             this.textElement.style.textAlign = "center";
@@ -976,7 +976,7 @@ function ObjectGroup(data)
             var elemTop = parseInt(obj.element.style.top);
             obj.y = elemTop - top;
             
-            //if (belle.display.usingDOM) {
+            //if (belle.display.DOM) {
                 obj.element.style.display = "block";
                 obj.element.style.left = obj.x + "px";
                 //temporary hack in DOM mode to fix top/y value
