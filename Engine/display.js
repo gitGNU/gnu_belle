@@ -64,39 +64,23 @@ var scaleFont = function(font, scale)
     
     if (size) {
         size *= scale;
-        if (font.split("px").length >= 2)
-            belle.game.font = size + "px" + font.split("px").slice(1);
+        $('#belle').css("font-size", parseInt(size)+"px");
     }
 }
 
-var scaleScene = function(size)
+var scaleScene = function(widthFactor, heightFactor)
 {
+    
     var game = belle.game;
-    var widthFactor = size.widthFactor;
-    var heightFactor = size.heightFactor;
-    var reverseWidthFactor = Math.round(10 / (scaleWidthFactor * 10));
-    var reverseHeightFactor = Math.round(10 / (scaleHeightFactor * 10));
-    
-    widthFactor *= reverseWidthFactor;
-    heightFactor *= reverseHeightFactor;
-    
-    //scale font before all objects in case some of the objects use text
-    scaleFont(game.font, widthFactor);
     
     //scale all objects if necessary
     var scene = null;
     for(var i=0; i < game.scenes.length; i++) {
       scene = game.scenes[i];
-      scene.scale(scaleWidth, scaleHeight);
+      scene.scale(widthFactor, heightFactor);
       for (var j=0; j < scene.objects.length; j++) {
           object = scene.objects[j];
           object.scale(widthFactor, heightFactor);
-      }
-      
-      //special case for ShowMenu action, which has an object that isn't added to the scene
-      for (var j=0; j < scene.actions.length; j++) {
-          action = scene.actions[j];
-          action.scale(widthFactor, heightFactor);
       }
     }
 }
@@ -142,12 +126,13 @@ function resize()
     if (height < screenHeight)
       top = (screenHeight - height) / 2;
        
-    $container.css("top", top + "px");
-    $container.css("left", left + "px");
-    $container.width(width);
-    $container.height(height);
+    $belle.css("top", top + "px");
+    $belle.css("left", left + "px");
+    $belle.width(width);
+    $belle.height(height);
     
     scaleFont(game.font, widthFactor);
+    scaleScene(widthFactor, heightFactor);
 }
 
 
@@ -171,10 +156,10 @@ var init = function()
     display.bgContext = display.bgCanvas.getContext('2d');
     display.context = display.canvas.getContext('2d');
     
-    var game = belle.game;
-    resize(); 
+    var game = belle.game; 
     initCanvas(game.width, game.height);
-     
+    resize(); 
+    
     if ($progress && $progress.attr("running"))
       stopLoading();
         
@@ -222,6 +207,7 @@ var redraw = function()
     var i, j;
     var length = 0;
 
+    display.context.font = game.font;
     if (game.currentScene.redrawBackground)
         game.currentScene.paint(display.bgContext);
 
@@ -249,10 +235,9 @@ var redraw = function()
     for(j=0; j !== length; j++) {
         
         obj = objectsToDraw[j];
-        
+
         if (! obj.redraw)
             continue;
-        
         obj.paint(display.context);
     }
     
@@ -342,7 +327,6 @@ var removeObjects = function(scene)
 
 var addObjects = function(scene)
 {
-    
     if (! display.DOM)
         return;
     var container = document.getElementById("belle");
@@ -356,14 +340,15 @@ var addObjects = function(scene)
 
 var addObject = function(object, container)
 {
-    if (! display.DOM)
-        return;
+    object.scale(display.scaledWidthFactor, display.scaledHeightFactor);
     
-    if (! container)
-        container = document.getElementById("belle");
-    if (object.visible)
-        object.element.style.display = "block";
-    container.appendChild(object.element);
+    if (display.DOM) {
+        if (! container)
+            container = document.getElementById("belle");
+        if (object.visible)
+            object.element.style.display = "block";
+        container.appendChild(object.element);
+    }
 }
 
 var isCanvasSupported = function() {
@@ -444,7 +429,6 @@ display.loading = loading;
 display.init = init;
 display.removeObjects = removeObjects;
 display.addObjects = addObjects;
-display.display = display;
 display.windowWidth = windowWidth;
 display.windowHeight = windowHeight;
 display.showPauseScreen = showPauseScreen;

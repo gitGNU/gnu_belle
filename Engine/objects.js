@@ -171,6 +171,8 @@ function Object(info)
     
     belle.utils.initElement(this.element, info);
     belle.utils.initElement(this.backgroundElement, info);
+    this.backgroundElement.style.width = "100%";
+    this.backgroundElement.style.height = "100%";
     this.backgroundElement.style.display = "block";
     
     this.setX(info.x);
@@ -328,27 +330,36 @@ Object.prototype.overlapedRect = function(object) {
 
 Object.prototype.setX = function(x)
 {
-    this.x = x;
+    
+    this.x = this.scaledX = x;
+    var scale = belle.display.scaledWidthFactor;
+    if (scale != 1)
+        this.scaledX *= scale;
+    
     if (this.element)
-        this.element.style.left = x + "px";
+        this.element.style.left = this.scaledX + "px";
 }
 
 Object.prototype.setY = function(y)
 {
-    this.y = y;
+    this.y = this.scaledY = y;
+    var scale = belle.display.scaledHeightFactor;
+    if (scale != 1)
+        this.scaledY *= scale;
     if (this.element)
-        this.element.style.top = y + "px";
+        this.element.style.top = this.scaledY + "px";
 }
 
 Object.prototype.contains = function(px, py)
 {
-    var x = this.x, y = this.y;
+    var x = this.scaledX, y = this.scaledY;
+    
     if (this.parent) {
-        x += this.parent.x;
-        y += this.parent.y;        
+        x += this.parent.scaledX;
+        y += this.parent.scaledY;        
     }
     
-    if ( px >= x && px <=  x+this.width && py >= y && py <= y+this.height)
+    if ( px >= x && px <=  x+this.scaledWidth && py >= y && py <= y+this.scaledHeight)
         return true;
     return false;
 }
@@ -417,6 +428,7 @@ Object.prototype.paint = function(context)
     
     var x = this.globalX();
     var y = this.globalY();
+   
     
     if (this.backgroundImage) {
         this.backgroundImage.paint(context, x, y, this.width, this.height);
@@ -584,23 +596,30 @@ Object.prototype.fullHeight = function()
 
 Object.prototype.setWidth = function(width)
 {
-    this.width = width;
+    this.width = this.scaledWidth = width;
+    var scale = belle.display.scaledWidthFactor;
+    if (scale != 1)
+        this.scaledWidth *= scale;
+    
     if (this.element) {
         if (typeof width == "string" && width.indexOf("%") !== -1)
             this.element.style.width = this.width;
         else
-            this.element.style.width = width + "px";
+            this.element.style.width = this.scaledWidth + "px";
     }
 }
 
 Object.prototype.setHeight = function(height)
 {
-    this.height = height;
+    this.height = this.scaledHeight = height;
+    var scale = belle.display.scaledHeightFactor;
+    if (scale != 1)
+        this.scaledHeight *= scale;
     if (this.element) {
         if (typeof height == "string" && height.indexOf("%") !== -1)
             this.element.style.height = this.height;
         else
-            this.element.style.height = height + "px";
+            this.element.style.height = this.scaledHeight + "px";
     }
 }
 
@@ -630,18 +649,10 @@ Object.prototype.setVisible = function(visible)
 
 Object.prototype.scale = function(widthFactor, heightFactor)
 {
-  this.x *= widthFactor;
-  this.width *= widthFactor;
-  this.y *= heightFactor;
-  this.height *= heightFactor;
-  if (this.element) {
-    this.element.style.left = this.x + "px";
-    this.element.style.width = this.width + "px";
-    this.element.style.top = this.y + "px";
-    this.element.style.height = this.height + "px";
-    this.backgroundElement.style.width = this.width + "px";
-    this.backgroundElement.style.height = this.height + "px";
-  }
+  this.setX(this.x);
+  this.setY(this.y);
+  this.setWidth(this.width);
+  this.setHeight(this.height);
   this.redraw = true;
 }
 
@@ -800,7 +811,8 @@ TextBox.prototype.paint = function(context)
     var defaultFont = context.font;
     
     if (this.font)
-        context.font = this.font;
+       context.font = this.font;
+    
 
     context.save();
     if (context.globalAlpha != this.color.alphaF())
@@ -838,18 +850,12 @@ TextBox.prototype.alignText = function(text, size)
         else
             this.textElement.style.textAlign = "left"; 
         
-        var size = belle.utils.textSize(text, this.font);
-        var height = size[1];
-        
-        if (height < this.height) {
-            var topOffset = 0;
-            if (this.textAlignment.contains("VCenter"))
-                topOffset = (this.height - height) / 2;
-            else if (this.textAlignment.contains("Bottom"))
-                topOffset = this.height - height;
-            topOffset = topOffset > 0 ? Math.round(topOffset) : 0;
-            
-            this.textElement.style.top = topOffset + "px";
+        if (this.textAlignment.contains("VCenter"))
+            this.textElement.style.lineHeight = this.scaledHeight + "px";
+        else if (this.textAlignment.contains("Bottom")) {
+            this.textElement.style.lineHeight = 1;
+            this.textElement.style.bottom = 0;
+            this.textElement.style.height = "auto";
         }
     }
     else {    
@@ -941,9 +947,15 @@ TextBox.prototype.setTextColor = function(color)
 TextBox.prototype.scale = function(widthFactor, heightFactor)
 {
   Object.prototype.scale.call(this, widthFactor, heightFactor);
+
   if (this.textElement) {
-    this.textElement.style.width = this.width + "px";
-    this.textElement.style.height = this.height + "px";
+    this.textElement.style.width = this.scaledWidth + "px";
+    this.textElement.style.height = this.scaledHeight + "px";
+    var font = parseInt(this.font);
+    if (font !== NaN) {
+        font *= widthFactor;
+        $(this.textElement).css("font-size", font+"px");
+    }
   }
   this.alignText();
 }
@@ -970,11 +982,11 @@ function ObjectGroup(data)
             }
             var left = parseInt(this.element.style.left);
             var elemLeft = parseInt(obj.element.style.left);
-            obj.x = elemLeft - left;
+            obj.setX(elemLeft - left);
             
             var top = parseInt(this.element.style.top);
             var elemTop = parseInt(obj.element.style.top);
-            obj.y = elemTop - top;
+            obj.setY(elemTop - top);
             
             //if (belle.display.DOM) {
                 obj.element.style.display = "block";
@@ -1029,8 +1041,6 @@ ObjectGroup.prototype.processEvent = function(event)
 {
     var x = event.canvasX;
     var y = event.canvasY;
-    
-    
     if (! this.visible || ! this.contains(x, y))
         return false;
     
@@ -1180,10 +1190,10 @@ function Scene(data)
     this.backgroundImageLoaded = false;
     var backgroundImage = "";
     var backgroundColor = null;
-    this.width = belle.game.width;
-    this.height = belle.game.height;
-    this.x = 0;
-    this.y = 0;
+    this.width = this.realWidth = belle.game.width;
+    this.height = this.realHeight = belle.game.height;
+    this.x = this.realX = 0;
+    this.y = this.realY = 0;
     data.width = this.width;
     data.height = this.height;
     this.visible = true;
@@ -1305,15 +1315,53 @@ Scene.prototype.frameChanged = function()
 
 Scene.prototype.scale = function(widthFactor, heightFactor)
 {
-    this.width *= widthFactor;
-    this.height *= heightFactor;
-    if (this.element) {
-        this.element.style.width = this.width + "px";
-        this.element.style.height = this.height + "px";
-        this.backgroundElement.style.width = this.width + "px";
-        this.backgroundElement.style.height = this.height + "px";
-    }
+    this.setX(this.x);
+    this.setY(this.y);
+    this.setWidth(this.width);
+    this.setHeight(this.height);      
 }
+
+Scene.prototype.setX = function(x)
+{
+    this.x = this.scaledX = x;
+    var scale = belle.display.scaledWidthFactor;
+    if (scale != 1)
+        this.scaledX *= scale;
+    this.element.style.left = this.scaledX + "px";
+    this.backgroundElement.style.left = this.scaledX + "px";
+}
+
+Scene.prototype.setY = function(y)
+{
+    this.y = this.scaledY = y;
+    var scale = belle.display.scaledHeightFactor;
+    if (scale != 1)
+        this.scaledY *= scale;
+    this.element.style.top = this.scaledY + "px";
+    this.backgroundElement.style.top = this.scaledY + "px";
+}
+
+Scene.prototype.setWidth = function(width)
+{
+    this.width = this.scaledWidth = width;
+    var scale = belle.display.scaledWidthFactor;
+    if (scale != 1)
+        this.scaledWidth *= scale;
+    this.element.style.width = this.scaledWidth + "px";
+    this.backgroundElement.style.width = this.scaledWidth + "px";
+}
+
+
+Scene.prototype.setHeight = function(height)
+{
+    this.height = this.scaledHeight = height;
+    var scale = belle.display.scaledHeightFactor;
+    if (scale != 1)
+        this.scaledHeight *= scale;
+    this.element.style.height = this.scaledHeight + "px";
+    this.backgroundElement.style.height = this.scaledHeight + "px";
+}
+    
 
 // Expose the public methods
 
