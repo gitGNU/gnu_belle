@@ -133,7 +133,7 @@ document.onmousedown = function(event)
 document.onkeyup = function(event) 
 {
     var ev = event || window.event || window.Event;
-    var game = belle.game;
+    var game = belle.getGame();
         
     switch(ev.keyCode) {
         case 13: //ENTER
