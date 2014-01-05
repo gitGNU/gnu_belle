@@ -464,6 +464,7 @@ void Belle::onSceneItemClicked(QTreeWidgetItem *item, int column)
     if (currSceneManager != mCurrentSceneManager || prevIndex != currIndex) {
         updateSceneIcon(mCurrentSceneManager->currentScene()); //update current scene icon
 
+        currSceneManager->setCurrentSceneIndex(currIndex);
         mCurrentSceneManager = currSceneManager;
         if (mCurrentSceneManager->currentScene())
             mCurrentSceneManager->currentScene()->show();
