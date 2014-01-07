@@ -72,6 +72,7 @@ class SceneManager : public QObject
         bool contains(const QString& name);
         bool isValidSceneName(const QString& name);
         int indexOf(Scene*);
+        void resizeScenes(int, int, bool, bool);
 
         static void setClipboard(Clipboard*);
         static Clipboard* clipboard();

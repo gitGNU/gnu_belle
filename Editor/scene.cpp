@@ -18,6 +18,7 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QtCore/qmath.h>
 
 #include "scene_manager.h"
 #include "textbox.h"
@@ -669,12 +670,26 @@ void Scene::paint(QPainter & painter)
     }
 }
 
-void Scene::resize(int w, int h)
+void Scene::resize(int w, int h, bool pos, bool size)
 {
     if (mBackgroundImage && mBackgroundImage->pixmap()) {
         QPixmap* pixmap = mBackgroundImage->pixmap();
         if (pixmap)
             *pixmap = pixmap->scaled(w, h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     }
-}
 
+    qreal wratio = w / (Scene::width() * 1.0);
+    qreal hratio = h / (Scene::height() * 1.0);
+
+    for(int i=0; i < mObjects.size(); i++) {
+        Object * obj = mObjects[i];
+        if (pos) {
+            obj->setX(qRound(obj->x()*wratio));
+            obj->setY(qRound(obj->y()*hratio));
+        }
+        if (size) {
+            obj->setWidth(qRound(obj->width()*wratio));
+            obj->setHeight(qRound(obj->height()*hratio));
+        }
+    }
+}

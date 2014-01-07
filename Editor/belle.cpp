@@ -56,6 +56,7 @@
 #include "engine.h"
 #include "simple_http_server.h"
 #include "save_project_dialog.h"
+#include "update_elements_dialog.h"
 
 static Belle* mInstance = 0;
 
@@ -1048,6 +1049,7 @@ void Belle::onPropertiesTriggered()
 
     if (dialog.result() == QDialog::Accepted) {
         QVariantMap data = dialog.novelData();
+        checkGameSize(data);
         setNovelProperties(data);
 
         Engine::setPath(dialog.enginePath());
@@ -1081,6 +1083,33 @@ bool Belle::checkEnginePath()
 
     Engine::setPath(path);
     return true;
+}
+
+void Belle::checkGameSize(const QVariantMap& data)
+{
+    int width = Scene::width(), height = Scene::height();
+    if (data.contains("width") && data.value("width").canConvert(QVariant::Int)) {
+        width = data.value("width").toInt();
+    }
+
+    if (data.contains("height") && data.value("height").canConvert(QVariant::Int)) {
+        height = data.value("height").toInt();
+    }
+
+    if (width != Scene::width() || height != Scene::height())
+        updateGameElements(width, height);
+}
+
+void Belle::updateGameElements(int w, int h)
+{
+    UpdateElementsDialog dialog(this);
+    dialog.exec();
+    if (dialog.result() == QDialog::Accepted) {
+        bool pos = dialog.ui.updatePositionsCheckBox->isChecked();
+        bool size = dialog.ui.updateSizesCheckBox->isChecked();
+        mDefaultSceneManager->resizeScenes(w, h, pos, size);
+        mPauseSceneManager->resizeScenes(w, h, pos, size);
+    }
 }
 
 void Belle::setNovelProperties(const QVariantMap& _data)

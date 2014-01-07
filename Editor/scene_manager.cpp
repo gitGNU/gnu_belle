@@ -231,3 +231,9 @@ QList<Scene*> SceneManager::scenes()
 {
     return mScenes;
 }
+
+void SceneManager::resizeScenes(int w, int h, bool pos, bool size)
+{
+    for(int i=0; i < mScenes.size(); i++)
+        mScenes[i]->resize(w, h, pos, size);
+}

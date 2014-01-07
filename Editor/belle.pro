@@ -16,7 +16,8 @@ FORMS += mainwindow.ui\
     novel_properties_dialog.ui \
     about.ui \
     add_character.ui \
-    save_project_dialog.ui
+    save_project_dialog.ui \
+    update_elements_dialog.ui
 
 HEADERS      += belle.h\
                 scene_manager.h\
@@ -109,7 +110,8 @@ HEADERS      += belle.h\
     simple_http_server.h \
     save_project_dialog.h \
     actions/runscript.h \
-    actions/runscript_editorwidget.h
+    actions/runscript_editorwidget.h \
+    update_elements_dialog.h
                 
 
 SOURCES      += main.cpp\
@@ -202,6 +204,7 @@ SOURCES      += main.cpp\
     simple_http_server.cpp \
     save_project_dialog.cpp \
     actions/runscript.cpp \
-    actions/runscript_editorwidget.cpp
+    actions/runscript_editorwidget.cpp \
+    update_elements_dialog.cpp
 
 RESOURCES += media.qrc

@@ -118,6 +118,8 @@ private:
         QTreeWidget* scenesWidget(const QString&);
         QTreeWidget* scenesWidget(SceneManager*);
         SceneManager* sceneManager(const QString&);
+        void updateGameElements(int, int);
+        void checkGameSize(const QVariantMap&);
 
 };
 
