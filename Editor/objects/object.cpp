@@ -251,6 +251,8 @@ void Object::setWidth(int w, bool percent)
         mPercentWidth = 0;
     }
 
+    updateResizeRects();
+
     notify("width", mSceneRect.width(), width);
 }
 
@@ -272,6 +274,8 @@ void Object::setHeight(int h, bool percent)
         mPercentHeight = 0;
         mSceneRect.setHeight(h);
     }
+
+    updateResizeRects();
 
     notify("height", mSceneRect.height(), height);
 }
