@@ -171,7 +171,7 @@ var init = function()
 
 var hidePauseScreen = function()
 {
-    var container = "#belle #game";
+    $container = $("#belle #game");
     if (! display.DOM) {
         canvas = $container.find("#canvas")[0];
         bgCanvas = $container.find("#backgroundCanvas")[0];
@@ -184,12 +184,14 @@ var hidePauseScreen = function()
 
 var showPauseScreen = function()
 {
-    var container = "#belle #pauseScreen";
+    $container = $("#belle #pauseScreen");
     if (! display.DOM) {
         canvas = $container.find("#canvas")[0];
         bgCanvas = $container.find("#backgroundCanvas")[0];
+        belle.game.pauseScreen.currentScene.redrawBackground = true;
         display.bgContext = bgCanvas.getContext('2d');
         display.context = canvas.getContext('2d');
+        
     }
     
     $("#belle #pauseScreen").css("display", "block");

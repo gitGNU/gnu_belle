@@ -1190,10 +1190,10 @@ function Scene(data)
     this.backgroundImageLoaded = false;
     var backgroundImage = "";
     var backgroundColor = null;
-    this.width = this.realWidth = belle.game.width;
-    this.height = this.realHeight = belle.game.height;
-    this.x = this.realX = 0;
-    this.y = this.realY = 0;
+    this.width = this.scaledWidth = belle.game.width;
+    this.height = this.scaledHeight = belle.game.height;
+    this.x = this.scaledX = 0;
+    this.y = this.scaledY = 0;
     data.width = this.width;
     data.height = this.height;
     this.visible = true;
