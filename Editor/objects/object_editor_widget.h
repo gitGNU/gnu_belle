@@ -48,6 +48,7 @@ public slots:
     void onColorChosen(const QColor&);
     void onSliderValueChanged(int);
     void onAddItemActivated();
+    void onItemActivated(int);
     void onRoundedRectToggled(bool);
     void onXRadiusValueChanged(int);
     void onYRadiusValueChanged(int);

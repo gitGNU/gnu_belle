@@ -119,6 +119,7 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     this->beginGroup(tr("Events"));
     mMousePressComboBox = new ComboBox(this);
     mMousePressComboBox->setObjectName("MousePressComboBox");
+    connect (mMousePressComboBox, SIGNAL(itemActivated(int)), this, SLOT(onItemActivated(int)));
     connect (mMousePressComboBox, SIGNAL(addItemActivated()), this, SLOT(onAddItemActivated()));
     connect (mMousePressComboBox, SIGNAL(itemRemoved(int)), this, SLOT(onEventItemRemoved(int)));
     this->appendRow("OnMousePress", mMousePressComboBox);
@@ -126,6 +127,7 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
 
     mMouseReleaseComboBox = new ComboBox(this);
     mMouseReleaseComboBox->setObjectName("MouseReleaseComboBox");
+    connect (mMouseReleaseComboBox, SIGNAL(itemActivated(int)), this, SLOT(onItemActivated(int)));
     connect (mMouseReleaseComboBox, SIGNAL(addItemActivated()), this, SLOT(onAddItemActivated()));
     connect (mMouseReleaseComboBox, SIGNAL(itemRemoved(int)), this, SLOT(onEventItemRemoved(int)));
     this->appendRow("OnMouseRelease", mMouseReleaseComboBox);
@@ -134,6 +136,7 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
 
     mMouseMoveComboBox = new ComboBox(this);
     mMouseMoveComboBox->setObjectName("MouseMoveComboBox");
+    connect (mMouseMoveComboBox, SIGNAL(itemActivated(int)), this, SLOT(onItemActivated(int)));
     connect (mMouseMoveComboBox, SIGNAL(addItemActivated()), this, SLOT(onAddItemActivated()));
     connect (mMouseMoveComboBox, SIGNAL(itemRemoved(int)), this, SLOT(onEventItemRemoved(int)));
     this->appendRow("OnMouseMove", mMouseMoveComboBox);
@@ -287,6 +290,26 @@ void ObjectEditorWidget::onAddItemActivated()
         if(comboBox) {
             comboBox->addItem(action->icon(), action->toString(), qVariantFromValue(static_cast<QObject*>(action)));
         }
+    }
+}
+
+void ObjectEditorWidget::onItemActivated(int index)
+{
+    if (! mCurrentObject)
+        return;
+
+    Interaction::InputEvent event = mWidgetToEvent.value(sender());
+    QList<Action*> actions = mCurrentObject->actionsForEvent(event);
+    if (index >= actions.size())
+        return;
+
+    Action * action = actions[index];
+    AddActionDialog dialog(action);
+    dialog.exec();
+
+    ComboBox *comboBox = qobject_cast<ComboBox*>(sender());
+    if(comboBox) {
+        comboBox->setItemText(index, action->toString());
     }
 }
 
