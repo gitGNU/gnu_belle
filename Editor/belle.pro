@@ -29,10 +29,10 @@ HEADERS      += belle.h\
     objects/textbox.h \
     objects/textbox_editor_widget.h\
     properties_widget.h \
-    object_editor_widget.h \
+    objects/object_editor_widget.h \
     color_pushbutton.h \
-    character_properties_widget.h \
-    character.h \
+    objects/character_properties_widget.h \
+    objects/character.h \
     action.h \
     actions_view.h \
     actions_model.h \
@@ -41,7 +41,7 @@ HEADERS      += belle.h\
     wait_editor_widget.h \
     actions/dialogue.h \
     actions/dialogue_editor_widget.h \
-    dialoguebox.h \
+    objects/dialoguebox.h \
     resource_manager.h \
     actions/slide.h \
     actions/slide_editor_widget.h \
@@ -122,7 +122,7 @@ SOURCES      += main.cpp\
     boxlayout.cpp \
     extendedlineedit.cpp \
     properties_widget.cpp \
-    object_editor_widget.cpp \
+    objects/object_editor_widget.cpp \
     color_pushbutton.cpp \
     objects/character_properties_widget.cpp \
     action.cpp \
@@ -133,7 +133,7 @@ SOURCES      += main.cpp\
     actions/wait_editor_widget.cpp \
     actions/dialogue.cpp \
     actions/dialogue_editor_widget.cpp \
-    dialoguebox.cpp \
+    objects/dialoguebox.cpp \
     resource_manager.cpp \
     actions/slide.cpp \
     actions/slide_editor_widget.cpp \
