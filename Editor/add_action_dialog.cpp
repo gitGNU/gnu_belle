@@ -66,6 +66,8 @@ AddActionDialog::AddActionDialog(Action* action, QWidget *parent) :
     QDialog(parent)
 {
     init();
+    setWindowTitle(tr("Edit Action"));
+    resize(640, 320);
     mEditMode = true;
     mButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal, this);
     setLayout(new QVBoxLayout(this));
