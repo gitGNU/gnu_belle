@@ -394,12 +394,7 @@ function gameLoop ()
     }
     
     if (_game.currentAction == null || _game.currentAction.isFinished()) {
-             
-        if (_game.currentAction && _game.currentAction.wait) {
-            _game.currentAction = _game.currentAction.wait;
-            _game.currentAction.execute();
-        }
-        else if (_game.nextAction >= _game.actions.length) {
+		if (_game.nextAction >= _game.actions.length) {
             if (_game.nextScene >= _game.scenes.length) {
                 _game.end = true;
             }
