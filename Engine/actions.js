@@ -39,6 +39,7 @@ function Action(data)
     this.type = "Action";
     this.valid = true;
     this.elapsedTime = 0;
+    this.listeners = {};
     var scene = data["__scene"];
     
     if (data) {
@@ -84,7 +85,23 @@ Action.prototype.isFinished = function() {
 }
 
 Action.prototype.setFinished = function(finished) {
-    this.finished = finished;
+    if (finished && this.wait) {
+        this.finished = false;
+        var that = this;
+        this.wait.addEventListener("onFinished", function() {
+            that.finished = true;
+        });
+        this.wait.execute();
+    }
+    else {
+        if (finished && this.eventListeners.hasOwnProperty("onFinished")) {
+            var listeners = this.eventListeners["onFinished"];
+            for(var i=0; i < listeners.length; i++)
+                listeners[i]();
+        }
+        
+        this.finished = finished;
+    }
 }
 
 Action.prototype.skip = function() 
@@ -122,6 +139,13 @@ Action.prototype.isReady = function()
 
 Action.prototype.scale = function(widthFactor, heightFactor)
 {
+}
+
+Action.prototype.addEventListener = function(ev, listener)
+{
+    if (! this.listeners.hasOwnProperty(ev))
+        this.listeners[ev] = [];
+    this.listeners[ev].push(listener);
 }
 
 /*********** FADE ACTION ***********/
@@ -787,7 +811,7 @@ GoToScene.prototype.execute = function()
         for (var i=0; i !== scenes.length; i++) {
             
             if (this.scene == scenes[i].name) {
-              
+
                 game.nextAction = game.currentScene.actions.length;
                 game.nextScene = i;
                 game.currentAction.setFinished(true);
