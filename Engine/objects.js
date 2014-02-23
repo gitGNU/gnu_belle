@@ -1181,6 +1181,7 @@ function Scene(data)
 {
     this.objects = [];
     this.actions = [];
+    this.action = null;
     this.image = null;
     this.ready = false;
     this.redrawBackground = false;
@@ -1228,6 +1229,60 @@ Scene.prototype.addObject = function(object) {
     if (belle.game.currentScene == this) {
         belle.display.addObject(object);
     }
+}
+
+Scene.prototype.indexOf = function(object) {
+    var isInstance = belle.utils.isInstance;
+    if (isInstance(object, belle.objects.Object))
+        return this.objects.indexOf(object);
+    else if (isInstance(object, belle.actions.Action))
+        return this.actions.indexOf(object);
+    return -1;
+}
+
+Scene.prototype.getActions = function() {
+    return this.actions;
+}
+
+Scene.prototype.getAction = function(name) {
+    if (name) {
+        for (var i=0; i < this.actions.length; i++)
+            if (this.actions[i].name == name)
+                return this.actions[i];
+    }
+    else if (name === undefined)
+        return this.action;
+    
+    return null;    
+}
+
+Scene.prototype.getObject = function(name) {
+    if (name) {
+        for (var i=0; i < this.actions.length; i++)
+            if (this.objects[i].name == name)
+                return this.objects[i];
+    }
+    
+    return null;    
+}
+
+Scene.protoype.nextAction = function() {
+    
+    var nextIndex = -1;
+    if (this.action)
+        nextIndex = this.actions.indexOf(this.action);
+    nextIndex++;
+    
+    if (nextIndex >= this.actions.length) { 
+        this.finished = true;
+        this.action = null;
+    }
+    else if (nextIndex >= 0)
+        this.action = this.actions[index];
+        
+    if (this.action)
+        return this.action;
+    return null;
 }
 
 Scene.prototype.setBackgroundImage = function(background)
