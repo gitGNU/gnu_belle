@@ -27,6 +27,26 @@ var stateMachine = belle.stateMachine;
 var game = belle.game;
 var loaded = false;
 
+
+belle.extend = function (sub, base) 
+{
+    // Copy the prototype from the base to setup inheritance
+    surrogateCtor.prototype = base.prototype;
+    // Tricky huh?
+    sub.prototype = new surrogateCtor();
+    // Remember the constructor property was set wrong, let's fix it
+    sub.prototype.constructor = sub;
+}
+
+belle.isInstance = function(object, constructor) {
+  while (object != null) {
+    if (object == constructor.prototype)
+      return true;
+    object = Object.getPrototypeOf(object);
+  }
+  return false;
+}
+
 var addObject = function (object)
 {
     if (game.currentScene)
