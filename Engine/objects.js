@@ -1232,10 +1232,9 @@ Scene.prototype.addObject = function(object) {
 }
 
 Scene.prototype.indexOf = function(object) {
-    var isInstance = belle.utils.isInstance;
-    if (isInstance(object, belle.objects.Object))
+    if (belle.isInstance(object, belle.objects.Object))
         return this.objects.indexOf(object);
-    else if (isInstance(object, belle.actions.Action))
+    else if (belle.isInstance(object, belle.actions.Action))
         return this.actions.indexOf(object);
     return -1;
 }
