@@ -442,10 +442,7 @@ function gameLoop ()
         }
     }
     
-    if (! display.DOM && display.needsRedraw()) {  
-        display.draw();
-    }
-    
+    display.draw();
     setTimeout(gameLoop, timeout);
 }
 

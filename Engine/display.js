@@ -197,7 +197,7 @@ var showPauseScreen = function()
     $("#belle #pauseScreen").css("display", "block");
 }
 
-var redraw = function()
+var _draw = function()
 {
     drawing = true;
     var game = belle.game;
@@ -243,14 +243,6 @@ var redraw = function()
         obj.paint(display.context);
     }
     
-    drawing = false;
-}
-
-var _draw = function()
-{   
-    drawing = true;
-    redraw();
-    
     if (_drawFPS) 
         drawFPS();
     
@@ -259,7 +251,8 @@ var _draw = function()
 
 var draw = function()
 {
-    requestAnimationFrame(_draw);
+    if (! display.DOM && display.needsRedraw())
+        requestAnimationFrame(_draw);
 }
 
 var needsRedraw = function() 
