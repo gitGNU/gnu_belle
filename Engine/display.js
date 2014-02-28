@@ -381,7 +381,7 @@ var updateLoading = function($progress)
       },
       2000,
       function(){
-        if ($progress.attr("running")) {
+        if ($progress.attr("running") == "true") {
           $progress.css("left", -width);
           setTimeout(function(){updateLoading($progress); }, 10);
         }
@@ -404,7 +404,7 @@ var loading = function()
 
 var stopLoading = function()
 {
-    if ($progress.attr("running")) {
+    if ($progress.attr("running") == "true") {
         $progress.attr("running", false);
         $loader.css("display", "none");
     }
