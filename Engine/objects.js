@@ -542,7 +542,9 @@ Object.prototype.processEvent = function(event)
     
     this.notify(event);
     
-    return true;
+    if (actions.length || listeners.length)
+      return true;
+    return false;
 }
 
 Object.prototype.moveTo = function(x, y) 
@@ -1265,7 +1267,7 @@ Scene.prototype.getObject = function(name) {
     return null;    
 }
 
-Scene.protoype.nextAction = function() {
+Scene.prototype.nextAction = function() {
     
     var nextIndex = -1;
     if (this.action)
