@@ -16,12 +16,16 @@
  
 (function(game) {
     
+  	game.isFinished = function(scene) {
+	  return this.finished;
+	}
+	
 	game.indexOf = function(scene) {
-		if (belle.utils.isInstance(scene, belle.objects.Scene)) {
-			var scenes = this.getScenes() || [];
-			return scenes.indexOf(scene);
-		}
-		return -1;
+	  if (scene && belle.utils.isInstance(scene, belle.objects.Scene)) {
+	    var scenes = this.getScenes() || [];
+	    return scenes.indexOf(scene);
+	  }
+	  return -1;
 	}
 
 	game.getScenes = function() {
@@ -37,14 +41,20 @@
 	}
 	
 	game.nextScene = function() {
-		var index = this.indexOf(this.getScene());
-		var scenes = this.getScenes();
-		if (index >= 0 && index+1 < scenes.length) {
-			this.scene = scenes[index+1];
-			return this.scene;
-		}
-		
-		return null;
+	  if (this isFinished())
+	    return null;
+	  
+	  var index = this.indexOf(this.getScene()) + 1;
+	  var scenes = this.getScenes();
+	  if (index >= 0 && index < scenes.length) {
+	    this.scene = scenes[index+1];
+	    return this.scene;
+	  }
+	  else {
+	    this.finished = true;
+	  }
+	  
+	  return null;
 	}
 	
 	game.next = function() {
