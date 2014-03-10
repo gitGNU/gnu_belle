@@ -1268,21 +1268,19 @@ Scene.prototype.getObject = function(name) {
 }
 
 Scene.prototype.nextAction = function() {
+    if (this.finished)
+      return null;
     
-    var nextIndex = -1;
-    if (this.action)
-        nextIndex = this.actions.indexOf(this.action);
-    nextIndex++;
+    var index = this.actions.indexOf(this.action) + 1;
     
-    if (nextIndex >= this.actions.length) { 
-        this.finished = true;
-        this.action = null;
-    }
-    else if (nextIndex >= 0)
+    if (index >= 0 && index < this.actions.length) { 
         this.action = this.actions[index];
-        
-    if (this.action)
-        return this.action;
+	return this.action;
+    }
+    else {
+      this.finished = true;
+    }
+
     return null;
 }
 
