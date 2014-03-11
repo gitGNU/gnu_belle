@@ -43,6 +43,10 @@ display.bgCanvas = null;
 display.scaledWidthFactor = 1;
 display.scaledHeightFactor = 1;
 
+var getContainer = function() {
+    return $('#belle .container.active');
+}
+
 var requestAnimationFrame = (function(){
   return  window.requestAnimationFrame       || 
           window.webkitRequestAnimationFrame || 
@@ -179,7 +183,8 @@ var hidePauseScreen = function()
         display.context = canvas.getContext('2d');
     }
     
-    $("#belle #pauseScreen").css("display", "none");
+    $("#belle #pauseScreen").removeClass("active");
+    $container.addClass("active");
 }
 
 var showPauseScreen = function()
@@ -191,10 +196,10 @@ var showPauseScreen = function()
         belle.game.pauseScreen.currentScene.redrawBackground = true;
         display.bgContext = bgCanvas.getContext('2d');
         display.context = canvas.getContext('2d');
-        
     }
     
-    $("#belle #pauseScreen").css("display", "block");
+    $("#belle #game").removeClass("active");
+    $("#belle #pauseScreen").addClass("active");
 }
 
 var _draw = function()
@@ -411,6 +416,7 @@ var stopLoading = function()
 }
 
 //Expose public functions
+display.getContainer = getContainer;
 display.scaleFont = scaleFont;
 display.draw = draw;
 display.clear = clear;
