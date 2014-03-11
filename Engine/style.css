@@ -60,6 +60,10 @@ body, html
     z-index: 1;
 }
 
+#belle .active {
+    display: block !important;
+}
+
 #fps 
 {
     position: absolute;
