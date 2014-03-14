@@ -310,6 +310,24 @@ var drawFPS = function()
     }
 }
 
+var displayScene = function(scene) 
+{
+  if (scene && display.DOM) {
+    var $container = getContainer();
+    var $scene = $container.find(".scene.active");
+    if ($scene.length) { 
+      $scene.removeClass("active");
+      $scene.hide();
+    }
+    $scene = $(scene.element);
+    $scene.addClass("active");
+    var objects = scene.objects;
+    for(var i=0; i < objects.length; i++)
+      $scene.append(objects[i].element);
+    $container.append($scene);
+  }
+}
+
 var removeObjects = function(scene)
 {
     if (! display.DOM)
@@ -350,6 +368,7 @@ var addObject = function(object, container)
         container.appendChild(object.element);
     }
 }
+
 
 var isCanvasSupported = function() {
   var elem = document.createElement("canvas");
@@ -417,6 +436,7 @@ var stopLoading = function()
 
 //Expose public functions
 display.getContainer = getContainer;
+display.displayScene = displayScene;
 display.scaleFont = scaleFont;
 display.draw = draw;
 display.clear = clear;
