@@ -1226,6 +1226,15 @@ function Scene(data)
         this.setBackgroundColor(backgroundColor);
 }
 
+Scene.prototype.setActive = function(active) {
+  if (active) {
+    belle.display.displayScene(this);
+    //when transitions for scenes are added call nextAction() after the transition is complete
+    this.nextAction();
+  }
+  this.active = active;
+}
+
 Scene.prototype.addObject = function(object) {
     this.objects[this.objects.length] = object;
     if (belle.game.currentScene == this) {
@@ -1259,9 +1268,9 @@ Scene.prototype.getAction = function(name) {
 
 Scene.prototype.getObject = function(name) {
     if (name) {
-        for (var i=0; i < this.actions.length; i++)
-            if (this.objects[i].name == name)
-                return this.objects[i];
+      for (var i=0; i < this.objects.length; i++)
+	if (this.objects[i].name == name)
+	  return this.objects[i];
     }
     
     return null;    
@@ -1275,6 +1284,7 @@ Scene.prototype.nextAction = function() {
     
     if (index >= 0 && index < this.actions.length) { 
         this.action = this.actions[index];
+	this.action.execute();
 	return this.action;
     }
     else {
