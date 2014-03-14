@@ -16,7 +16,7 @@
  
 (function(game) {
     
-  	game.isFinished = function(scene) {
+  	game.isFinished = function() {
 	  return this.finished;
 	}
 	
@@ -30,24 +30,26 @@
 
 	game.getScenes = function() {
 		if (this.paused)
-			return this.game.pause.scenes;
-		return this.game.scenes;
+			return this.pause.scenes;
+		return this.scenes;
 	}
 
 	game.getScene = function(scene) {
 		if (this.paused)
-			return this.game.pause.scene;
-		return this.game.scene;  
+			return this.pause.scene;
+		return this.scene;  
 	}
 	
 	game.nextScene = function() {
-	  if (this isFinished())
+	  if (this.isFinished())
 	    return null;
 	  
 	  var index = this.indexOf(this.getScene()) + 1;
 	  var scenes = this.getScenes();
 	  if (index >= 0 && index < scenes.length) {
-	    this.scene = scenes[index+1];
+	    var scene = scenes[index];
+	    scene.setActive(true);
+	    this.scene = scene;
 	    return this.scene;
 	  }
 	  else {
@@ -90,7 +92,7 @@
 		if (variable.startsWith("$"))
 			variable = variable.slice(1);
 		
-		return game.variables[variable];
+		return this.variables[variable];
 	}
 
 	game.addVariable = function (variable, value) {
@@ -144,4 +146,4 @@
 		return text;
 	}
 	
-}(game);
+})(game);
