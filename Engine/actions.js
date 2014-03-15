@@ -744,9 +744,17 @@ function Label (data)
 {
     Action.call(this, data);
     this.needsRedraw = false;
+    //since this action is just a checkpoint, we can mark it as finished already
+    this.finished = true;
 }
 
 belle.utils.extend (Action, Label);
+
+Label.prototype.reset = function()
+{
+  //prevent reset default behaviour and set as finished
+  this.finished = true;
+}
 
 /************* Go TO LABEL *****************/
 
