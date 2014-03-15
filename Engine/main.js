@@ -105,74 +105,6 @@ function getResource(name)
     return null;
 }
 
-function containsVariable (variable) {
-    if (variable.startsWith("$"))
-        variable = variable.slice(1);
-    
-    return (variable in game.variables);
-}
-
-function value (variable) {
-    if (! containsVariable(variable))
-        return "";
-        
-    if (variable.startsWith("$"))
-        variable = variable.slice(1);
-    
-    return game.variables[variable];
-}
-
-function insertVariable (variable, value) {
-    game.variables[variable] = value;
-}
-
-var replaceVariables = function(text)
-{
-    if (! text)
-        return text;
-    
-    if (! text.contains("$"))
-        return text;
-    
-    var validChar = /^[a-zA-Z]+[0-9]*$/g;
-    var variable = "";
-    var variables = [];
-    var values = [];
-    var appendToVariable = false;
-    
-    //Parse text to determine variables, which start from "$" 
-    //until the end of string or until any other character that is not a letter nor a digit.
-    for(var i=0; i !== text.length; i++) {
-      
-      if (text.charAt(i).search(validChar) == -1) {
-        appendToVariable = false;          
-        if (variable)
-          variables.push(variable);
-        variable = "";
-        if(text.charAt(i) == "$")
-          appendToVariable = true;
-      }
-        
-      if (appendToVariable)
-        variable += text.charAt(i);
-    }
-    
-    //replace variables with the respective values and append them to the values list
-    for(var i=0; i != variables.length; i++) {
-        if (belle.containsVariable(variables[i]))
-          values.push(belle.value(variables[i]));
-        else //if the variable is not found, still add an empty value to the values so we have an equal number of elements in both lists
-          values.push("");
-    }
-    
-    //replace variables with the values previously extracted
-    for(var i=0; i != values.length; i++) {
-      text = text.replace(variables[i], values[i]);
-    }
-    
-    return text;
-}
-
 function setGameFile(gamefile)
 {
     game.filename = gamefile;
@@ -434,10 +366,6 @@ belle.addObject = addObject;
 belle.createObject = createObject;
 belle.getObject = getObject;
 belle.getResource = getResource;
-belle.containsVariable = containsVariable;
-belle.value = value;
-belle.replaceVariables = replaceVariables;
-belle.insertVariable = insertVariable;
 belle.game = game;
 belle.getObjectPrototype = getObjectPrototype;
 belle.getActionPrototype = getActionPrototype;

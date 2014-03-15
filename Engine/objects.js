@@ -820,7 +820,7 @@ TextBox.prototype.paint = function(context)
     if (context.globalAlpha != this.color.alphaF())
         context.globalAlpha = this.color.alphaF();
     
-    var text = belle.replaceVariables(this.text);
+    var text = game.replaceVariables(this.text);
     if (text != this.displayedText)
         this.alignText();
     this.displayedText = text;
@@ -841,7 +841,7 @@ TextBox.prototype.alignText = function(text, size)
     if (! text && ! this.text)
         return;
     if (! text)
-        text = belle.replaceVariables(this.text);
+        text = game.replaceVariables(this.text);
     
     if (belle.display.DOM && this.textElement) {
         text = text.replace("\n", "<br/>");
@@ -910,7 +910,7 @@ TextBox.prototype.needsRedraw = function()
     if (! this.visible)
         return false;
     
-    var displayText = belle.replaceVariables(this.text);
+    var displayText = game.replaceVariables(this.text);
     
     if (displayText != this.displayedText) {
         this.redraw = true;
@@ -929,7 +929,7 @@ TextBox.prototype.setText = function(text)
 {
     if (this.text != text) {
         this.text = text;
-        this.textElement.innerHTML = belle.replaceVariables(text.replace("\n", "<br/>"));
+        this.textElement.innerHTML = game.replaceVariables(text.replace("\n", "<br/>"));
         this.alignText();
         this.redraw = true;
     }
