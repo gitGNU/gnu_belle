@@ -1186,6 +1186,7 @@ function Scene(data)
     this.action = null;
     this.image = null;
     this.ready = false;
+    this.finished = false;
     this.redrawBackground = false;
     this.name = "";
     this.backgroundImage = null;
@@ -1233,6 +1234,10 @@ Scene.prototype.setActive = function(active) {
     this.nextAction();
   }
   this.active = active;
+}
+
+Scene.prototype.isFinished = function(active) {
+  return this.finished;
 }
 
 Scene.prototype.addObject = function(object) {
