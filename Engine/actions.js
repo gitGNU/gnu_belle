@@ -32,6 +32,7 @@ actions.init = function()
 function Action(data)
 {
     this.finished = false;
+    this._finished = false;
     this.interval = null;
     this.wait = null;
     this.needsRedraw = true;
@@ -39,7 +40,7 @@ function Action(data)
     this.type = "Action";
     this.valid = true;
     this.elapsedTime = 0;
-    this.listeners = {};
+    this.eventListeners = {};
     var scene = data["__scene"];
     
     if (data) {
@@ -84,13 +85,19 @@ Action.prototype.isFinished = function() {
     return this.finished;
 }
 
+Action.prototype._isFinished = function() {
+    return this.finished || this._finished;
+}
+
 Action.prototype.setFinished = function(finished) {
-    if (finished && this.wait) {
+    if (finished && this.wait && ! this._isFinished()) {
         this.finished = false;
+        this._finished = true;
         var that = this;
         this.wait.addEventListener("onFinished", function() {
-            that.finished = true;
+            that.setFinished(true);
         });
+        
         this.wait.execute();
     }
     else {
@@ -99,20 +106,27 @@ Action.prototype.setFinished = function(finished) {
             for(var i=0; i < listeners.length; i++)
                 listeners[i]();
         }
-        
         this.finished = finished;
     }
 }
 
 Action.prototype.skip = function() 
 {
-    this.skipped = true;
+    if (! this.skippable)
+        return;
+    
+    if (this._isFinished() && this.wait) {
+        this.wait.skip();
+    }
+    else {
+        this.setFinished(true);
+    }
 }
+
 
 Action.prototype.reset = function ()
 {
-    this.finished = false;
-    this.skipped = false;
+    this.finished = this._finished = false;
     if (this.interval) {
         clearInterval(this.interval)
         this.interval = null;
@@ -143,9 +157,9 @@ Action.prototype.scale = function(widthFactor, heightFactor)
 
 Action.prototype.addEventListener = function(ev, listener)
 {
-    if (! this.listeners.hasOwnProperty(ev))
-        this.listeners[ev] = [];
-    this.listeners[ev].push(listener);
+    if (! this.eventListeners.hasOwnProperty(ev))
+        this.eventListeners[ev] = [];
+    this.eventListeners[ev].push(listener);
 }
 
 /*********** FADE ACTION ***********/
