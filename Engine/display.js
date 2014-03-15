@@ -166,11 +166,6 @@ var init = function()
     
     if ($progress && $progress.attr("running"))
       stopLoading();
-        
-    if (game.currentScene) {
-        game.currentScene.redrawBackground = true;
-        addObjects(game.currentScene);
-    }
 }
 
 var hidePauseScreen = function()
@@ -204,19 +199,26 @@ var showPauseScreen = function()
 
 var _draw = function()
 {
+    //if (drawing)
+      //return;
+    
     drawing = true;
-    var game = belle.game;
-    if (belle.game.paused)
-        game = belle.game.pauseScreen;
-    var objectsToDraw = game.currentScene.objects;
+    var scene = game.getScene();
+
+    if (! scene) {
+      drawing = false;
+      return;
+    }
+    
+    var objectsToDraw = scene.objects;
     var rect = null;
     var obj = null;
     var i, j;
     var length = 0;
 
     display.context.font = game.font;
-    if (game.currentScene.redrawBackground)
-        game.currentScene.paint(display.bgContext);
+    if (scene.redrawBackground)
+        scene.paint(display.bgContext);
 
     for(i=objectsToDraw.length-1; i !== -1; --i) {
         if (! objectsToDraw[i].redraw)
@@ -262,19 +264,18 @@ var draw = function()
 
 var needsRedraw = function() 
 {
-    var game = belle.game;
-    if (game.paused)
-        game = game.pauseScreen;
     if (forceRedraw) {
         forceRedraw = false;
         return true;
     }
+    
+    var scene = game.getScene();
 
-    if (game.currentScene && game.currentScene.redrawBackground) {
+    if (scene && scene.redrawBackground) {
         return true;
     }
     
-    var objects = game.currentScene.objects;
+    var objects = scene.objects;
     for(var i=0; i !== objects.length; i++) {
         if (objects[i].needsRedraw()) {
             return true;

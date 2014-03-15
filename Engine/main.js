@@ -24,9 +24,7 @@ var display = belle.display;
 var objects = belle.objects;
 var actions = belle.actions;
 var stateMachine = belle.stateMachine;
-var game = belle.game;
 var loaded = false;
-
 
 belle.extend = function (sub, base) 
 {
@@ -39,6 +37,7 @@ belle.extend = function (sub, base)
 }
 
 belle.isInstance = function(object, constructor) {
+  
   while (object != null) {
     if (object == constructor.prototype)
       return true;
@@ -305,19 +304,8 @@ function initializeData(data)
     
     if ("pauseScreen" in data && "scenes" in data["pauseScreen"]) {
         game.pauseScreen.scenes = loadScenes(data.pauseScreen["scenes"]);
-        game.pauseScreen.currentScene = game.pauseScreen.scenes[0];
-        game.pauseScreen.actions = game.pauseScreen.currentScene.actions;
-        game.pauseScreen.nextScene = 1;
-        game.pauseScreen.nextAction = 0; //first action
     }
-    
-    if (game.scenes && game.scenes.length > 0 ) {
-        game.currentScene = game.scenes[0];
-        game.actions = game.currentScene.actions;
-        game.nextScene = 1;
-        game.nextAction = 0; //first action
-    }
-    
+        
     isgameDataReady();
 }
 
@@ -376,6 +364,8 @@ function isgameDataReady() {
         setTimeout(isgameDataReady, 100);
     else {
         display.init();
+	if (game.getScenes()) 
+	  game.nextScene();
         setTimeout(gameLoop, 1);
     }
 }
@@ -400,46 +390,16 @@ function importgameData(path) {
 //game's main loop
 function gameLoop ()
 {   
-    var _game = belle.game;
+    var scene = game.getScene();
+    var action = scene.getAction();
     
-    if (_game.end) {
-        alert("The End");
-        return;
-    }
-   
-   if (_game.paused) {
-      _game = _game.pauseScreen;
-      if (_game.end)
-        _game = belle.game;
-    }
-    
-    if (_game.currentAction == null || _game.currentAction.isFinished()) {
-		if (_game.nextAction >= _game.actions.length) {
-            if (_game.nextScene >= _game.scenes.length) {
-                _game.end = true;
-            }
-            else {
-                display.removeObjects(_game.currentScene);
-                _game.currentScene = _game.scenes[_game.nextScene];
-                display.addObjects(_game.currentScene);
-
-                if (! display.DOM) {
-                    display.clear();
-                    if (_game.currentScene)
-                        _game.currentScene.paint(display.bgContext);
-                }
-                
-                _game.actions = _game.currentScene.actions;
-                _game.nextScene++;
-                _game.nextAction = 0;
-                _game.currentAction = null;
-            }
-        }
-        else {
-            _game.currentAction = _game.currentScene.actions[_game.nextAction];
-            _game.currentAction.execute();
-            _game.nextAction++;
-        }
+    if (action && action.isFinished()) {
+	action = scene.nextAction();
+	if (! action && scene.isFinished())
+	  scene = game.nextScene();
+	 
+	if (! scene && game.isFinished()) //game is finished
+	  return;
     }
     
     display.draw();
@@ -482,6 +442,5 @@ belle.game = game;
 belle.getObjectPrototype = getObjectPrototype;
 belle.getActionPrototype = getActionPrototype;
 belle.pause = pause;
-belle.getGame = getGame;
 
 }(belle));

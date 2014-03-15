@@ -44,13 +44,12 @@ function Action(data)
     var scene = data["__scene"];
     
     if (data) {
-
         if ("object" in data) {
-            if (typeof data["object"] == "string")
-                this.object = belle.getObject(data["object"], scene);
+            if (scene && typeof data["object"] == "string")
+                this.object = scene.getObject(data["object"]);
             else if (typeof data["object"] == "object") {
-                if (data["object"].name)
-                    this.object = belle.getObject(data["object"].name, scene);
+                if (scene && data["object"].name)
+                    this.object = scene.getObject(data["object"].name);
 
                 if (! this.object && belle.objects[data["object"].type])  {
                     var _Object = belle.getObjectPrototype(data["object"].type);
@@ -122,7 +121,6 @@ Action.prototype.skip = function()
         this.setFinished(true);
     }
 }
-
 
 Action.prototype.reset = function ()
 {
@@ -438,14 +436,15 @@ Dialogue.prototype.execute = function () {
             this.object.setSpeakerName(this.speakerName);
     }
     this.object.setText("");
-    this.text = belle.replaceVariables(this.text);
+    this.text = game.replaceVariables(this.text);
+    
     
     //this.lines = splitText(context.font, this.text, this.object.rect.width-this.object.leftPadding);
     if (this.character)
         this.object.color = this.character.textColor;
     
     this.object.redraw = true;
-    this.interval = setInterval(function() { t.updateText(); }, belle.game.textDelay);
+    this.interval = setInterval(function() { t.updateText(); }, game.textDelay);
 }
 
 Dialogue.prototype.updateText = function() {
@@ -463,9 +462,13 @@ Dialogue.prototype.updateText = function() {
 }
 
 Dialogue.prototype.skip = function () {
-    this.object.appendText(this.text.slice(this.index));
-    this.index = this.text.length;
-    this.object.redraw = true;
+    if (this.skippable && ! this._isFinished()) {
+        clearInterval(this.interval);
+        this.object.appendText(this.text.slice(this.index));
+        this.index = this.text.length;
+        this.object.redraw = true;
+    }
+    Action.prototype.skip.call(this);
 }
 
 Dialogue.prototype.reset = function () 
@@ -503,20 +506,9 @@ Wait.prototype.execute = function ()
     var t = this;
     this.reset();
     if (this.waitType == "Timed" && this.time > 0) {
-        setTimeout(function() {t.end(); }, this.time);
+        setTimeout(function() { t.setFinished(true); }, this.time);
     }
 }
-
-Wait.prototype.end = function ()
-{
-    this.setFinished(true);
-}
-
-Wait.prototype.skip = function (){
-    if (this.skippable)
-        this.setFinished(true);
-}
-
 
 /*********** CHANGE VISIBILITY Action ***********/
 
@@ -726,13 +718,13 @@ belle.utils.extend(Action, ChangeBackground);
 ChangeBackground.prototype.execute = function () 
 {
     this.reset();
-    var game = belle.game;
+    var scene = game.getScene();
     
-    if (game.currentScene) {
+    if (scene) {
         if (this.backgroundImage)
-            game.currentScene.setBackgroundImage(this.backgroundImage);
+            scene.setBackgroundImage(this.backgroundImage);
         if (this.backgroundColor)
-            game.currentScene.setBackgroundColor(this.backgroundColor);
+            scene.setBackgroundColor(this.backgroundColor);
     }
     
     this.setFinished(true);
@@ -752,9 +744,10 @@ belle.utils.extend (Action, Label);
 
 Label.prototype.reset = function()
 {
-  //prevent reset default behaviour and set as finished
+  //prevent reset default behaviour and set as finished already
   this.finished = true;
 }
+
 
 /************* Go TO LABEL *****************/
 
@@ -771,30 +764,28 @@ belle.utils.extend(Action, GoToLabel);
 GoToLabel.prototype.execute = function()
 {
    this.reset();
-   var game = belle.game;
+   var scene = game.getScene();
    
-   var currentScene = game.currentScene;
-   
-   if (! currentScene || ! currentScene.actions) {
+   if (! scene || ! scene.getActions()) {
         this.setFinished(true);
         return;
    }
    
+   var actions = scene.getActions();
     
    if (this.label instanceof String || typeof this.label === 'string') {
-        for (var i=0; i !== currentScene.actions.length; i++) {
+        for (var i=0; i !== actions.length; i++) {
             
-            if (currentScene.actions[i].name === this.label) {
-                this.resetActions(i, game.nextAction-1); 
-                game.currentAction.setFinished(true);
-                game.nextAction = i;
+            if (actions[i].name === this.label) {
+                this.resetActions(i, scene.indexOf(actions[i])-1); 
+		scene.action = actions[i];
                 break;
             }
         }
    }
    else if (this.label instanceof Label || typeof this.object === 'label'){
-       if (currentScene.actions.indexOf(this.label) != -1)
-            window.nextAction = game.currentScene.actions.indexOf(this.label);
+       if (actions.indexOf(this.label) != -1)
+	 scene.action = actions.indexOf(this.label);
    }
  
    this.setFinished(true);
@@ -802,7 +793,11 @@ GoToLabel.prototype.execute = function()
 
 GoToLabel.prototype.resetActions = function(from, to)
 {
-    var actions =  belle.game.currentScene.actions;
+    var scene = game.getScene();
+    if (! scene) 
+      return;
+    
+    var actions =  scene.getActions();
     for(var i=from; i < to && i < actions.length; i++) {
         actions[i].reset();
     }
@@ -1063,7 +1058,7 @@ belle.utils.extend(Action, ChangeColor);
 ChangeColor.prototype.execute = function()
 {
     this.reset();
-   
+    
     if (! this.object) {
         this.setFinished(true);
         return;
@@ -1246,6 +1241,7 @@ function ShowMenu(data)
 {
     Action.call(this, data);
     this.options = 0;
+    this.skippable = false;
    
     if ( "options" in data && typeof data["options"] == "number") 
         this.options = options; 
@@ -1259,9 +1255,9 @@ belle.utils.extend(Action, ShowMenu);
 ShowMenu.prototype.execute = function()
 {
     this.reset();
-
-    if (this.object) {
-        belle.addObject(this.object);
+    var scene = game.getScene();
+    if (this.object && scene) {
+        scene.addObject(this.object);
     }
 }
 
@@ -1293,7 +1289,7 @@ belle.utils.extend(Action, EndNovel);
 
 EndNovel.prototype.execute = function()
 {
-    belle.game.end = true;  
+    game.finished = true;
     this.setFinished(true);
 }
 
@@ -1334,7 +1330,7 @@ GetUserInput.prototype.execute = function()
     var value = prompt(this.message, this.defaultValue);
     if (! value)
         value = this.defaultValue;
-    belle.insertVariable(this.variable, value);
+    game.addVariable(this.variable, value);
     
     this.setFinished(true);
 }
@@ -1443,6 +1439,7 @@ RunScript.prototype.execute = function()
 }
 
 //Expose objects
+actions.Action = Action;
 actions.Fade = Fade;
 actions.Slide = Slide;
 actions.Dialogue = Dialogue;

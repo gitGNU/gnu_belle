@@ -75,19 +75,17 @@ function mapToDisplay(event)
 
 document.onmousemove = function(event)
 {
-    if (! belle)
-        return;
-    var game = belle.getGame();
-    if (! game.currentScene)
+    var scene = game.getScene();
+    if (! scene)
       return;
-
+    
     var ev = event || window.event || window.Event;
     if (! mapToDisplay(ev))
         return;
     
     var prevHoveredObject = hoveredObject;
     hoveredObject = null;
-    var objects = game.currentScene.objects;
+    var objects = scene.objects;
     for (var i=objects.length-1; i !== -1; --i) {
         if (objects[i].processEvent(ev)) {
             hoveredObject = objects[i];
@@ -105,7 +103,7 @@ document.onmouseup = function(event)
 {
     var ev = event || window.event || window.Event;
     var processed = false;
-    var game = belle.getGame();
+    
     if (! mapToDisplay(ev))
         return;
     
@@ -114,8 +112,11 @@ document.onmouseup = function(event)
             processed = true;
     }
     
-    if (game.currentAction && ! processed)
-        game.currentAction.skip();
+    if (! processed) {
+      var a = game.getScene().getAction();
+      if (a)
+	a.skip();
+    }
 }
 
 document.onmousedown = function(event) 
@@ -133,13 +134,13 @@ document.onmousedown = function(event)
 document.onkeyup = function(event) 
 {
     var ev = event || window.event || window.Event;
-    var game = belle.getGame();
-        
+
     switch(ev.keyCode) {
         case 13: //ENTER
         case 32: //SPACE
-            if (game.currentAction)
-                game.currentAction.skip();
+	    var a = game.getScene().getAction();
+            if (a)
+                a.skip();
         break;
         case 27:
             belle.pause();

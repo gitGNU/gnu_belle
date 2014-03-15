@@ -1,19 +1,23 @@
 belle = {};
-belle.game = {
+belle.actions = {};
+belle.objects = {};
+belle.display = {};
+belle.utils = {};
+belle.stateMachine = {};
+
+game = {
     "resources" : {},
-    "actions": [],
     "customFonts" : [],
     "currentScene" : null,
-    "nextScene" : 0,
     "scenes" : [],
+    "scene": null,
     "ready" : false,
-    "nextAction" : 0,
     "width": 640,
     "height" : 480,
     "currentWidth": 640,
     "currentHeight": 480,
     "variables" : {},
-    "end" : false,
+    "finished" : false,
     "textSpeed" : 10,
     "textDelay" : 100,
     "filename" : "game.json",
@@ -23,22 +27,13 @@ belle.game = {
     "paused": false
 };
 
-belle.game.pauseScreen = {
-    "currentScene" : null,
-    "nextScene" : 1,
+game.pauseScreen = {
     "scenes" : [],
-    "actions": [],
-    "nextAction" : 0,
-    "currentAction": null,
+    "scene": null,
     "states" : {},
-    "end": false
+    "finished": false
 };
 
-belle.actions = {};
-belle.objects = {};
-belle.display = {};
-belle.utils = {};
-belle.stateMachine = {};
 
 //Extend Array and String objects
 if (typeof String.prototype.startsWith != 'function') 
