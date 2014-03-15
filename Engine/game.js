@@ -21,7 +21,7 @@
 	}
 	
 	game.indexOf = function(scene) {
-	  if (scene && belle.utils.isInstance(scene, belle.objects.Scene)) {
+	  if (scene && belle.isInstance(scene, belle.objects.Scene)) {
 	    var scenes = this.getScenes() || [];
 	    return scenes.indexOf(scene);
 	  }
