@@ -86,7 +86,7 @@
 	}
 
 	game.getValue = function(variable) {
-		if (! containsVariable(variable))
+		if (! this.hasVariable(variable))
 			return "";
 			
 		if (variable.startsWith("$"))
