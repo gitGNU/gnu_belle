@@ -1250,6 +1250,10 @@ Scene.prototype.addObject = function(object) {
     }
 }
 
+Scene.prototype.goto = function(action) {
+    this.setCurrentAction(action);
+}
+
 Scene.prototype.indexOf = function(object) {
     if (belle.isInstance(object, belle.objects.Object))
         return this.objects.indexOf(object);
@@ -1260,6 +1264,29 @@ Scene.prototype.indexOf = function(object) {
 
 Scene.prototype.getActions = function() {
     return this.actions;
+}
+
+Scene.prototype.setCurrentAction = function(action) {
+  var actions = this.getActions();
+  if (typeof action == "number") {
+    if (action >= 0 && action < actions.length)
+      this.action = actions[action];
+  }
+  else if (action instanceof String || typeof action === 'string') {
+      for (var i=0; i !== actions.length; i++) {
+	  if (actions[i].name === action) {
+	      this.action = actions[i];
+	      break;
+	  }
+      }
+  }
+  else if (belle.isInstance(action, belle.actions.Action) && this.indexOf(action) !== -1){
+      this.action = action;
+  }
+}
+
+Scene.prototype.getCurrentAction = function() {
+  return this.getAction();
 }
 
 Scene.prototype.getAction = function(name) {
