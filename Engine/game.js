@@ -30,13 +30,13 @@
 
 	game.getScenes = function() {
 		if (this.paused)
-			return this.pause.scenes;
+			return this.pauseScreen.scenes;
 		return this.scenes;
 	}
-
+	
 	game.getScene = function(scene) {
 		if (this.paused)
-			return this.pause.scene;
+			return this.pauseScreen.scene;
 		return this.scene;  
 	}
 	
@@ -97,6 +97,20 @@
 
 	game.addVariable = function (variable, value) {
 		game.variables[variable] = value;
+	}
+	
+	game.pause = function() {
+	  if (! this.pauseScreen.scenes.length) 
+	    return;
+	  var scene = game.pauseScreen.scenes[0];
+	  this.pauseScreen.scene = scene;
+	  scene.action = null;
+	  scene.setActive(true);
+	  this.paused = true;
+	}
+	
+	game.resume = function() {
+	  game.paused = false;
 	}
 
 	game.replaceVariables = function(text) {
