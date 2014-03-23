@@ -87,8 +87,9 @@ document.onmousemove = function(event)
     hoveredObject = null;
     var objects = scene.objects;
     for (var i=objects.length-1; i !== -1; --i) {
-        if (objects[i].processEvent(ev)) {
+        if (objects[i].contains(ev.canvasX, ev.canvasY)) {
             hoveredObject = objects[i];
+	    hoveredObject.processEvent(ev);
             break;
         }
     }
@@ -127,7 +128,7 @@ document.onmousedown = function(event)
     
     if (hoveredObject) {
         mapToDisplay(event);
-        hoveredObject.processEvent(ev)
+        hoveredObject.processEvent(ev);
     }
 }
 

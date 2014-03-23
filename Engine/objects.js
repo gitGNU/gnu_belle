@@ -352,6 +352,9 @@ Object.prototype.setY = function(y)
 
 Object.prototype.contains = function(px, py)
 {
+    if (! this.visible)
+      return false;
+  
     var x = this.scaledX, y = this.scaledY;
     
     if (this.parent) {
@@ -516,7 +519,7 @@ Object.prototype.processEvent = function(event)
     var x = event.canvasX;
     var y = event.canvasY;
 
-    if (! this.visible || ! this.contains(x, y))
+    if (! this.contains(x, y))
         return false;
     
     var actions = [];
