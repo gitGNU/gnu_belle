@@ -180,14 +180,8 @@ function Fade(data)
     this.increment = 1;
 
     if (this.fadeType == "in") {
-        if (this.object) {
-            this.target = this.object.color.alpha;
-            this.bgTarget = this.object.backgroundColor.alpha;
-        }
-        else {
-            this.target = 255;
-            this.bgTarget = 255;
-        }
+        this.target = 255;
+        this.bgTarget = 255;
         this.increment = 1;
     }
     else if (this.fadeType == "out") {
@@ -207,19 +201,6 @@ Fade.prototype.execute = function () {
     
     this.prevTime = new Date().getTime();
     this.timePassed = 0;
-    
-    //special case for fade in; fade out usually goes to zero
-    if (this.fadeType == "in") {
-        this.target = this.object.opacity();
-        this.bgTarget = this.object.backgroundOpacity();
-    }
-    
-    //this.reset();
-    
-    if (this.fadeType == "in") {
-        this.object.setBackgroundOpacity(0);
-        this.object.setOpacity(0);
-    }
      
     this.interval = setInterval(function() {t.fade();}, this.intervalDuration);        
     this.object.redraw = true;
