@@ -802,20 +802,10 @@ GoToScene.prototype.execute = function()
 {
    this.reset();
    
-   var game = belle.game;
-   var scenes = game.scenes;
+   var scenes = game.getScenes();
    
    if (this.scene) {
-        for (var i=0; i !== scenes.length; i++) {
-            
-            if (this.scene == scenes[i].name) {
-
-                game.nextAction = game.currentScene.actions.length;
-                game.nextScene = i;
-                game.currentAction.setFinished(true);
-                break;
-            }
-        }
+     game.goto(this.scene);
    }
 
    this.setFinished(true);
