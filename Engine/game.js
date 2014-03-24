@@ -28,10 +28,47 @@
 	  return -1;
 	}
 
+	game._setCurrentScene = function(scene) {
+	  if (! scene)
+	    return;
+	  if (this.paused)
+	    this.pauseScreen.scene = scene;
+	  else
+	    this.scene = scene;
+	  scene.setActive(true);
+	}
+	
+	game.goto = function(scene) {
+	  this.setCurrentScene(scene);
+	}
+	
+	game.setCurrentScene = function(scene) {
+	    var scenes = this.getScenes();
+	    if (typeof scene == "number") {
+	      if (scene >= 0 && scene < scenes.length)
+		this._setCurrentScene(scenes[scene]);
+	    }
+	    else if (scene instanceof String || typeof scene === 'string') {
+		for (var i=0; i !== scenes.length; i++) {
+		    if (scenes[i].name === scene) {
+			this._setCurrentScene(scenes[i]);
+			break;
+		    }
+		}
+	    }
+	    else if (belle.isInstance(scene, belle.objects.Scene) && this.indexOf(scene) !== -1){
+		this._setCurrentScene(scene);
+	    }
+	}
+	
 	game.getScenes = function() {
 		if (this.paused)
 			return this.pauseScreen.scenes;
 		return this.scenes;
+	}
+	
+	game.getCurrentScene = function() {
+	  return this.getScene();
 	}
 	
 	game.getScene = function(scene) {
