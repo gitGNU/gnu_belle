@@ -1181,7 +1181,6 @@ belle.utils.extend(TextBox, Button);
 
 /*********** SCENE ***********/
 
-//function Scene(background, width, height)
 function Scene(data)
 {
     this.objects = [];
@@ -1233,10 +1232,17 @@ function Scene(data)
 Scene.prototype.setActive = function(active) {
   if (active) {
     belle.display.displayScene(this);
-    //when transitions for scenes are added call nextAction() after the transition is complete
-    this.nextAction();
+    //when transitions for scenes are added, call the animation here and set scene
+    //to active after the animation is finished
+    this.active = active;
   }
-  this.active = active;
+  else {
+    this.active = active;
+  }
+}
+
+Scene.prototype.isActive = function() {
+  return this.active;
 }
 
 Scene.prototype.isFinished = function(active) {
@@ -1393,7 +1399,7 @@ Scene.prototype.paint = function(context)
     }
     else if (this.backgroundColor) {
         context.fillStyle  = this.backgroundColor.toString();
-        context.fillRect(0, 0, this.width, this.height);
+        context.fillRect(this.x, this.y, this.width, this.height);
     }
     
     this.redrawBackground = false;
