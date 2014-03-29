@@ -343,14 +343,17 @@ function gameLoop ()
 
 function pause()
 {
+    if (! game.hasPauseScreen())
+      return;
+  
     if (game.paused) {
         display.hidePauseScreen();
+	game.resume();
     }
     else {
         display.showPauseScreen();
+	game.pause();
     }
-    
-    game.paused = ! game.paused;
 }
 
 function getGame()
