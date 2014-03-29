@@ -147,7 +147,7 @@
 	}
 	
 	game.resume = function() {
-	  game.paused = false;
+	  this.paused = false;
 	}
 
 	game.replaceVariables = function(text) {
