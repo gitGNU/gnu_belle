@@ -16,6 +16,12 @@
  
 (function(game) {
     
+    	game.hasPauseScreen = function() {
+	  if(this.pauseScreen.scenes.length)
+	    return true;
+	  return false;
+	}
+	
   	game.isFinished = function() {
 	  return this.finished;
 	}
