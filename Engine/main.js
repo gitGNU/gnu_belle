@@ -323,15 +323,18 @@ function importgameData(path) {
 function gameLoop ()
 {   
     var scene = game.getScene();
-    var action = scene.getAction();
     
-    if (action && action.isFinished()) {
-	action = scene.nextAction();
-	if (! action && scene.isFinished())
-	  scene = game.nextScene();
-	 
-	if (! scene && game.isFinished()) //game is finished
-	  return;
+    if (scene && scene.isActive()) {
+      var action = scene.getAction();
+      
+      if (! action || action.isFinished()) {
+	  action = scene.nextAction();
+	  if (! action && scene.isFinished())
+	    scene = game.nextScene();
+	  
+	  if (! scene && game.isFinished()) //game is finished
+	    return;
+      }
     }
     
     display.draw();
