@@ -1210,6 +1210,7 @@ function Scene(data)
     this.backgroundElement = document.createElement("div");
     this.element.appendChild(this.backgroundElement);
     this.element.id = data["name"];
+    $(this.element).addClass("scene");
     
     belle.utils.initElement(this.element, data);
     belle.utils.initElement(this.backgroundElement, data);
