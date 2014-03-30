@@ -103,7 +103,7 @@ Action.prototype.setFinished = function(finished) {
         if (finished && this.eventListeners.hasOwnProperty("onFinished")) {
             var listeners = this.eventListeners["onFinished"];
             for(var i=0; i < listeners.length; i++)
-                listeners[i]();
+                listeners[i].call(this);
         }
         this.finished = finished;
     }

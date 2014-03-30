@@ -542,7 +542,7 @@ Object.prototype.processEvent = function(event)
     for(var i =0; i !== actions.length; i++) 
         actions[i].execute();
     for (var i=0; i !== listeners.length; i++)
-        listeners[i](this);
+        listeners[i].call(this);
     
     this.notify(event);
     
