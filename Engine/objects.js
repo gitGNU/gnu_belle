@@ -272,6 +272,7 @@ function Object(info)
         this.visible = info["visible"];
         if (this.visible) {
             this.redraw = true;
+	    this.element.style.display = "block";
         }
     }
     
