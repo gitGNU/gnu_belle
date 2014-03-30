@@ -23,7 +23,6 @@ var fps = 0;
 var elapsed = 0;
 var before = 0;
 var drawing = false;
-var forceRedraw = false;
 var scaleWidthFactor = 1;
 var scaleHeightFactor = 1;
 var showFps = false;
@@ -74,7 +73,6 @@ var scaleFont = function(font, scale)
 
 var scaleScene = function(widthFactor, heightFactor)
 {
-    
     var game = belle.game;
     
     //scale all objects if necessary
@@ -140,13 +138,27 @@ function resize()
 }
 
 
-function initCanvas(width, height)
+function initCanvasSize($canvas, width, height)
 {
   if (! display.DOM) {
-    $('#belle canvas').each(function(index, canvas){
+    $canvas.each(function(index, canvas){
         canvas.width = width;
         canvas.height = height;
     });
+  }
+}
+
+function setGameCanvas($canvas, clear)
+{
+  if (! display.DOM && $canvas.length) {
+    display.canvas = $canvas.filter(".main")[0];
+    display.bgCanvas = $canvas.filter(".background")[0];
+    display.context = display.canvas.getContext('2d');
+    display.bgContext = display.bgCanvas.getContext('2d');
+    if (clear) {
+      	display.bgContext.clearRect(0, 0, $container.width(), $container.height());
+	display.context.clearRect(0, 0, $container.width(), $container.height());
+    }
   }
 }
 
@@ -155,13 +167,8 @@ var init = function()
     if (! isCanvasSupported())
       display.DOM = true;
     
-    display.canvas = $("#belle #game").find("#canvas")[0];
-    display.bgCanvas = $("#belle #game").find("#backgroundCanvas")[0];
-    display.bgContext = display.bgCanvas.getContext('2d');
-    display.context = display.canvas.getContext('2d');
-    
-    var game = belle.game; 
-    initCanvas(game.width, game.height);
+    initCanvasSize($('#belle canvas'), game.width, game.height);
+    setGameCanvas($("#belle #game").find("canvas"));
     resize(); 
     
     if ($progress && $progress.attr("running"))
@@ -171,13 +178,7 @@ var init = function()
 var hidePauseScreen = function()
 {
     $container = $("#belle #game");
-    if (! display.DOM) {
-        canvas = $container.find("#canvas")[0];
-        bgCanvas = $container.find("#backgroundCanvas")[0];
-        display.bgContext = bgCanvas.getContext('2d');
-        display.context = canvas.getContext('2d');
-    }
-    
+    setGameCanvas($container.find("canvas"));
     $("#belle #pauseScreen").removeClass("active");
     $container.addClass("active");
 }
@@ -185,16 +186,9 @@ var hidePauseScreen = function()
 var showPauseScreen = function()
 {
     $container = $("#belle #pauseScreen");
-    if (! display.DOM) {
-        canvas = $container.find("#canvas")[0];
-        bgCanvas = $container.find("#backgroundCanvas")[0];
-        belle.game.pauseScreen.currentScene.redrawBackground = true;
-        display.bgContext = bgCanvas.getContext('2d');
-        display.context = canvas.getContext('2d');
-    }
-    
+    setGameCanvas($container.find("canvas"), true);
     $("#belle #game").removeClass("active");
-    $("#belle #pauseScreen").addClass("active");
+    $container.addClass("active");
 }
 
 var _draw = function()
@@ -264,11 +258,6 @@ var draw = function()
 
 var needsRedraw = function() 
 {
-    if (forceRedraw) {
-        forceRedraw = false;
-        return true;
-    }
-    
     var scene = game.getScene();
 
     if (scene && scene.redrawBackground) {
@@ -311,21 +300,59 @@ var drawFPS = function()
     }
 }
 
-var displayScene = function(scene) 
+function initCanvas($container) 
 {
-  if (scene && display.DOM) {
-    var $container = getContainer();
-    var $scene = $container.find(".scene.active");
-    if ($scene.length) { 
-      $scene.removeClass("active");
-      $scene.hide();
+    var canvas = document.createElement("canvas");
+    var bgcanvas = document.createElement("canvas");
+    var $canvas = $(canvas);
+    var $bgcanvas = $(bgcanvas);
+    $canvas.addClass("main");
+    $bgcanvas.addClass("background");
+    $container.append($bgcanvas);
+    $container.append($canvas);
+    var $newcanvas = $container.find("canvas");
+    initCanvasSize($newcanvas, game.width, game.height);
+    setGameCanvas($newcanvas);
+}
+
+function displayScene(scene) 
+{
+  if (! scene)
+    return;
+  
+  var $container = getContainer();
+  var $oldscene = $container.find(".scene.active");
+  $oldscene.removeClass("active");
+  
+  var $scene = $(scene.element);
+  $scene.addClass("active");
+  var added = false;
+  if (! $container.find("#" + scene.name).length) {
+    $container.append($scene);
+    added = true;
+  }
+    
+  if (display.DOM) {
+    if (added) {
+      var objects = scene.objects;
+      for(var i=0; i < objects.length; i++)
+	$scene.append(objects[i].element);
     }
-    $scene = $(scene.element);
-    $scene.addClass("active");
+  }
+  else {
+    $scene.find("div").remove(); //remove background div for now
+    initCanvas($scene);
+    scene.redrawBackground = true;
     var objects = scene.objects;
     for(var i=0; i < objects.length; i++)
-      $scene.append(objects[i].element);
-    $container.append($scene);
+      objects[i].redraw = true;    
+  }
+  
+  if (added) {
+    scene.addEventListener("onActivated", function() {
+      $oldscene.find("canvas").remove();
+      $oldscene.hide();
+    });
   }
 }
 
