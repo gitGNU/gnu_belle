@@ -41,7 +41,7 @@
 	    this.pauseScreen.scene = scene;
 	  else
 	    this.scene = scene;
-	  scene.setActive(true);
+	  scene.display();
 	}
 	
 	game.goto = function(scene) {
@@ -91,7 +91,7 @@
 	  var scenes = this.getScenes();
 	  if (index >= 0 && index < scenes.length) {
 	    var scene = scenes[index];
-	    scene.setActive(true);
+	    scene.display();
 	    this.scene = scene;
 	    return this.scene;
 	  }
@@ -148,7 +148,7 @@
 	  var scene = game.pauseScreen.scenes[0];
 	  this.pauseScreen.scene = scene;
 	  scene.action = null;
-	  scene.setActive(true);
+	  scene.display();
 	  this.paused = true;
 	}
 	

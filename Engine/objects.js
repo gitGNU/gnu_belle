@@ -1204,6 +1204,7 @@ function Scene(data)
     data.height = this.height;
     this.visible = true;
     this.tries = 0;
+    this.eventListeners = {};
     
     this.element = document.createElement("div");
     this.backgroundElement = document.createElement("div");
@@ -1229,16 +1230,36 @@ function Scene(data)
         this.setBackgroundColor(backgroundColor);
 }
 
+Scene.prototype.addEventListener = function(event, listener)
+{
+  var events = []; 
+  if(this.eventListeners.hasOwnProperty(event))
+    events =  this.eventListeners[event];
+  events.push(listener);
+  this.eventListeners[event] = events;
+}
+
+Scene.prototype.display = function() {
+  belle.display.displayScene(this);
+ 
+  //when transitions for scenes are added, call the animation here and set scene
+  //to active after the animation is finished
+  this.setActive(true);
+}
+
 Scene.prototype.setActive = function(active) {
-  if (active) {
-    belle.display.displayScene(this);
-    //when transitions for scenes are added, call the animation here and set scene
-    //to active after the animation is finished
-    this.active = active;
+  var listeners = [];
+  if(active && this.eventListeners.hasOwnProperty("onActivated")) {
+    listeners = this.eventListeners["onActivated"];
   }
-  else {
-    this.active = active;
+  else if(! active && this.eventListeners.hasOwnProperty("onDeactivated")) {
+    listeners = this.eventListeners["onDeactivated"];
   }
+
+  for(var i=0; i < listeners.length; i++)
+    listeners[i].call(this);
+    
+  this.active = active;
 }
 
 Scene.prototype.isActive = function() {
