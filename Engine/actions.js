@@ -1217,8 +1217,16 @@ function ShowMenu(data)
     if ( "options" in data && typeof data["options"] == "number") 
         this.options = options; 
     
-    if (this.object)
-        this.object.addReceiver(this);
+    if (this.object && this.object.objects.length) {
+      var self = this;
+      var buttons = this.object.objects;
+      for(var i=0; i < buttons.length; i++) {
+	buttons[i].addEventListener("mouserelease", function() {
+	    self.object.setVisible(false);
+	    self.setFinished(true);
+	});
+      }
+    }
 }
 
 belle.utils.extend(Action, ShowMenu);
@@ -1230,15 +1238,6 @@ ShowMenu.prototype.execute = function()
     if (this.object && scene) {
         scene.addObject(this.object);
     }
-}
-
-ShowMenu.prototype.receive = function(event) 
-{
-  if (event.type == "mouseup") {
-    this.object.setVisible(false);
-    this.object.redraw = true;
-    this.setFinished(true);
-  }
 }
 
 ShowMenu.prototype.scale = function(widthFactor, heightFactor)

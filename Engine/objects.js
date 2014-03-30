@@ -204,7 +204,6 @@ function Object(info)
     this.loaded = true;
     this.moveToPoint = null;
     this.data = info;
-    this.receivers = [];
     this.borderWidth = 0;
     this.borderColor = this.color;
     this.parent = parent ? parent : null;
@@ -543,9 +542,7 @@ Object.prototype.processEvent = function(event)
         actions[i].execute();
     for (var i=0; i !== listeners.length; i++)
         listeners[i].call(this);
-    
-    this.notify(event);
-    
+
     if (actions.length || listeners.length)
       return true;
     return false;
@@ -560,16 +557,6 @@ Object.prototype.moveTo = function(x, y)
 Object.prototype.needsRedraw = function()
 {
     return this.redraw;
-}
-
-Object.prototype.addReceiver = function(receiver) 
-{
-    this.receivers.push(receiver);
-}
-
-Object.prototype.notify = function(event) {
-  for(var i=0; i !== this.receivers.length; i++)
-    this.receivers[i].receive(event);
 }
 
 Object.prototype.clear = function (context)
