@@ -1260,8 +1260,8 @@ Scene.prototype.isFinished = function(active) {
 }
 
 Scene.prototype.addObject = function(object) {
-    this.objects[this.objects.length] = object;
-    if (belle.game.currentScene == this) {
+    this.objects.push(object);
+    if (game.getScene() == this) {
         belle.display.addObject(object);
     }
 }
