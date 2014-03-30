@@ -50,16 +50,6 @@ body, html
   z-index: 1;
 }
 
-#belle #backgroundCanvas 
-{
-    z-index: 0;
-}
-
-#belle #canvas 
-{
-    z-index: 1;
-}
-
 #belle .active {
     display: block !important;
 }
