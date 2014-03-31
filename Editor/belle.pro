@@ -33,7 +33,7 @@ HEADERS      += belle.h\
     color_pushbutton.h \
     objects/character_properties_widget.h \
     objects/character.h \
-    action.h \
+    actions/action.h \
     actions_view.h \
     actions_model.h \
     actions/wait.h \
@@ -125,7 +125,7 @@ SOURCES      += main.cpp\
     objects/object_editor_widget.cpp \
     color_pushbutton.cpp \
     objects/character_properties_widget.cpp \
-    action.cpp \
+    actions/action.cpp \
     actions_view.cpp \
     actions_model.cpp \
     actions/wait.cpp \
