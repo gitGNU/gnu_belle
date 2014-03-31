@@ -77,10 +77,8 @@ ActionEditorWidget* Wait::editorWidget()
 void Wait::setTime(double t)
 {
     mTime = t;
-    if (mWaitType == Timed) {
+    if (mWaitType == Timed)
         setDisplayText(QString::number(mTime) + tr(" second(s)"));
-        emit dataChanged();
-    }
 }
 
 double Wait::time()
@@ -91,6 +89,13 @@ double Wait::time()
 void Wait::setWaitType(WaitType type)
 {
     mWaitType = type;
+
+    if (type == Timed)
+        setTime(mTime);
+    else if (type == MouseClick)
+        setDisplayText(tr("Until mouse button is clicked"));
+    else
+        setDisplayText(tr("Forever"));
 }
 
 QString Wait::waitTypeToString(WaitType type)
@@ -111,13 +116,13 @@ void Wait::setWaitTypeFromIndex(int index)
 {
     switch (index) {
     case 0:
-        mWaitType = Timed;
+        setWaitType(Timed);
         break;
     case 1:
-        mWaitType = MouseClick;
+        setWaitType(MouseClick);
         break;
     case 2:
-        mWaitType = Forever;
+        setWaitType(Forever);
         break;
     }
 }

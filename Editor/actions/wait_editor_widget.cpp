@@ -69,11 +69,6 @@ void WaitEditorWidget::onCurrentIndexChanged(int index)
         return;
 
     mCurrentAction->setWaitTypeFromIndex(index);
-    if (index >= 1)
-       mCurrentAction->setDisplayText(mWaitTypeWidget->currentText());
-    else
-       mCurrentAction->setTime(mTimeSpin->value());
-
     updateWidgets(index);
 }
 
