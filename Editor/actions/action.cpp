@@ -171,8 +171,10 @@ void Action::paint(const QPainter & painter)
 
 void Action::setDisplayText(const QString & text)
 {
-    mDisplayText = text;
-    emit dataChanged();
+    if (text != mDisplayText) {
+        mDisplayText = text;
+        emit dataChanged();
+    }
 }
 
 QString Action::displayText() const
