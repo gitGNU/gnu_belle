@@ -283,6 +283,12 @@ utils.getNewName = function(name) {
     return name;
 }
 
+utils.setBorderRadius = function(elem, radius) {
+    elem.style.borderRadius = radius + "px"; // standard
+    elem.style.MozBorderRadius = radius + "px"; // Mozilla
+    elem.style.WebkitBorderRadius = radius + "px";; // WebKit
+}
+
 }(belle.utils));
 
 log("Utils module loaded!");

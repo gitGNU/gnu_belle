@@ -179,11 +179,10 @@ function Object(info)
     this.setY(info.y);
     this.setWidth(info.width);
     this.setHeight(info.height);
-    this.xRadius = 10;
-    this.yRadius = 10;
+    this.cornerRadius = 0;
+    this.roundedRect = false;
     this.paintX = false;
     this.paintY = false;
-    this.roundedRect = false;
     this.backgroundColor = new Color([255, 255, 255, 255]);
     this.fillStyle = this.backgroundColor.toString();
     this.interval = null;
@@ -241,16 +240,8 @@ function Object(info)
         this.mouseLeaveActions = this.initActions(info["onMouseLeave"]);
     }
     
-    if ("xRadius" in info) {
-        this.xRadius = info["xRadius"];
-    }
-    
-    if ("yRadius" in info) {
-        this.yRadius = info["yRadius"];
-    }
-    
-    if ("roundedRect" in info) {
-        this.roundedRect = info["roundedRect"];
+    if ("cornerRadius" in info && info["cornerRadius"] > 0) {
+      this.setCornerRadius(info["cornerRadius"]);
     }
     
     if( "backgroundImage" in info) {
@@ -283,6 +274,14 @@ function Object(info)
 Object.prototype.frameChanged = function()
 {
     this.redraw = true;
+}
+
+Object.prototype.setCornerRadius = function(radius) {
+    this.cornerRadius = radius;
+    belle.utils.setBorderRadius(this.element, radius);
+    belle.utils.setBorderRadius(this.backgroundElement, radius);
+    if (this.cornerRadius > 0)
+      this.roundedRect = true;
 }
 
 Object.prototype.globalX = function()
@@ -440,8 +439,8 @@ Object.prototype.paint = function(context)
         
         var width = this.width;
         var height = this.height;
-        var xradius = this.xRadius;
-        var yradius = this.yRadius;
+        var xradius = this.cornerRadius;
+        var yradius = this.cornerRadius;
     
         context.fillStyle  = this.backgroundColor.toString();
         context.strokeStyle = this.borderColor.toString();
