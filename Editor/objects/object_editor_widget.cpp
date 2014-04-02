@@ -77,28 +77,15 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     mBorderWidthSpinBox = new QSpinBox(this);
     mBorderWidthSpinBox->setMaximum(50);
     mBorderColorButton = new ColorPushButton(this);
-    mRoundedRectCheckBox = new QCheckBox(this);
-    mXRadiusSpinBox = new QSpinBox(this);
-    mYRadiusSpinBox = new QSpinBox(this);
-    mXRadiusSpinBox->setDisabled(true);
-    mYRadiusSpinBox->setDisabled(true);
+    mCornerRadiusSpinBox = new QSpinBox(this);
 
     connect(mBorderWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onBorderWidthChanged(int)));
     connect(mBorderColorButton, SIGNAL(colorChosen(const QColor&)), this, SLOT(onBorderColorChanged(const QColor&)));
-    connect(mXRadiusSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onXRadiusValueChanged(int)));
-    connect(mYRadiusSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onYRadiusValueChanged(int)));
-    connect(mRoundedRectCheckBox, SIGNAL(toggled(bool)), this, SLOT(onRoundedRectToggled(bool)));
-    connect(mRoundedRectCheckBox, SIGNAL(toggled(bool)), mXRadiusSpinBox, SLOT(setEnabled(bool)));
-    connect(mRoundedRectCheckBox, SIGNAL(toggled(bool)), mYRadiusSpinBox, SLOT(setEnabled(bool)));
+    connect(mCornerRadiusSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onCornerRadiusValueChanged(int)));
 
     appendRow(tr("Border Width"), mBorderWidthSpinBox);
     appendRow(tr("Border Color"), mBorderColorButton);
-
-    beginSubGroup(tr("Rounded"), mRoundedRectCheckBox);
-    appendRow(tr("X Radius"), mXRadiusSpinBox);
-    appendRow(tr("Y Radius"), mYRadiusSpinBox);
-    endGroup();
-
+    appendRow(tr("Corner Radius"), mCornerRadiusSpinBox);
     endGroup();
 
     mImageChooser = new ChooseFileButton(ChooseFileButton::ImageFilter, this);
@@ -160,23 +147,10 @@ void ObjectEditorWidget::onYChanged(int y)
         mCurrentObject->setY(y);
 }
 
-void ObjectEditorWidget::onRoundedRectToggled(bool checked)
-{
-    if (mCurrentObject) {
-        mCurrentObject->setRoundedRect(checked);
-    }
-}
-
-void ObjectEditorWidget::onXRadiusValueChanged(int v)
+void ObjectEditorWidget::onCornerRadiusValueChanged(int v)
 {
     if (mCurrentObject)
-        mCurrentObject->setXRadius(v);
-}
-
-void ObjectEditorWidget::onYRadiusValueChanged(int v)
-{
-    if (mCurrentObject)
-        mCurrentObject->setYRadius(v);
+        mCurrentObject->setCornerRadius(v);
 }
 
 void ObjectEditorWidget::onSliderValueChanged(int value)
@@ -263,9 +237,7 @@ void ObjectEditorWidget::updateData(Object *currObj)
         mMouseMoveComboBox->addItem(actions[i]->icon(), actions[i]->toString(), qVariantFromValue(object));
     }
 
-    mRoundedRectCheckBox->setChecked(currObj->roundedRect());
-    mXRadiusSpinBox->setValue(currObj->xRadius());
-    mYRadiusSpinBox->setValue(currObj->yRadius());
+    mCornerRadiusSpinBox->setValue(currObj->cornerRadius());
     mVisibleCheckbox->setChecked(currObj->visible());
     mKeepAspectRatioCheckbox->setChecked(currObj->keepAspectRatio());
 

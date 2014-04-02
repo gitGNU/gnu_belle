@@ -96,14 +96,9 @@ class Object : public QObject
         int x() const;
         int y() const;
 
-        int xRadius() const;
-        void setXRadius(int);
-
-        int yRadius() const;
-        void setYRadius(int);
-
-        bool roundedRect() const;
-        void setRoundedRect(bool);
+        bool isRounded() const;
+        int cornerRadius();
+        void setCornerRadius(int);
 
         AnimationImage* backgroundImage() const;
         void setBackgroundImage(const QString&);
@@ -185,9 +180,6 @@ class Object : public QObject
         Padding mPadding;
         QList<QRect> mPreviousSceneRects;
         QColor mBackgroundColor;
-        bool mRoundedRect;
-        int mXRadius;
-        int mYRadius;
         AnimationImage *mBackgroundImage;
         QHash<Interaction::InputEvent, QList<Action*> > mEventToActions;
         bool mEditableName;
@@ -206,6 +198,7 @@ class Object : public QObject
         QColor mBorderColor;
         Object* mSelectedObject;
         bool mKeepAspectRatio;
+        int mCornerRadius;
 
 private slots:
         void onResourceDestroyed();

@@ -48,9 +48,7 @@ void Object::init(const QString& name)
 {
     mBackgroundImage = 0;
     mBackgroundColor.setRgb(255, 255, 255, 0);
-    mRoundedRect = false;
-    mXRadius = 0;
-    mYRadius = 0;
+    mCornerRadius = 0;
     mType = "Object";
     mOriginalResizePointIndex = -1;
     mVisible = true;
@@ -375,57 +373,26 @@ void Object::update()
     emit dataChanged();
 }
 
-int Object::xRadius() const
+bool Object::isRounded() const
 {
-    return mXRadius;
+    if (mCornerRadius)
+        return true;
+    return false;
 }
 
-void Object::setXRadius(int radius)
+void Object::setCornerRadius(int r)
 {
-    mXRadius = radius;
-    if (mRoundedRect) {
+    if (mCornerRadius != r) {
+        mCornerRadius = r;
         QVariantMap data;
-        data.insert("roundedRect", mRoundedRect);
-        data.insert("xRadius", mXRadius);
+        data.insert("cornerRadius", r);
         emit dataChanged(data);
     }
 }
 
-int Object::yRadius() const
+int Object::cornerRadius()
 {
-    return mYRadius;
-}
-
-
-void Object::setYRadius(int radius)
-{
-    mYRadius = radius;
-    if (mRoundedRect) {
-        QVariantMap data;
-        data.insert("roundedRect", mRoundedRect);
-        data.insert("yRadius", mYRadius);
-        emit dataChanged(data);
-    }
-}
-
-bool Object::roundedRect() const
-{
-    return mRoundedRect;
-}
-
-void Object::setRoundedRect(bool rounded)
-{
-    mRoundedRect = rounded;
-
-    QVariantMap data;
-    data.insert("roundedRect", mRoundedRect);
-
-    if (mRoundedRect) {
-        data.insert("xRadius", mXRadius);
-        data.insert("yRadius", mYRadius);
-    }
-
-    emit dataChanged(data);
+    return mCornerRadius;
 }
 
 QString Object::type()
@@ -461,8 +428,9 @@ void Object::paint(QPainter & painter)
             else
                 painter.drawPixmap(rect, *mBackgroundImage->pixmap());
         }
-        else if (mRoundedRect)
-            painter.drawRoundedRect(rect, mXRadius, mYRadius);
+        else if (mCornerRadius) {
+            painter.drawRoundedRect(rect, mCornerRadius, mCornerRadius);
+        }
         else
             painter.drawRect(rect);
 
@@ -555,10 +523,8 @@ QVariantMap Object::toJsonObject()
              << mBackgroundColor.alpha();
     object.insert("backgroundColor", color);
 
-    if (mRoundedRect) {
-        object.insert("roundedRect", mRoundedRect);
-        object.insert("xRadius", mXRadius);
-        object.insert("yRadius", mYRadius);
+    if (mCornerRadius) {
+        object.insert("cornerRadius", mCornerRadius);
     }
 
     if (mBackgroundImage) {
@@ -1011,15 +977,8 @@ void Object::setProperties(const QVariantMap &data)
             mSceneRect.setHeight(data.value("height").toInt());
     }
 
-    if (data.contains("roundedRect") && data.value("roundedRect").type() == QVariant::Bool) {
-        mRoundedRect = data.value("roundedRect").toBool();
-
-        if (mRoundedRect) {
-            if (data.contains("xRadius") && data.value("xRadius").canConvert(QVariant::Int))
-                mXRadius = data.value("xRadius").toInt();
-            if (data.contains("yRadius") && data.value("yRadius").canConvert(QVariant::Int))
-                mYRadius = data.value("yRadius").toInt();
-        }
+    if (data.contains("cornerRadius") && data.value("cornerRadius").type() == QVariant::Int) {
+        mCornerRadius = data.value("cornerRadius").toInt();
     }
 
     if (data.contains("visible") && data.value("visible").type() == QVariant::Bool)

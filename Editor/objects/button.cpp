@@ -49,9 +49,7 @@ void Button::init()
     setBackgroundColor(color);
     setBackgroundOpacity(255);
     setTextAlignment(Qt::AlignCenter);
-    setRoundedRect(true);
-    setXRadius(10);
-    setYRadius(10);
+    setCornerRadius(10);
     setBorderColor(Qt::black);
     setBorderWidth(1);
     setType("Button");

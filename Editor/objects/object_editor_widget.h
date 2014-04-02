@@ -49,9 +49,6 @@ public slots:
     void onSliderValueChanged(int);
     void onAddItemActivated();
     void onItemActivated(int);
-    void onRoundedRectToggled(bool);
-    void onXRadiusValueChanged(int);
-    void onYRadiusValueChanged(int);
     void onVisibilityChanged(bool);
     void onBorderWidthChanged(int);
     void onBorderColorChanged(const QColor&);
@@ -65,6 +62,7 @@ private slots:
     void onImageChosen(const QString&);
     void onXChanged(int);
     void onYChanged(int);
+    void onCornerRadiusValueChanged(int);
     void onObjectDataChanged(const QVariantMap&);
     void onCurrentObjectDestroyed();
     void onKeepAspectRatioToggled(bool);
@@ -80,9 +78,7 @@ private:
     ComboBox * mMouseReleaseComboBox;
     ComboBox * mMouseMoveComboBox;
     ChooseFileButton* mImageChooser;
-    QCheckBox* mRoundedRectCheckBox;
-    QSpinBox* mXRadiusSpinBox;
-    QSpinBox* mYRadiusSpinBox;
+    QSpinBox* mCornerRadiusSpinBox;
     QCheckBox* mVisibleCheckbox;
     QSpinBox* mXSpin;
     QSpinBox* mYSpin;
