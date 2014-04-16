@@ -28,20 +28,18 @@ class Image : public Object
 {
     Q_OBJECT
 
-    AnimationImage* mImage;
-    QMovie *mMovie; //for animated images
-    QList<QPixmap*> mMoviePixmaps;
-    int mCurrentFrame;
+    ImageFile* mImage;
+    ImageTransform mImageTransform;
 
 public:
-    explicit Image(QPixmap* image=0, QObject *parent = 0, const QString& name="Image");
+    //explicit Image(QPixmap* image=0, QObject *parent = 0, const QString& name="Image");
     Image(const QString&path, QObject* parent=0, const QString& name="Image");
     Image(const QVariantMap&, QObject*);
     virtual ~Image();
     virtual void paint(QPainter &);
     virtual void setImage(const QString&);
-    virtual void setImage(AnimationImage*);
-    AnimationImage* image() const;
+    virtual void setImage(ImageFile*);
+    ImageFile* image() const;
     virtual QVariantMap toJsonObject();
 
     virtual void show();
@@ -51,11 +49,9 @@ signals:
 
 public slots:
 
-private slots:
-    void onFrameChanged(int);
-
 private:
     void init();
+
 
 
 };

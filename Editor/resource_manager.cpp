@@ -30,8 +30,8 @@
 
 static QList<Object*> mResources;
 static ResourceManager* mInstance = new ResourceManager();
-static QHash<QString, AnimationImage*> mImageCache;
-static QHash<AnimationImage*, int> mImageReferences;
+static QHash<QString, ImageFile*> mImageCache;
+static QHash<ImageFile*, int> mImageReferences;
 static QHash<QString, int> mFontsPaths;
 static QHash<QString, QString> mMediaResources;
 static QHash<QString, QString> mSounds;
@@ -204,11 +204,11 @@ void  ResourceManager::removeResources(bool del)
 
     mResources.clear();
 
-    QHashIterator <QString, AnimationImage*>it(mImageCache);
-    AnimationImage* image = 0;
+    QHashIterator <QString, ImageFile*>it(mImageCache);
+    ImageFile* image = 0;
     while(it.hasNext()) {
         it.next();
-        image = static_cast<AnimationImage*>(it.value());
+        image = static_cast<ImageFile*>(it.value());
         if (image)
             delete image;
     }
@@ -238,7 +238,7 @@ QString ResourceManager::absolutePath(const QString& path)
     return path;
 }
 
-AnimationImage* ResourceManager::newImage(const QVariant& imageData)
+ImageFile* ResourceManager::newImage(const QVariant& imageData)
 {
     if (imageData.type() == QVariant::String) {
         return newImage(imageData.toString());
@@ -252,7 +252,7 @@ AnimationImage* ResourceManager::newImage(const QVariant& imageData)
     return 0;
 }
 
-AnimationImage* ResourceManager::newImage(const QString& fileName)
+ImageFile* ResourceManager::newImage(const QString& fileName)
 {
     QString path;
     //fileName can be either a full path or just the file name
@@ -269,39 +269,31 @@ AnimationImage* ResourceManager::newImage(const QString& fileName)
     if (! QFile::exists(path))
         return 0;
 
-    AnimationImage* image = new AnimationImage(path);
-    image->setFileName(newMedia(path));
+    ImageFile* image = ImageFile::create(path);
+    image->setName(newMedia(path));
     mImageCache.insert(path, image);
     mImageReferences.insert(image, 1);
 
     return image;
 }
 
-QString ResourceManager::imagePath(QPixmap* pixmap, QMovie* movie)
+QString ResourceManager::imagePath(ImageFile* image)
 {
-    if (! pixmap && ! movie)
+    if (! image)
         return "";
 
-    QHashIterator<QString, AnimationImage*> it(mImageCache);
+    QHashIterator<QString, ImageFile*> it(mImageCache);
 
     while(it.hasNext()) {
         it.next();
-        if (it.value()->contains(pixmap) || it.value()->contains(movie))
+        if (it.value() == image)
             return it.key();
     }
 
     return "";
 }
 
-QString ResourceManager::imagePath(AnimationImage* image)
-{
-    if (! image)
-        return "";
-
-    return imagePath(image->pixmap(), image->movie());
-}
-
-void ResourceManager::incrementReference(AnimationImage* image)
+void ResourceManager::incrementReference(ImageFile* image)
 {
     int refs = mImageReferences.value(image, -1);
     if (refs == -1)
@@ -311,13 +303,13 @@ void ResourceManager::incrementReference(AnimationImage* image)
 }
 
 
-void ResourceManager::decrementReference(QPixmap* _pixmap)
+void ResourceManager::decrementReference(const QPixmap& _pixmap)
 {
-    QHashIterator<QString, AnimationImage*> it(mImageCache);
-    AnimationImage* image = 0;
+    QHashIterator<QString, ImageFile*> it(mImageCache);
+    ImageFile* image = 0;
     while(it.hasNext()) {
         it.next();
-        if (it.value()->pixmap() == _pixmap) {
+        if (it.value()->pixmap().toImage() == _pixmap.toImage()) {
             image = it.value();
             break;
         }
@@ -326,7 +318,7 @@ void ResourceManager::decrementReference(QPixmap* _pixmap)
     decrementReference(image);
 }
 
-void ResourceManager::decrementReference(AnimationImage* image)
+void ResourceManager::decrementReference(ImageFile* image)
 {
     if(! image || ! mImageReferences.contains(image))
         return;
@@ -408,12 +400,6 @@ QString ResourceManager::mediaName(const QString& path)
 
 void ResourceManager::exportResources(const QDir& dir)
 {
-    foreach(const QString& path, mImageCache.keys()) {
-        AnimationImage* image = mImageCache[path];
-        if (image)
-            image->save(dir);
-    }
-
     ResourceManager::exportCustomFonts(dir);
 
     //export everything else (e.g. sounds)
@@ -480,8 +466,8 @@ QString ResourceManager::display()
 {
     QString display = "canvas";
     foreach(const QString& path, mImageCache.keys()) {
-        AnimationImage* image = mImageCache[path];
-        if (image && image->movie()) {
+        ImageFile* image = mImageCache[path];
+        if (image && image->isAnimated()) {
             display = "DOM";
             break;
         }

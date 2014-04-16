@@ -69,7 +69,7 @@ ActionEditorWidget* ChangeBackground::editorWidget()
 
 void ChangeBackground::setBackgroundImage(const QString & background)
 { 
-    AnimationImage* image = ResourceManager::newImage(background);
+    ImageFile* image = ResourceManager::newImage(background);
     if (mBackgroundImage == image)
         return;
 

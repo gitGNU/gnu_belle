@@ -20,12 +20,14 @@
 #include <QFileInfo>
 #include <QMovie>
 
-Image::Image(QPixmap *image, QObject *parent, const QString& name) :
-    Object(parent, name)
-{
-    init();
-    setImage(new AnimationImage(image));
-}
+#include "imagetransform.h"
+
+//Image::Image(QPixmap *image, QObject *parent, const QString& name) :
+//    Object(parent, name)
+//{
+//    init();
+//    setImage(new AnimatedImage(image));
+//}
 
 Image::Image(const QString& path, QObject *parent, const QString& name) :
     Object(parent, name)
@@ -60,8 +62,6 @@ void Image::init()
     setKeepAspectRatio(true);
     mImage = 0;
     setType("Image");
-    mMovie = 0;
-    mCurrentFrame = 0;
 }
 
 void Image::setImage(const QString& path)
@@ -69,60 +69,60 @@ void Image::setImage(const QString& path)
     setImage(ResourceManager::newImage(path));
 }
 
-void Image::setImage(AnimationImage* image)
+void Image::setImage(ImageFile* image)
 {
     if (image == mImage)
         return;
 
-    ResourceManager::decrementReference(mImage);
-    mImage = image;
-    mMovie = 0;
-
-    if (mImage && mImage->movie()) {
-        mMovie = mImage->movie();
-        connect(mMovie, SIGNAL(frameChanged(int)), this, SLOT(onFrameChanged(int)));
-
-        if (mMovie->state() != QMovie::Running)
-            mMovie->start();
+    if (mImage && mImage->isAnimated()) {
+        mImage->movie()->stop();
+        mImage->movie()->disconnect(this);
     }
 
-    if (mImage && !mImage->isNull() && (width() == 0 || height() == 0)) {
+    ResourceManager::decrementReference(mImage);
+    mImage = image;
+
+    if (mImage && mImage->isAnimated()) {
+        connect(mImage->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
+        mImage->movie()->start();
+    }
+
+    if (mImage && mImage->isValid() && (width() == 0 || height() == 0)) {
         mSceneRect.setWidth(mImage->width());
         mSceneRect.setHeight(mImage->height());
     }
 
     updateAspectRatio();
+    mImageTransform.setImage(mImage);
 }
 
-AnimationImage* Image::image() const
+ImageFile* Image::image() const
 {
     return mImage;
-}
-
-void Image::onFrameChanged(int frame)
-{
-    emit dataChanged();
 }
 
 void Image::paint(QPainter & painter)
 {
     Object::paint(painter);
-    if (mMovie)
-        painter.drawPixmap(mSceneRect, mMovie->currentPixmap());
-    else if (mImage)
-        painter.drawPixmap(mSceneRect, *mImage->pixmap());
+
+    if (mImage) {
+        if (mImageTransform.hasToBeTransformed(mImage, sceneRect(), cornerRadius()))
+            painter.drawPixmap(mSceneRect, mImageTransform.transform(mImage, sceneRect(), cornerRadius()));
+        else
+            painter.drawPixmap(mSceneRect, mImage->pixmap());
+    }
 }
 
 void Image::show()
 {
-    if (mMovie)
-        mMovie->start();
+    if (mImage && mImage->isAnimated())
+        mImage->movie()->start();
 }
 
 void Image::hide()
 {
-    if (mMovie)
-        mMovie->stop();
+    if (mImage && mImage->isAnimated())
+        mImage->movie()->stop();
 }
 
 QVariantMap Image::toJsonObject()
@@ -130,7 +130,7 @@ QVariantMap Image::toJsonObject()
     QVariantMap object = Object::toJsonObject();
 
     if (mImage)
-        object.insert("image", mImage->fileName());
+        object.insert("image", mImage->name());
 
     filterResourceData(object);
     return object;

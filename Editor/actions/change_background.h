@@ -26,7 +26,7 @@ class ChangeBackground : public Action
 {
     Q_OBJECT
 
-    AnimationImage* mBackgroundImage;
+    ImageFile* mBackgroundImage;
     QColor mBackgroundColor;
 
 public:

@@ -22,7 +22,7 @@
 #include <QDir>
 
 #include "objects/object.h"
-#include "animationimage.h"
+#include "imagefile.h"
 
 class Object;
 
@@ -56,10 +56,9 @@ public:
     static QStringList customFonts();
     static int customFontsCount();
     static QList<int> customFontsIds();
-    static AnimationImage* newImage(const QString&);
-    static AnimationImage* newImage(const QVariant&);
-    static QString imagePath(QPixmap*, QMovie* movie=0);
-    static QString imagePath(AnimationImage*);
+    static ImageFile* newImage(const QString&);
+    static ImageFile* newImage(const QVariant&);
+    static QString imagePath(ImageFile*);
     static QMovie* movie(const QString&);
     static QStringList imagePaths();
     static void exportResources(const QDir&);
@@ -71,9 +70,9 @@ public:
     static void importResources(const QVariantMap&);
     static QString display();
 
-    static void incrementReference(AnimationImage*);
-    static void decrementReference(AnimationImage*);
-    static void decrementReference(QPixmap*);
+    static void incrementReference(ImageFile*);
+    static void decrementReference(ImageFile*);
+    static void decrementReference(const QPixmap&);
 
     static void destroy();
     void removeResources(bool del);

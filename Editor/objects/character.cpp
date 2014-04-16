@@ -62,7 +62,7 @@ Character::Character(const QVariantMap& data, QObject* parent) :
 
 Character::~Character()
 {
-    QHashIterator<QString, AnimationImage*> it(mStateToImage);
+    QHashIterator<QString, ImageFile*> it(mStateToImage);
     while(it.hasNext()) {
         it.next();
         ResourceManager::decrementReference(it.value());
@@ -101,7 +101,7 @@ void Character::removeState(const QString& state)
         setImage(0);
 
     if ((! path.isEmpty()) && mStateToImage.contains(path)) {
-        AnimationImage * image = mStateToImage.take(path);
+        ImageFile * image = mStateToImage.take(path);
         ResourceManager::decrementReference(image);
     }
 }
@@ -222,7 +222,7 @@ QVariantMap Character::toJsonObject()
 {
     QVariantMap object = Object::toJsonObject();
     QVariantMap stateToPath;
-    QHashIterator<QString, AnimationImage*> it(mStateToImage);
+    QHashIterator<QString, ImageFile*> it(mStateToImage);
 
     while(it.hasNext()) {
         it.next();        
