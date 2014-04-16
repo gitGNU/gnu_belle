@@ -469,11 +469,13 @@ void Belle::onSceneItemClicked(QTreeWidgetItem *item, int column)
         mCurrentSceneManager = currSceneManager;
         if (mCurrentSceneManager->currentScene())
             mCurrentSceneManager->currentScene()->show();
-        updateSceneEditorWidget(mCurrentSceneManager->currentScene());
+
         updateActions();
         mDrawingSurfaceWidget->setSceneManager(currSceneManager);
         mDrawingSurfaceWidget->update();
     }
+
+    updateSceneEditorWidget(mCurrentSceneManager->currentScene());
 }
 
 void Belle::updateSceneIcon(Scene* scene)
