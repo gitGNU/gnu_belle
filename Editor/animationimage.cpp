@@ -5,149 +5,93 @@
 #include "utils.h"
 #include "resource_manager.h"
 
-AnimationImage::AnimationImage(const QString& path)
+AnimatedImage::AnimatedImage(const QString& path) :
+    ImageFile(path, false)
 {
-    mPixmap = new QPixmap(path);
-    mMovie = 0;
-    mFilePath = path;
-    QFileInfo info(path);
-    mFileName = info.fileName();
-
     //support for animated images
     mMovie = new QMovie(path);
-    if (mMovie->frameCount() <= 1) {
-        mMovie->deleteLater(); //movie isn't need afterall, so delete it
-        mMovie = 0;
-    }
-    else {
-        mMovie->jumpToFrame(0);
-        QString movieName = mMovie->fileName();
-        QString frameName = "";
+     mMovie->jumpToFrame(0);
+    QString movieName = mMovie->fileName();
+    QString frameName = "";
 
-        if (movieName.isEmpty())
-            movieName = "image"; //shouldn't happen but just for precaution
-        else //remove suffix
-            movieName = QFileInfo(movieName).baseName();
+    if (movieName.isEmpty())
+        movieName = "image"; //shouldn't happen but just for precaution
+    else //remove suffix
+        movieName = QFileInfo(movieName).baseName();
 
-        for(int i=0; i < mMovie->frameCount(); i++) {
-            frameName = movieName + QString::number(i) + ".png"; //always save to PNG.
-            mFramesNames.append(frameName);
-            mMovie->jumpToNextFrame();
-        }
+    for(int i=0; i < mMovie->frameCount(); i++) {
+        frameName = movieName + QString::number(i) + ".png"; //always save to PNG.
+        mFramesNames.append(frameName);
+        mMovie->jumpToNextFrame();
     }
 }
 
-AnimationImage::AnimationImage(QPixmap* pixmap)
+AnimatedImage::~AnimatedImage()
 {
-    mPixmap = pixmap;
-    mMovie = 0;
-    mFilePath = "";
-    mFileName = "";
+    if (mMovie)
+        mMovie->deleteLater();
 }
 
-void AnimationImage::init()
+void AnimatedImage::init()
 {
 }
 
-QMovie* AnimationImage::movie()
+bool AnimatedImage::isAnimated()
+{
+    if (mMovie && mMovie->isValid())
+        return true;
+    return false;
+}
+
+QMovie* AnimatedImage::movie()
 {
     return mMovie;
 }
 
-QPixmap* AnimationImage::pixmap()
+QPixmap AnimatedImage::pixmap()
 {
-    return mPixmap;
+    if (mMovie)
+        return mMovie->currentPixmap();
+    return QPixmap();
 }
 
-bool AnimationImage::contains(QMovie * movie)
+int AnimatedImage::width()
 {
-    if (movie && movie == mMovie)
-        return true;
-    return false;
-}
-
-bool AnimationImage::contains(QPixmap * pixmap)
-{
-    if (pixmap && pixmap == mPixmap)
-        return true;
-    return false;
-}
-
-int AnimationImage::width()
-{
-    if (mPixmap)
-        return mPixmap->width();
-    else if (mMovie)
+    if (mMovie)
         return mMovie->currentPixmap().width();
     return 0;
 }
 
-int AnimationImage::height()
+int AnimatedImage::height()
 {
-    if (mPixmap)
-        return mPixmap->height();
-    else if (mMovie)
+    if (mMovie)
         return mMovie->currentPixmap().height();
     return 0;
 }
 
-bool AnimationImage::isNull()
+bool AnimatedImage::isValid()
 {
-    if (mPixmap)
-        return mPixmap->isNull();
-    else if (mMovie)
-        return ! mMovie->isValid();
-    return true;
+    if (mMovie)
+        return mMovie->isValid();
+    return false;
 }
 
-QStringList AnimationImage::framesNames() const
+int AnimatedImage::frameNumber() const
+{
+    if (mMovie)
+        return mMovie->currentFrameNumber();
+    return -1;
+}
+
+QStringList AnimatedImage::framesNames() const
 {
     return mFramesNames;
 }
 
-void AnimationImage::save(const QDir & dir)
-{
-    /*if (mMovie) {
-        QMovie::MovieState prevState = mMovie->state();
-        mMovie->stop();
-        mMovie->jumpToFrame(0);
-        for(int i=0; i < mMovie->frameCount(); i++) {
-            mMovie->currentPixmap().save(Utils::newFileName(dir.absoluteFilePath(mFramesNames[i])));
-            mMovie->jumpToNextFrame();
-        }
-        if (prevState == QMovie::Running)
-            mMovie->start();
-    }*/
-
-    //save the original image
-    bool saved = false;
-    if (mPixmap)
-        saved = mPixmap->save(dir.absoluteFilePath(mFileName));
-    if (! saved)
-        QFile::copy(mFilePath, dir.absoluteFilePath(mFileName));
-}
-
-QString AnimationImage::path()
-{
-    return mFilePath;
-}
-
-QRect AnimationImage::rect() const
+QRect AnimatedImage::rect() const
 {
     if (mMovie)
         return mMovie->frameRect();
-    else if (mPixmap)
-        return mPixmap->rect();
 
     return QRect();
-}
-
-void AnimationImage::setFileName(const QString & name)
-{
-    mFileName = name;
-}
-
-QString AnimationImage::fileName() const
-{
-    return mFileName;
 }

@@ -1,37 +1,34 @@
-#ifndef ANIMATIONIMAGE_H
-#define ANIMATIONIMAGE_H
+#ifndef AnimatedImage_H
+#define AnimatedImage_H
 
 #include <QObject>
 #include <QMovie>
 #include <QPixmap>
 #include <QDir>
 
-class AnimationImage
+#include "imagefile.h"
+
+class ImageFile;
+
+class AnimatedImage : public ImageFile
 {
-    QPixmap* mPixmap;
     QMovie* mMovie;
     QStringList mFramesNames;
-    QString mFilePath;
-    QString mFileName;
 
 public:
-    explicit AnimationImage(const QString& path="");
-    AnimationImage(QPixmap*);
+    explicit AnimatedImage(const QString& path="");
+    AnimatedImage(QPixmap*);
+    virtual ~AnimatedImage();
 
-    bool hasAnimation();
+    QPixmap pixmap();
+    bool isAnimated();
+    bool isValid();
     QMovie* movie();
-    QPixmap* pixmap();
-    bool contains(QMovie*);
-    bool contains(QPixmap*);
     int width();
     int height();
-    bool isNull();
-    QString path();
+    int frameNumber() const;
     QStringList framesNames() const;
     QRect rect() const;
-    void save(const QDir&);
-    void setFileName(const QString&);
-    QString fileName() const;
     
 signals:
     
@@ -41,4 +38,4 @@ private:
    void init();
 };
 
-#endif // ANIMATIONIMAGE_H
+#endif // AnimatedImage_H
