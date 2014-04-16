@@ -52,6 +52,8 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     mHeightEditor->setValidator(validator);
     mHeightEditor->setObjectName("heightEditor");
     mKeepAspectRatioCheckbox = new QCheckBox(this);
+    mOpacitySlider = new QSlider(Qt::Horizontal, this);
+    mOpacitySlider->setMaximum(255);
 
     //connect(mChooseObjectComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentWorkingObjectChanged(int)));
     connect(mNameEdit, SIGNAL(textEdited(const QString &)), this, SLOT(onNameChanged(const QString&)));
@@ -61,6 +63,8 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     connect(mWidthEditor, SIGNAL(textEdited(const QString &)), this, SLOT(onSizeEdited(const QString&)));
     connect(mHeightEditor, SIGNAL(textEdited(const QString &)), this, SLOT(onSizeEdited(const QString&)));
     connect(mKeepAspectRatioCheckbox, SIGNAL(toggled(bool)), this, SLOT(onKeepAspectRatioToggled(bool)));
+    connect(mOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(onOpacityChanged(int)));
+
 
     this->beginGroup(tr("Object"), "Object");
     //this->appendRow(tr("Current"), mChooseObjectComboBox);
@@ -71,6 +75,7 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
     this->appendRow(tr("Width"), mWidthEditor);
     this->appendRow(tr("Height"), mHeightEditor);
     this->appendRow(tr("Keep aspect ratio"), mKeepAspectRatioCheckbox);
+    this->appendRow(tr("Opacity"), mOpacitySlider);
     this->endGroup();
 
     this->beginGroup(tr("Bounding Rect"));
@@ -90,17 +95,17 @@ ObjectEditorWidget::ObjectEditorWidget(QWidget *parent) :
 
     mImageChooser = new ChooseFileButton(ChooseFileButton::ImageFilter, this);
     mColorButton = new ColorPushButton(this);
-    mOpacitySlider = new QSlider(Qt::Horizontal, this);
-    mOpacitySlider->setMaximum(255);
+    mBackgroundOpacitySlider = new QSlider(Qt::Horizontal, this);
+    mBackgroundOpacitySlider->setMaximum(255);
 
     connect(mImageChooser, SIGNAL(fileSelected(const QString&)), this, SLOT(onImageChosen(const QString&)));
-    connect(mOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(onSliderValueChanged(int)));
+    connect(mBackgroundOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(onSliderValueChanged(int)));
     connect(mColorButton, SIGNAL(colorChosen(const QColor&)), this, SLOT(onColorChosen(const QColor&)));
 
     this->beginGroup(tr("Background"));
     this->appendRow(tr("Color"), mColorButton);
     this->appendRow(tr("Image"), mImageChooser);
-    this->appendRow(tr("Opacity"), mOpacitySlider);
+    this->appendRow(tr("Opacity"), mBackgroundOpacitySlider);
     this->endGroup();
 
     this->beginGroup(tr("Events"));
@@ -159,6 +164,12 @@ void ObjectEditorWidget::onSliderValueChanged(int value)
         mCurrentObject->setBackgroundOpacity(value);
 }
 
+void ObjectEditorWidget::onOpacityChanged(int value)
+{
+    if (mCurrentObject)
+        mCurrentObject->setOpacity(value);
+}
+
 void ObjectEditorWidget::onColorChosen(const QColor & color)
 {
     if (mCurrentObject)
@@ -191,11 +202,12 @@ void ObjectEditorWidget::updateData(Object *currObj)
 
     //mChooseObjectComboBox->addItem(currObj->objectName() + tr("(copy)"));
     mObjectsHierarchy.append(currObj);
+    mOpacitySlider->setValue(currObj->opacity());
     mBorderWidthSpinBox->setValue(currObj->borderWidth());
     mBorderColorButton->setColor(currObj->borderColor());
     mColorButton->setText(currObj->backgroundColor().name());
     mColorButton->setColor(currObj->backgroundColor());
-    mOpacitySlider->setValue(currObj->backgroundOpacity());
+    mBackgroundOpacitySlider->setValue(currObj->backgroundOpacity());
     mNameEdit->setText(currObj->objectName());
     mNameEdit->setStyleSheet("");
     mNameEdit->setEnabled(currObj->editableName());

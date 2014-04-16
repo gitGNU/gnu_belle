@@ -46,8 +46,8 @@ Object::Object(const QVariantMap& data, QObject* parent):
 
 void Object::init(const QString& name)
 {
-    mBackgroundImage = 0;
-    mBackgroundColor.setRgb(255, 255, 255, 0);
+    mOpacity = 255;
+    mBackground.setColor(QColor(255, 255, 255, 0));
     mCornerRadius = 0;
     mType = "Object";
     mOriginalResizePointIndex = -1;
@@ -61,6 +61,7 @@ void Object::init(const QString& name)
     mSelectedObject = 0;
     mKeepAspectRatio = false;
     mAspectRatio = 1;
+    mScaledBackgroundImage = 0;
 
     //check if name is valid
     if (objectName().isEmpty()) {
@@ -207,28 +208,53 @@ ObjectEditorWidget* Object::editorWidget()
 
 QColor Object::backgroundColor() const
 {
-    return mBackgroundColor;
+    return mBackground.color();
 }
 
 void Object::setBackgroundColor(const QColor & color)
 {
-    notify("backgroundColor", Utils::colorToList(color), Utils::colorToList(mBackgroundColor));
-    int alpha = mBackgroundColor.alpha();
-    mBackgroundColor = color;
-    mBackgroundColor.setAlpha(alpha);
+    notify("backgroundColor", Utils::colorToList(color), Utils::colorToList(mBackground.color()));
+    int alpha = mBackground.opacity();
+    mBackground.setColor(color);
+    mBackground.setOpacity(alpha);
 }
 
 int Object::backgroundOpacity() const
 {
-    return mBackgroundColor.alpha();
+    return mBackground.opacity();
 }
 
 void Object::setBackgroundOpacity(int alpha)
 {
-    int prevAlpha = mBackgroundColor.alpha();
-    mBackgroundColor.setAlpha(alpha);
+    int prevAlpha = mBackground.opacity();
+    mBackground.setOpacity(alpha);
     notify("backgroundOpacity", alpha, prevAlpha);
 }
+
+int Object::opacity() const
+{
+    return mOpacity;
+}
+
+qreal Object::opacityF() const
+{
+    return (mOpacity * 1.0) / 255;
+}
+
+void Object::setOpacity(int opacity)
+{
+    if (opacity > 255)
+        opacity = 255;
+    else if (opacity < 0)
+        opacity = 0;
+
+    if (opacity != mOpacity){
+        int prevOpacity = mOpacity;
+        mOpacity = opacity;
+        notify("opacity", mOpacity, prevOpacity);
+    }
+}
+
 
 void Object::setWidth(int w, bool percent)
 {
@@ -407,34 +433,23 @@ void Object::setType(const QString & type)
 
 void Object::paint(QPainter & painter)
 {
-    if (mBackgroundColor.alpha() > 0 || mBorderColor.isValid()) {
-        painter.save();
-        QBrush brush(backgroundColor());
-        painter.setBrush(brush);
-        painter.setOpacity(backgroundColor().alphaF());
+    painter.setOpacity(opacityF());
 
-        if (mBorderColor.isValid())
-            painter.setPen(QPen(mBorderColor, mBorderWidth));
-        else
-            painter.setPen(QPen(backgroundColor(), mBorderWidth));
+    if (! mVisible || ! mOpacity) {
+        return;
+    }
 
-        QRect rect(mSceneRect.x(), mSceneRect.y(), contentWidth(), contentHeight());
-        //rect.setWidth(rect.width()+mPadding.left()+ mPadding.right());
-        //rect.setHeight(rect.height()+mPadding.top()+ mPadding.bottom());
+    painter.setOpacity(opacityF());
+    QRect rect(mSceneRect.x(), mSceneRect.y(), contentWidth(), contentHeight());
 
-        if (mBackgroundImage) {
-            if (mBackgroundImage->movie())
-                painter.drawPixmap(rect, mBackgroundImage->movie()->currentPixmap());
-            else
-                painter.drawPixmap(rect, *mBackgroundImage->pixmap());
-        }
-        else if (mCornerRadius) {
+    mBackground.paint(painter, rect, mCornerRadius, opacityF());
+
+    if (mBorderColor.isValid()) {
+        painter.setPen(QPen(mBorderColor, mBorderWidth));
+        if (mCornerRadius)
             painter.drawRoundedRect(rect, mCornerRadius, mCornerRadius);
-        }
         else
             painter.drawRect(rect);
-
-        painter.restore();
     }
 }
 
@@ -476,29 +491,34 @@ void Object::removeEventActionAt(Interaction::InputEvent event, int index, bool 
 
 void Object::setBackgroundImage(const QString & path)
 {
-    if (mBackgroundImage && mBackgroundImage->path() == path)
+    ImageFile* image = mBackground.image();
+
+    if (image && image->path() == path)
         return;
 
-    if (mBackgroundImage && mBackgroundImage->movie()) {
-        mBackgroundImage->movie()->stop();
-        mBackgroundImage->movie()->disconnect(this);
+    if (image && image->isAnimated()) {
+        image->movie()->stop();
+        image->movie()->disconnect(this);
     }
 
-    AnimationImage* image = ResourceManager::newImage(path);
-    if (image && image->movie()) {
+    ResourceManager::decrementReference(image);
+
+    image = ResourceManager::newImage(path);
+    if (image && image->isAnimated()) {
         connect(image->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
         image->movie()->start();
     }
 
-    ResourceManager::decrementReference(mBackgroundImage);
-    QString prevPath = ResourceManager::imagePath(mBackgroundImage);
-    mBackgroundImage = image;
+    QString prevPath("");
+    if (mBackground.image())
+        mBackground.image()->path();
+    mBackground.setImage(image);
     notify("backgroundImage", path, prevPath);
 }
 
-AnimationImage* Object::backgroundImage() const
+ImageFile* Object::backgroundImage() const
 {
-    return mBackgroundImage;
+    return mBackground.image();
 }
 
 QList<Action*> Object::actionsForEvent(Interaction::InputEvent event)
@@ -513,22 +533,24 @@ QVariantMap Object::toJsonObject()
     object.insert("type", mType);
     object.insert("x", mSceneRect.x());
     object.insert("y", mSceneRect.y());
+    object.insert("opacity", mOpacity);
 
     if (mPercentWidth) object.insert("width", QString("%1\%").arg(mPercentWidth));
     else object.insert("width", contentWidth());
     if (mPercentHeight) object.insert("height", QString("%1\%").arg(mPercentHeight));
     else object.insert("height", contentHeight());
     QVariantList color;
-    color << mBackgroundColor.red() << mBackgroundColor.green() << mBackgroundColor.blue()
-             << mBackgroundColor.alpha();
+    QColor bgColor = mBackground.color();
+    color << bgColor.red() << bgColor.green() << bgColor.blue()
+             << bgColor.alpha();
     object.insert("backgroundColor", color);
 
     if (mCornerRadius) {
         object.insert("cornerRadius", mCornerRadius);
     }
 
-    if (mBackgroundImage) {
-        object.insert("backgroundImage", mBackgroundImage->fileName());
+    if (mBackground.image()) {
+        object.insert("backgroundImage", mBackground.image()->name());
     }
 
     QVariantList jsonActions;
@@ -933,23 +955,25 @@ void Object::setProperties(const QVariantMap &data)
     if (data.contains("name") && data.value("name").type() == QVariant::String)
         setObjectName(data.value("name").toString());
 
+    if (data.contains("opacity") && data.value("opacity").canConvert(QVariant::Int))
+        setOpacity(data.value("opacity").toInt());
 
     if (data.contains("backgroundColor") && data.value("backgroundColor").type() == QVariant::List) {
         QColor color = Utils::listToColor(data.value("backgroundColor").toList());
         if (color.isValid())
-            mBackgroundColor = color;
-
+            mBackground.setColor(color);
     }
 
     if (data.contains("backgroundOpacity") && data.value("backgroundOpacity").type() == QVariant::Int) {
         if (data.contains("previousValue") && data.value("previousValue").type() == QVariant::Int)
-            if (data.value("previousValue").toInt() != mBackgroundColor.alpha())
+            if (data.value("previousValue").toInt() != mBackground.opacity())
                 return;
-        mBackgroundColor.setAlpha(data.value("backgroundOpacity").toInt());
+
+        mBackground.setOpacity(data.value("backgroundOpacity").toInt());
     }
 
     if (data.contains("backgroundImage") && data.value("backgroundImage").type() == QVariant::String) {
-        mBackgroundImage = ResourceManager::newImage(data.value("backgroundImage").toString());
+        mBackground.setImage(data.value("backgroundImage").toString());
     }
 
     if (data.contains("x") && data.value("x").canConvert(QVariant::Int)) {
@@ -1125,14 +1149,14 @@ void Object::onResourceChanged(const QVariantMap & data)
 
 void Object::show()
 {
-    if (mBackgroundImage && mBackgroundImage->movie())
-        mBackgroundImage->movie()->start();
+    if (mBackground.image() && mBackground.image()->movie())
+        mBackground.image()->movie()->start();
 }
 
 void Object::hide()
 {
-    if (mBackgroundImage && mBackgroundImage->movie())
-        mBackgroundImage->movie()->stop();
+    if (mBackground.image() && mBackground.image()->movie())
+        mBackground.image()->movie()->stop();
 }
 
 bool Object::keepAspectRatio()

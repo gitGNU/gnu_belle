@@ -47,6 +47,7 @@ signals:
 public slots:
     void onColorChosen(const QColor&);
     void onSliderValueChanged(int);
+    void onOpacityChanged(int);
     void onAddItemActivated();
     void onItemActivated(int);
     void onVisibilityChanged(bool);
@@ -69,6 +70,7 @@ private slots:
 
 private:
     ColorPushButton* mColorButton;
+    QSlider* mBackgroundOpacitySlider;
     QSlider* mOpacitySlider;
     Object *mCurrentObject;
     Object *mResourceObject;

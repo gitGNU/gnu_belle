@@ -29,6 +29,7 @@
 #include "object_editor_widget.h"
 #include "padding.h"
 #include "animationimage.h"
+#include "background.h"
 
 #define RESIZE_RECT_WIDTH 7
 
@@ -41,6 +42,7 @@ class Object : public QObject
     Q_OBJECT
     
     public:
+
         explicit Object(QObject* parent=0, const QString& name="Object");
         Object(const QVariantMap& data, QObject* parent=0);
         virtual ~Object();
@@ -85,6 +87,10 @@ class Object : public QObject
         int backgroundOpacity() const;
         void setBackgroundOpacity(int);
 
+        int opacity() const;
+        qreal opacityF() const;
+        void setOpacity(int);
+
         int width() const;
         int height() const;
         int contentWidth() const;
@@ -100,7 +106,7 @@ class Object : public QObject
         int cornerRadius();
         void setCornerRadius(int);
 
-        AnimationImage* backgroundImage() const;
+        ImageFile* backgroundImage() const;
         void setBackgroundImage(const QString&);
 
         bool visible();
@@ -167,6 +173,7 @@ class Object : public QObject
         void movePoint(int, QPoint&);
         int parentWidth() const;
         int parentHeight() const;
+        void updateScaledBackgroundImage();
 
     protected:
         QRect mSceneRect;
@@ -179,8 +186,6 @@ class Object : public QObject
         float mYDif;
         Padding mPadding;
         QList<QRect> mPreviousSceneRects;
-        QColor mBackgroundColor;
-        AnimationImage *mBackgroundImage;
         QHash<Interaction::InputEvent, QList<Action*> > mEventToActions;
         bool mEditableName;
         Object* mResource;
@@ -195,10 +200,13 @@ class Object : public QObject
         float mAspectRatio;
         int mOriginalWidth;
         int mBorderWidth;
+        int mOpacity;
         QColor mBorderColor;
         Object* mSelectedObject;
         bool mKeepAspectRatio;
         int mCornerRadius;
+        QPixmap* mScaledBackgroundImage;
+        Background mBackground;
 
 private slots:
         void onResourceDestroyed();
