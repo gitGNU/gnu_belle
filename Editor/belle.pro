@@ -111,7 +111,10 @@ HEADERS      += belle.h\
     save_project_dialog.h \
     actions/runscript.h \
     actions/runscript_editorwidget.h \
-    update_elements_dialog.h
+    update_elements_dialog.h \
+    objects/background.h \
+    imagefile.h \
+    imagetransform.h
                 
 
 SOURCES      += main.cpp\
@@ -205,6 +208,9 @@ SOURCES      += main.cpp\
     save_project_dialog.cpp \
     actions/runscript.cpp \
     actions/runscript_editorwidget.cpp \
-    update_elements_dialog.cpp
+    update_elements_dialog.cpp \
+    objects/background.cpp \
+    imagefile.cpp \
+    imagetransform.cpp
 
 RESOURCES += media.qrc
