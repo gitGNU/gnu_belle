@@ -27,7 +27,7 @@
 #include "object.h"
 #include "action.h"
 #include "scene_editor_widget.h"
-#include "animationimage.h"
+#include "imagefile.h"
 #include "scene_manager.h"
 
 class SceneManager;
@@ -42,8 +42,8 @@ class Scene : public QObject
     QList<Action*> mActions;
     Object * mSelectedObject;
     Object* mHighlightedObject;
-    AnimationImage *mBackgroundImage;
-    AnimationImage *mTemporaryBackgroundImage;
+    ImageFile *mBackgroundImage;
+    ImageFile *mTemporaryBackgroundImage;
     QColor mBackgroundColor;
     QColor mTemporaryBackgroundColor;
     
@@ -70,8 +70,8 @@ class Scene : public QObject
         static void setEditorWidget(SceneEditorWidget*);
         static SceneEditorWidget* editorWidget();
 
-        void setTemporaryBackgroundImage(AnimationImage*);
-        AnimationImage* temporaryBackgroundImage();
+        void setTemporaryBackgroundImage(ImageFile*);
+        ImageFile* temporaryBackgroundImage();
 
         void setTemporaryBackgroundColor(const QColor&);
         QColor temporaryBackgroundColor();
@@ -81,7 +81,7 @@ class Scene : public QObject
         void stopMoveSelectedObject();
         Object *selectedObject();
         void setBackgroundImage(const QString&);
-        AnimationImage* backgroundImage();
+        ImageFile* backgroundImage();
         void setBackgroundColor(const QColor&);
         QColor backgroundColor();
         QString backgroundPath();

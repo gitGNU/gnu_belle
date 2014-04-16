@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2013 Carlos Pais 
+/* Copyright (C) 2012, 2013 Carlos Pais
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -290,19 +290,18 @@ void Scene::fillWidth()
 
 void Scene::setBackgroundImage(const QString & path)
 {
-    AnimationImage* image = ResourceManager::newImage(path);
+    ImageFile* image = ResourceManager::newImage(path);
 
     if (mBackgroundImage != image) {
-        if (mBackgroundImage && mBackgroundImage->movie())
+        if (mBackgroundImage && mBackgroundImage->isAnimated()) {
             mBackgroundImage->movie()->disconnect(this);
+        }
         ResourceManager::decrementReference(mBackgroundImage);
 
-        if (image) {
-            QPixmap* pixmap = image->pixmap();
-            if (pixmap)
-                *pixmap = pixmap->scaled(Scene::size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-            if (image->movie()) {
+        if (image && image->isValid()) {
+            if (image->isAnimated()) {
                 connect(image->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
+                image->movie()->setScaledSize(Scene::size());
                 image->movie()->start();
             }
         }
@@ -312,22 +311,24 @@ void Scene::setBackgroundImage(const QString & path)
     }
 }
 
-AnimationImage* Scene::backgroundImage()
+ImageFile* Scene::backgroundImage()
 {
     return mBackgroundImage;
 }
 
-void Scene::setTemporaryBackgroundImage(AnimationImage* image)
+void Scene::setTemporaryBackgroundImage(ImageFile* image)
 {
     if (mTemporaryBackgroundImage != image) {
-        if (mTemporaryBackgroundImage && mTemporaryBackgroundImage->movie()) { //disconnect previous background
-            mTemporaryBackgroundImage->movie()->stop();
-            mTemporaryBackgroundImage->movie()->disconnect(this);
+        if (mTemporaryBackgroundImage && mTemporaryBackgroundImage->isAnimated()) { //disconnect previous background
+            AnimatedImage* anim = dynamic_cast<AnimatedImage*>(mTemporaryBackgroundImage);
+            anim->movie()->stop();
+            anim->movie()->disconnect(this);
         }
 
-        if (image && image->movie()) {
-            connect(image->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
-            mTemporaryBackgroundImage->movie()->start();
+        if (image && image->isAnimated()) {
+            AnimatedImage* anim = dynamic_cast<AnimatedImage*>(mTemporaryBackgroundImage);
+            connect(anim->movie(), SIGNAL(frameChanged(int)), this, SIGNAL(dataChanged()));
+            anim->movie()->start();
         }
 
         mTemporaryBackgroundImage = image;
@@ -335,7 +336,7 @@ void Scene::setTemporaryBackgroundImage(AnimationImage* image)
     }
 }
 
-AnimationImage* Scene::temporaryBackgroundImage()
+ImageFile* Scene::temporaryBackgroundImage()
 {
     return mTemporaryBackgroundImage;
 }
@@ -368,7 +369,9 @@ QColor Scene::temporaryBackgroundColor()
 
 QString Scene::backgroundPath()
 {
-    return ResourceManager::imagePath(mBackgroundImage);
+    if (mBackgroundImage)
+        return mBackgroundImage->path();
+    return "";
 }
 
 void Scene::clearBackground()
@@ -582,8 +585,10 @@ QString Scene::newObjectName(QString name)
 
 void Scene::show()
 {
-    if (mBackgroundImage && mBackgroundImage->movie())
-        mBackgroundImage->movie()->start();
+    if (mBackgroundImage && mBackgroundImage->isAnimated()) {
+        AnimatedImage* anim = dynamic_cast<AnimatedImage*>(mBackgroundImage);
+        anim->movie()->start();
+    }
 
     for(int i=0; i < mObjects.size(); i++)
         mObjects[i]->show();
@@ -592,8 +597,11 @@ void Scene::show()
 void Scene::hide()
 {
     removeTemporaryBackground();
-    if (mBackgroundImage && mBackgroundImage->movie())
-        mBackgroundImage->movie()->stop();
+    if (mBackgroundImage && mBackgroundImage->isAnimated()) {
+        AnimatedImage* anim = dynamic_cast<AnimatedImage*>(mBackgroundImage);
+        anim->movie()->stop();
+    }
+
     for(int i=0; i < mObjects.size(); i++)
         mObjects[i]->hide();
 }
@@ -601,9 +609,10 @@ void Scene::hide()
 void Scene::removeTemporaryBackground()
 {
     if (mTemporaryBackgroundImage) {
-        if (mTemporaryBackgroundImage->movie()) {
-            mTemporaryBackgroundImage->movie()->stop();
-            mTemporaryBackgroundImage->movie()->disconnect(this);
+        if (mTemporaryBackgroundImage->isAnimated()) {
+            AnimatedImage* anim = dynamic_cast<AnimatedImage*>(mBackgroundImage);
+            anim->movie()->stop();
+            anim->movie()->disconnect(this);
         }
         mTemporaryBackgroundImage = 0;
     }
@@ -616,20 +625,13 @@ void Scene::paint(QPainter & painter)
 {
     QColor bgColor = backgroundColor().isValid() ? backgroundColor() : Qt::gray;
 
-    if (mTemporaryBackgroundImage) {
-        painter.drawPixmap(Scene::point(), *mTemporaryBackgroundImage->pixmap());
-        if (mTemporaryBackgroundImage->movie())
-            painter.drawPixmap(0, 0, Scene::width(), Scene::height(), mTemporaryBackgroundImage->movie()->currentPixmap());
-        else if (mTemporaryBackgroundImage->pixmap())
-            painter.drawPixmap(0, 0, Scene::width(), Scene::height(), *mTemporaryBackgroundImage->pixmap());
+    if (mTemporaryBackgroundImage && mTemporaryBackgroundImage->isValid()) {
+        painter.drawPixmap(Scene::point(), mTemporaryBackgroundImage->pixmap());
     }
     else if (mTemporaryBackgroundColor.isValid())
         painter.fillRect(QRect(Scene::point().x(), Scene::point().y(), width(), height()), mTemporaryBackgroundColor);
-    else if (mBackgroundImage) {
-        if (mBackgroundImage->movie())
-            painter.drawPixmap(0, 0, Scene::width(), Scene::height(), mBackgroundImage->movie()->currentPixmap());
-        else if (mBackgroundImage->pixmap())
-            painter.drawPixmap(0, 0, Scene::width(), Scene::height(), *mBackgroundImage->pixmap());
+    else if (mBackgroundImage && mBackgroundImage->isValid()) {
+        painter.drawPixmap(0, 0, Scene::width(), Scene::height(), mBackgroundImage->pixmap());
     }
     else
         painter.fillRect(QRect(Scene::point().x(), Scene::point().y(), width(), height()), bgColor);
@@ -647,7 +649,9 @@ void Scene::paint(QPainter & painter)
     for (int i=0; i < objects.size(); i++) {
         object = objects.at(i);
         if (object && object->visible()){
+            painter.save();
             object->paint(painter);
+            painter.restore();
         }
     }
 
@@ -655,7 +659,9 @@ void Scene::paint(QPainter & painter)
     for (int i=0; i < objects.size(); i++) {
         object = objects.at(i);
         if (object && object->visible()){
+            painter.save();
             object->paint(painter);
+            painter.restore();
         }
     }
 
@@ -672,12 +678,6 @@ void Scene::paint(QPainter & painter)
 
 void Scene::resize(int w, int h, bool pos, bool size)
 {
-    if (mBackgroundImage && mBackgroundImage->pixmap()) {
-        QPixmap* pixmap = mBackgroundImage->pixmap();
-        if (pixmap)
-            *pixmap = pixmap->scaled(w, h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    }
-
     qreal wratio = w / (Scene::width() * 1.0);
     qreal hratio = h / (Scene::height() * 1.0);
 
