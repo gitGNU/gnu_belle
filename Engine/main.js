@@ -71,7 +71,10 @@ var createObject = function (data)
         return null;
     }
 
-    return new _Object(data);
+    var obj = new _Object(data);
+    if (belle.display.DOM)
+      obj.initElement();
+    return obj;
 }
 
 function getObjectPrototype(type)

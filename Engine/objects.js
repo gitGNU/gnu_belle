@@ -169,24 +169,18 @@ function Object(info)
     this.backgroundElement = document.createElement("div");
     this.element.appendChild(this.backgroundElement);
     
-    belle.utils.initElement(this.element, info);
-    belle.utils.initElement(this.backgroundElement, info);
-    this.backgroundElement.style.width = "100%";
-    this.backgroundElement.style.height = "100%";
-    this.backgroundElement.style.display = "block";
-    
     this.setX(info.x);
     this.setY(info.y);
     this.setWidth(info.width);
     this.setHeight(info.height);
     this.cornerRadius = 0;
+    this.opacity = 1;
     this.roundedRect = false;
     this.paintX = false;
     this.paintY = false;
     this.backgroundColor = new Color([255, 255, 255, 255]);
     this.fillStyle = this.backgroundColor.toString();
     this.interval = null;
-    this.color = new Color([255,255,255,255]);
     this.mousePressActions = [];
     this.mouseReleaseActions = [];
     this.mouseMoveActions = [];
@@ -204,7 +198,7 @@ function Object(info)
     this.moveToPoint = null;
     this.data = info;
     this.borderWidth = 0;
-    this.borderColor = this.color;
+    this.borderColor = null;
     this.parent = parent ? parent : null;
     this.type = info["type"];
     this.eventListeners = {
@@ -258,16 +252,12 @@ function Object(info)
       this.borderColor = new Color(info["borderColor"]);
     }
     
-    if ("visible" in info) {
-        this.visible = info["visible"];
-        if (this.visible) {
-            this.redraw = true;
-	    this.element.style.display = "block";
-        }
+    if ("opacity" in info) {
+	this.setOpacity(info["opacity"]);
     }
     
-    if (this.element) {
-        this.element.style.border = this.borderWidth + "px" + " solid " + this.borderColor.toHex(); 
+    if ("visible" in info) {
+        this.visible = info["visible"];
     }
 }
 
@@ -366,14 +356,22 @@ Object.prototype.contains = function(px, py)
     return false;
 }
 
+Object.prototype.backgroundOpacity = function()
+{
+  return this.backgroundColor.alpha;
+}
+
+Object.prototype.backgroundOpacityF = function()
+{
+  return this.backgroundColor.alphaF();
+}
+
 Object.prototype.setBackgroundOpacity = function(alpha)
 {
-    if (this.backgroundElement) {
-        this.backgroundElement.style.opacity = alpha / 255; 
-        //ie support
-        this.backgroundElement.style.filter = "alpha(opacity=" + Math.round(100 * alpha / 255) + ");";
-    }
     this.backgroundColor.alpha = alpha; 
+    if (this.backgroundElement) {
+      $(this.backgroundElement).fadeTo(1, this.backgroundOpacityF() * this.opacityF())
+    }
 }
 
 Object.prototype.setBackgroundColor = function(color)
@@ -384,10 +382,14 @@ Object.prototype.setBackgroundColor = function(color)
     this.setBackgroundOpacity(color.alpha);
 }
 
-Object.prototype.setColor = function (color)
+Object.prototype.opacity = function (alpha)
 {
-    this.color = color;
-    this.setOpacity(this.color.alpha);
+  return this.opacity;
+}
+
+Object.prototype.opacityF = function (alpha)
+{
+  return this.opacity / 255;
 }
 
 Object.prototype.setOpacity = function (alpha)
@@ -397,22 +399,15 @@ Object.prototype.setOpacity = function (alpha)
     else if (alpha > 255)
         alpha = 255;
     
-    this.color.alpha = alpha;
-    if (this.element) {
-        this.element.style.opacity = alpha / 255;
-        //ie support
-        this.element.style.filter = "alpha(opacity=" + Math.round(100 * alpha / 255) + ");";
+    if (this.opacity != alpha) {
+      this.opacity = alpha;
+      this.redraw = true;
     }
-}
-
-Object.prototype.backgroundOpacity = function()
-{
-    return this.backgroundColor.alpha;
-}
-
-Object.prototype.opacity = function ()
-{
-    return this.color.alpha;
+    
+    //always update DOM element, since this function is called on constructor
+    //and then on initElement with all children added
+    if (this.element)
+	$(this.element).children().fadeTo(1, this.opacityF());   
 }
 
 Object.prototype.paint = function(context)
@@ -430,7 +425,8 @@ Object.prototype.paint = function(context)
     
     var x = this.globalX();
     var y = this.globalY();
-   
+    
+    context.globalAlpha = this.opacityF();
     
     if (this.backgroundImage) {
         this.backgroundImage.paint(context, x, y, this.width, this.height);
@@ -670,6 +666,31 @@ Object.prototype.initActions = function(actions)
     return actionInstances;
 }
 
+Object.prototype.initElement = function() 
+{
+  if (! this.element)
+    return;
+
+  $(this.element).css("position", "absolute");
+  $(this.element).width(this.scaledWidth);
+  $(this.element).height(this.scaledHeight);
+  if (! this.visible)
+    $(this.element).hide();
+  var $children = $(this.element).children();
+  $children.css("position", "absolute");
+  $children.css("width", "100%");
+  $children.css("height", "100%");
+  $children.css("display", "block");
+  $children.css("filter", "inherit");
+    
+  if (this.opacity != 1) {
+    this.setOpacity(this.opacity);
+  }
+  
+  if (this.borderWidth && this.borderColor)
+    this.element.style.border = this.borderWidth + "px" + " solid " + this.borderColor.toHex(); 
+}
+
 /*********** IMAGE OBJECT ***********/
 function Image (data)
 {
@@ -680,9 +701,7 @@ function Image (data)
     if ("image" in data) {
         this.image = new AnimationImage(data["image"], this);
         if (this.element) {
-            this.image.img.style.display = "block";
-            var firstNode = this.element.childNodes[0];
-            this.element.insertBefore(this.image.img, firstNode);
+	  $(this.element).append(this.image.img);
         }
     }
 }
@@ -695,12 +714,7 @@ Image.prototype.paint = function(context)
     if (! draw)
         return false;
 
-    context.save();
-    if (context.globalAlpha != this.color.alphaF())
-        context.globalAlpha = this.color.alphaF();
-
     this.image.paint(context, this.globalX(), this.globalY(), this.width, this.height);
-    context.restore();
     
     this.redraw = false;
     return true;
@@ -805,11 +819,6 @@ TextBox.prototype.paint = function(context)
     if (this.font)
        context.font = this.font;
     
-
-    context.save();
-    if (context.globalAlpha != this.color.alphaF())
-        context.globalAlpha = this.color.alphaF();
-    
     var text = game.replaceVariables(this.text);
     if (text != this.displayedText)
         this.alignText();
@@ -819,7 +828,6 @@ TextBox.prototype.paint = function(context)
         context.fillText(this.textParts[i], x+this.textLeftPadding[i], y+this.textTopPadding[i], this.width);
     }
     
-    context.restore();
     context.font = defaultFont;
   
     this.redrawing = false;
@@ -1475,7 +1483,6 @@ Scene.prototype.setHeight = function(height)
     this.element.style.height = this.scaledHeight + "px";
     this.backgroundElement.style.height = this.scaledHeight + "px";
 }
-    
 
 // Expose the public methods
 
