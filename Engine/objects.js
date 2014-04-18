@@ -370,7 +370,7 @@ Object.prototype.setBackgroundOpacity = function(alpha)
 {
     this.backgroundColor.alpha = alpha; 
     if (this.backgroundElement) {
-      $(this.backgroundElement).fadeTo(1, this.backgroundOpacityF() * this.opacityF())
+      $(this.backgroundElement).fadeTo(1, this.backgroundOpacityF() * this.opacityF());
     }
 }
 
@@ -683,10 +683,13 @@ Object.prototype.initElement = function()
   $children.css("display", "block");
   $children.css("filter", "inherit");
     
-  if (this.opacity != 1) {
+  if (this.opacityF() != 1) {
     this.setOpacity(this.opacity);
   }
   
+  if (this.backgroundOpacityF() != 1)
+    this.setBackgroundOpacity(this.backgroundOpacity());
+
   if (this.borderWidth && this.borderColor)
     this.element.style.border = this.borderWidth + "px" + " solid " + this.borderColor.toHex(); 
 }
