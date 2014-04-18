@@ -90,7 +90,7 @@ var Color = function(components)
     var error = false;
     if (components.length < 4) {
         error = true;
-        log("Color(components) : Missing one or more color component(s)");
+        belle.log("Color(components) : Missing one or more color component(s)");
     }
     
     if (error) {
@@ -980,7 +980,7 @@ function ObjectGroup(data)
             obj = belle.createObject(objects[i]);
             
             if (! obj) {
-                log(objects[i].type + ": is not a valid object type!!!!.");
+                belle.log(objects[i].type + ": is not a valid object type!!!!.");
                 continue;
             }
             var left = parseInt(this.element.style.left);
@@ -1194,4 +1194,4 @@ objects.Menu = Menu;
 
 }(belle.objects));
 
-log("Objects module loaded!");
+belle.log("Objects module loaded!");

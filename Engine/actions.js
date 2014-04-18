@@ -503,7 +503,7 @@ function ChangeVisibility(data)
         var transitions = data["transitions"];
         for(var i=0; i !== transitions.length; i++) {
             if (! belle.getActionPrototype(transitions[i].type)) {
-                log("TypeError: Action '" + transitions[i].type + "' is not a valid Action"); 
+                belle.log("TypeError: Action '" + transitions[i].type + "' is not a valid Action"); 
                 continue;
             }
             
@@ -1431,5 +1431,5 @@ actions.RunScript = RunScript;
 
 }(belle.actions));
 
-log("Actions module loaded!");
+belle.log("Actions module loaded!");
 

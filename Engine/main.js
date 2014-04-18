@@ -67,7 +67,7 @@ var createObject = function (data)
     var _Object = belle.objects[type];
     
     if (! _Object) {
-        log("'" + type + "' is not a valid object type.");
+        belle.log("'" + type + "' is not a valid object type.");
         return null;
     }
 
@@ -145,7 +145,7 @@ function loadScenes(scenes)
         scene = scenes[i];
         
         if (! belle[scene.type]) {
-            log("Invalid Scene type: " + scene.type);
+            belle.log("Invalid Scene type: " + scene.type);
             continue;
         }
         
@@ -170,7 +170,7 @@ function loadScenes(scenes)
             var actions = scene.actions;
             for (var j=0; j < actions.length; j++) {
                 if (! belle.actions[actions[j].type]) {
-                    log("Invalid Action type: " + actions[j].type);
+                    belle.log("Invalid Action type: " + actions[j].type);
                     continue;
                 }
                 
@@ -314,7 +314,7 @@ function importgameData(path) {
     xobj.onreadystatechange = function() {
         if(xobj.readyState == 4){
             var gameData = jQuery.parseJSON(xobj.responseText);
-            log("Game data loaded!");
+            belle.log("Game data loaded!");
             initializeData(gameData);
         }
     };

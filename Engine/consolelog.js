@@ -1,5 +1,7 @@
 /*global log:false*/
 
+(function(belle) {
+
 // Tell IE9 to use its built-in console
 if (Function.prototype.bind && (typeof console === 'object' || typeof console === 'function') && typeof console.log === 'object') {
   ['log','info','warn','error','assert','dir','clear','profile','profileEnd']
@@ -9,13 +11,14 @@ if (Function.prototype.bind && (typeof console === 'object' || typeof console ==
 }
 
 // log() -- The complete, cross-browser (we don't judge!) console.log wrapper for his or her logging pleasure
-if (!window.log) {
-  window.log = function () {
+if (!belle.log) {
+  belle.log = function () {
     var args = arguments,
         isReallyIE8 = false,
         isReallyIE8Plus = false,
         ua, winRegexp, script, i;
-
+    var log = belle.log;
+    
     log.history = log.history || []; // store logs to an array for reference
     log.history.push(arguments);
 
@@ -88,12 +91,14 @@ if (!window.log) {
         // If you want to expand the console window by default, uncomment this line
         //document.getElementsByTagName('HTML')[0].setAttribute('debug','true');
         document.getElementsByTagName('HEAD')[0].appendChild(script);
-        setTimeout(function () { window.log.apply(window, args); }, 2000);
+        setTimeout(function () { belle.log.apply(window, args); }, 2000);
       }
       else {
         // FBL was included but it hasn't finished loading yet, so try again momentarily
-        setTimeout(function () { window.log.apply(window, args); }, 500);
+        setTimeout(function () { belle.log.apply(window, args); }, 500);
       }
     }
   };
 }
+
+})(belle);

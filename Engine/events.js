@@ -152,4 +152,4 @@ document.onkeyup = function(event)
 
 }(EventDispatcher));
 
-log("Event module loaded!");
+belle.log("Event module loaded!");

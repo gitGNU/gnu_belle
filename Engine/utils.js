@@ -291,4 +291,4 @@ utils.setBorderRadius = function(elem, radius) {
 
 }(belle.utils));
 
-log("Utils module loaded!");
+belle.log("Utils module loaded!");

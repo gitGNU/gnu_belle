@@ -488,4 +488,4 @@ display.resize = resize;
 
 }(belle.display));
 
-log("Display module loaded!");
+belle.log("Display module loaded!");
