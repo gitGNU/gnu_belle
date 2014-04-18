@@ -241,7 +241,9 @@ var _draw = function()
 
         if (! obj.redraw)
             continue;
+	display.context.save();
         obj.paint(display.context);
+	display.context.restore();
     }
     
     if (_drawFPS) 
