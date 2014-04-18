@@ -144,12 +144,13 @@ function loadScenes(scenes)
     for(var i=0; i < scenes.length; i++) {
         scene = scenes[i];
         
-        if (! belle.objects[scene.type]) {
+        if (! belle[scene.type]) {
             log("Invalid Scene type: " + scene.type);
             continue;
         }
         
-        var sceneObject = new belle.objects[scene.type](scene);
+        var _Scene = belle[scene.type];
+        var sceneObject = new _Scene(scene);
         sceneObject.objects = [];
         sceneObject.actions = [];
         
