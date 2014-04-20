@@ -42,6 +42,7 @@ function Scene(data)
     this.visible = true;
     this.tries = 0;
     this.eventListeners = {};
+    this.states = [];
     
     this.element = document.createElement("div");
     this.backgroundElement = document.createElement("div");
@@ -66,6 +67,41 @@ function Scene(data)
         this.setBackgroundImage(backgroundImage);
     if (backgroundColor)
         this.setBackgroundColor(backgroundColor);
+    
+    this.loadObjects(data);
+    this.loadActions(data);
+}
+
+Scene.prototype.loadActions = function(data) 
+{
+  //instanciate actions
+  if (data.actions && data.actions.length > 0) {
+      var actions = data.actions;
+      for (var j=0; j < actions.length; j++) {
+	  if (! belle.actions[actions[j].type]) {
+	      belle.log("Invalid Action type: " + actions[j].type);
+	      continue;
+	  }
+	  
+	  actions[j].__scene = this;
+	  var actionObject = new belle.actions[actions[j].type](actions[j]);
+	  this.actions.push(actionObject);
+      }
+  }
+}
+
+Scene.prototype.loadObjects = function(data) 
+{
+  //instanciate objects
+  if (data.objects && data.objects.length > 0) {
+      for(var j=0; j !== data.objects.length; j++) {
+	  var object = data.objects[j];
+	  object.__parent = this;
+	  obj = belle.createObject(object);
+	  if (obj) 
+	      this.objects.push(obj);
+      }
+  }
 }
 
 Scene.prototype.addEventListener = function(event, listener)

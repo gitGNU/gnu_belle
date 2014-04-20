@@ -153,37 +153,7 @@ function loadScenes(scenes)
         }
         
         var _Scene = belle[scene.type];
-        var sceneObject = new _Scene(scene);
-        sceneObject.objects = [];
-        sceneObject.actions = [];
-        
-        //instanciate objects
-        if (scene.objects && scene.objects.length > 0) {
-            for(var j=0; j !== scene.objects.length; j++) {
-                var object = scene.objects[j];
-                object.__parent = sceneObject;
-                obj = createObject(object);
-                if (obj) 
-                    sceneObject.objects.push(obj);
-            }
-        }
-        
-        //instanciate actions
-        if (scene.actions && scene.actions.length > 0) {
-            var actions = scene.actions;
-            for (var j=0; j < actions.length; j++) {
-                if (! belle.actions[actions[j].type]) {
-                    belle.log("Invalid Action type: " + actions[j].type);
-                    continue;
-                }
-                
-                actions[j].__scene = sceneObject;
-                var actionObject = new belle.actions[actions[j].type](actions[j]);
-                sceneObject.actions.push(actionObject);
-            }
-        }
-        
-        
+        var sceneObject = new _Scene(scene);        
         _scenes.push(sceneObject);
     }
     
