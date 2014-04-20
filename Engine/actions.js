@@ -481,7 +481,11 @@ Wait.prototype.execute = function ()
 {
     var t = this;
     this.reset();
-    if (this.waitType == "Timed" && this.time > 0) {
+    
+    if (isNaN(this.time) || this.time < 0)
+      this.time = 0;
+    
+    if (this.waitType == "Timed") {
         setTimeout(function() { t.setFinished(true); }, this.time);
     }
 }
