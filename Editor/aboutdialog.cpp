@@ -25,9 +25,9 @@ AboutDialog::AboutDialog(QWidget *parent) :
 {
     mUi.setupUi(this);
 
-    QString desc = tr("Belle is a cross-platform visual novel maker, using Qt4 for the editor and HTML5 for the engine.");
-    QString copyright = "Copyright &copy; 2012, 2013 Carlos Pais";
-    QString version = "Belle 0.3 alpha";
+    QString desc = tr("Belle is a cross-platform visual novel maker,<br/>using Qt4 for the editor and HTML5 for the engine.");
+    QString copyright = "Copyright &copy; 2012-2014 Carlos Pais";
+    QString version = "Belle 0.4 alpha";
 
     QString fullDesc = QString("<p><b>%1</b></p><p>%2</p><p>%3</p>").arg(version).arg(desc).arg(copyright);
 
@@ -55,14 +55,17 @@ AboutDialog::AboutDialog(QWidget *parent) :
     mUi.licenseEdit->setText(license.join("\n"));
 
     QStringList thanksTo;
+    QString style = "<style>a {text-decoration: none; }</style>";
     thanksTo    << "Main Developer:"
-                << "Carlos Pais <freemind@lavabit.com>"
+                << "<a  href='mailto:freemind@live.com.pt'>Carlos Pais</a>"
                 << ""
                 << "Thanks to:"
-                << "Qt4 Libraries <http://qt-project.org/>"
-                << "Eeli Reilin, Luis Gustavo S., Stephen Kockentiedt <https://github.com/ereilin/qt-json>";
+                << "<a href='http://qt-project.org'>Qt4 library</a>"
+                << "<a href='http://jquery.com'>jQuery library</a>"
+                << "<a href='https://github.com/ereilin/qt-json'>Eeli Reilin, Luis Gustavo S., Stephen Kockentiedt</a>";
 
-    mUi.creditsEdit->setText(thanksTo.join("\n"));
+    mUi.creditsBrowser->setOpenExternalLinks(true);
+    mUi.creditsBrowser->setHtml(style + thanksTo.join("<br/>"));
 
     connect(mUi.buttonBox, SIGNAL(rejected()), this, SLOT(close()));
     //resize(width(), 400);

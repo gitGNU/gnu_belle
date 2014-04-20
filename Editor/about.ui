@@ -54,11 +54,7 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
-        <widget class="QTextEdit" name="creditsEdit">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
+        <widget class="QTextBrowser" name="creditsBrowser"/>
        </item>
       </layout>
      </widget>
