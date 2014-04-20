@@ -16,6 +16,8 @@
 
 (function(belle) {
 
+var Color = belle.objects.Color;
+  
 function Scene(data)
 {
     this.objects = [];
