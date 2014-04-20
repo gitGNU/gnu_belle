@@ -915,6 +915,7 @@ void Belle::exportGameFile(const QString& path)
     pauseScreen.insert("scenes", scenes);
     jsonFile.insert("pauseScreen", pauseScreen);
 
+    file.write("game.data = ");
     file.write(QtJson::Json::serialize(jsonFile));
     file.close();
 }

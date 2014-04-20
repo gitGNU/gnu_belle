@@ -33,7 +33,7 @@
 
 #define WIDTH 640
 #define HEIGHT 480
-#define GAME_FILENAME "game.json"
+#define GAME_FILENAME "game_data.js"
 
 class Belle : public QMainWindow
 {
