@@ -20,15 +20,10 @@ var belle = belle ||  {};
 belle.actions = {};
 
 (function(actions) {
-
     
-actions.init = function()
-{
-    Color = belle.objects.Color;
-    Point = belle.objects.Point;
-    utils = belle.utils;
-}
-    
+var Color = belle.objects.Color;
+var Point = belle.objects.Point;
+ 
 function Action(data)
 {
     this.finished = false;

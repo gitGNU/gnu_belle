@@ -23,16 +23,6 @@
     <title>Belle Engine</title>
     <link rel="stylesheet" type="text/css" href="style.css"/>
     <link rel="stylesheet" type="text/css" href="fontfaces.css"/>
-    <script>
-        var _load = function() {
-            belle.load();
-        }
-        if (window.addEventListener) 
-            window.addEventListener('load', _load, false);
-        else if (window.attachEvent)
-            window.attachEvent('onload', _load);
-
-    </script>
   </head>
   <body>
     <div id="belle">
@@ -62,7 +52,10 @@
     <script type="text/javascript" src="game.js"></script>
     <script type="text/javascript" src="main.js"> </script>
     <script type="text/javascript" src="events.js"> </script>
-    
+    <script type="text/javascript" src="game_data.js"></script>
+    <script>
+            belle.load();
+    </script>
   </body>
 
 </html>

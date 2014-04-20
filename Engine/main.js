@@ -122,9 +122,12 @@ function setGameDirectory(dir)
 
 function load()
 {
-    actions.init();
-    display.loading();
-    importgameData(game.directory+game.filename);
+    if (game.data) {
+      display.loading(); 
+      initializeData(game.data)
+    }
+    else
+      alert("No game data found!");
 }
 
 window.onload = function () {
