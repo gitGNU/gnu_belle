@@ -34,9 +34,13 @@ GoToScene::GoToScene(const QVariantMap& data, QObject *parent) :
 {
     init();
 
-    if (data.contains("scene") && data.value("scene").type() == QVariant::String) {
-        mTargetSceneName = data.value("scene").toString();
-        setDisplayText(mTargetSceneName);
+    if (data.contains("target") && data.value("target").type() == QVariant::String) {
+        mTargetScene = data.value("target").toString();
+        setDisplayText(mTargetScene);
+    }
+
+    if (data.contains("targetType") && data.value("targetType").canConvert(QVariant::Int)) {
+        mTargetType = static_cast<GoToScene::TargetType>(data.value("targetType").toInt());
     }
 }
 
@@ -46,7 +50,8 @@ void GoToScene::init()
     setName(Info.name);
     setIcon(Info.icon);
     setSupportedEvents(Interaction::MousePress | Interaction::MouseRelease);
-    mTargetSceneName = "";
+    mTargetScene = "";
+    mTargetType = Name;
 }
 
 void GoToScene::setGoToSceneEditorWidget(GoToSceneEditorWidget * widget)
@@ -64,31 +69,24 @@ ActionEditorWidget* GoToScene::editorWidget()
     return mEditorWidget;
 }
 
-void GoToScene::setTargetSceneName(const QString & name)
+void GoToScene::setTargetScene(const QString & name, TargetType type)
 {
-    QList<Scene*> scenes;
-    if (this->scene() && this->scene()->sceneManager())
-        scenes = scene()->sceneManager()->scenes();
-
-    for(int i=0; i < scenes.size(); i++) {
-        if (scenes[i] && scenes[i]->objectName() == name) {
-            mTargetSceneName = name;
-            setDisplayText(name);
-            break;
-        }
-    }
+    mTargetScene = name;
+    mTargetType = type;
+    setDisplayText(mTargetScene);
 }
 
-
-QString GoToScene::targetSceneName()
+QString GoToScene::targetScene()
 {
-    return mTargetSceneName;
+    return mTargetScene;
 }
 
 QVariantMap GoToScene::toJsonObject()
 {
     QVariantMap action = Action::toJsonObject();
-    action.insert("scene", mTargetSceneName);
-
+    if (! mTargetScene.isEmpty()) {
+        action.insert("target", mTargetScene);
+        action.insert("targetType", mTargetType);
+    }
     return action;
 }

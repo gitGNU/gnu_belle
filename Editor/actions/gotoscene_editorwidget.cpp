@@ -16,16 +16,24 @@
 
 #include "gotoscene_editorwidget.h"
 
+#include "scene.h"
+
 GoToSceneEditorWidget::GoToSceneEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
     mCurrentGoToScene = 0;
 
-    mNameEdit = new QLineEdit(this);
-    connect(mNameEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onNameEdited(const QString&)));
+    mSceneEdit = new QComboBox(this);
+    mSceneEdit->addItem(tr("Next"), QVariant(GoToScene::Position));
+    mSceneEdit->addItem(tr("Previous"), QVariant(GoToScene::Position));
+    mSceneEdit->addItem(tr("First"), QVariant(GoToScene::Position));
+    mSceneEdit->addItem(tr("Last"), QVariant(GoToScene::Position));
+    mSceneEdit->insertSeparator(5);
+
+    connect(mSceneEdit, SIGNAL(currentIndexChanged(int)), this, SLOT(onSceneChanged(int)));
 
     beginGroup(tr("Go to scene Editor"));
-    appendRow(tr("Scene"), mNameEdit);
+    appendRow(tr("Scene"), mSceneEdit);
     endGroup();
 
     resizeColumnToContents(0);
@@ -33,23 +41,44 @@ GoToSceneEditorWidget::GoToSceneEditorWidget(QWidget *parent) :
 
 void GoToSceneEditorWidget::updateData(Action * action)
 {
-    mCurrentGoToScene = qobject_cast<GoToScene*>(action);
+    GoToScene* goToScene = qobject_cast<GoToScene*>(action);
 
-    if (! mCurrentGoToScene)
+    if (! goToScene)
         return;
 
-    mNameEdit->setText(mCurrentGoToScene->targetSceneName());
+    mCurrentGoToScene = 0;
+    //remove all scenes for update
+    for(int i=mSceneEdit->count()-1; i > 4; i--)
+        mSceneEdit->removeItem(i);
 
+    Scene * scene = goToScene->scene();
+    if (scene && scene->sceneManager()) {
+        QList<Scene*> scenes = scene->sceneManager()->scenes();
+        for(int i=0; i < scenes.size(); i++) {
+            mSceneEdit->addItem(scenes[i]->objectName(), QVariant(GoToScene::Name));
+        }
+    }
+
+    QString currScene = goToScene->targetScene();
+    int i=0;
+    for(; i < mSceneEdit->count(); i++) {
+        if (mSceneEdit->itemText(i) == currScene)
+            break;
+    }
+
+    if (i >= 0 && i < mSceneEdit->count())
+        mSceneEdit->setCurrentIndex(i);
+
+    mCurrentGoToScene = goToScene;
 }
 
-void GoToSceneEditorWidget::onNameEdited(const QString & text)
+void GoToSceneEditorWidget::onSceneChanged(int index)
 {
     if (! mCurrentGoToScene)
         return;
 
-   mCurrentGoToScene->setTargetSceneName(text);
-   if (! text.isEmpty() && mCurrentGoToScene->targetSceneName() == text)
-        mNameEdit->setStyleSheet("background-color: rgba(0, 255, 0, 100);");
-   else
-        mNameEdit->setStyleSheet("background-color: rgba(255, 0, 0, 100);");
+    QString name = mSceneEdit->itemText(index);
+    QVariant data = mSceneEdit->itemData(index);
+
+    mCurrentGoToScene->setTargetScene(name, static_cast<GoToScene::TargetType>(data.toInt()));
 }

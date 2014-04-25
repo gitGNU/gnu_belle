@@ -27,7 +27,7 @@ class GoToSceneEditorWidget : public ActionEditorWidget
     Q_OBJECT
 
     GoToScene * mCurrentGoToScene;
-    QLineEdit* mNameEdit;
+    QComboBox* mSceneEdit;
 
 public:
     explicit GoToSceneEditorWidget(QWidget *parent = 0);
@@ -36,7 +36,7 @@ public:
 signals:
 
 public slots:
-    void onNameEdited(const QString&);
+    void onSceneChanged(int);
 
 };
 

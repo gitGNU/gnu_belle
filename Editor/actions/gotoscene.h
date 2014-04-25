@@ -26,9 +26,12 @@ class GoToScene : public Action
 {
     Q_OBJECT
 
-    QString mTargetSceneName;
-
 public:
+    enum TargetType {
+        Name=0,
+        Position
+    };
+
     static ActionInfo Info;
 
 public:
@@ -39,8 +42,8 @@ public:
     static void setGoToSceneEditorWidget(GoToSceneEditorWidget*);
     virtual ActionEditorWidget* editorWidget();
 
-    void setTargetSceneName(const QString&);
-    QString targetSceneName();
+    void setTargetScene(const QString&, TargetType type=Name);
+    QString targetScene();
 
     virtual QVariantMap toJsonObject();
 
@@ -51,6 +54,9 @@ public slots:
 
 private:
     void init();
+
+    QString mTargetScene;
+    TargetType mTargetType;
 
 };
 
