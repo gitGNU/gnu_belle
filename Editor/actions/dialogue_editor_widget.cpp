@@ -219,7 +219,11 @@ bool DialogueEditorWidget::eventFilter(QObject *obj, QEvent *event)
 
 bool DialogueEditorWidget::isValidOutputBox(Object* object)
 {
-    if ( qobject_cast<TextBox*>(object) || qobject_cast<DialogueBox*>(object))
+    if (! object)
+        return false;
+
+    QString className = object->metaObject()->className();
+    if (className == "TextBox" || className == "DialogueBox")
         return true;
 
     return false;
