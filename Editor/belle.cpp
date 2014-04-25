@@ -781,8 +781,12 @@ void Belle::saveProject()
 
 void Belle::openFileOrProject()
 {
-    QString filters(tr("JSON Files(*.json)"));
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Select project file"), QDir::currentPath(), filters);
+    QStringList filters;
+    filters << tr("All supported files ") + "(*.js *.json)"
+            << "Javascript (*.js)"
+            << "JSON (*.json)";
+
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Select project file"), QDir::currentPath(), filters.join(";;"));
 
     if (fileName.isEmpty())
         return;
@@ -794,12 +798,17 @@ void Belle::openFileOrProject()
     QString contents = file.readAll();
     file.close();
 
+    //if new game file format, just remove start ("game.data =")
+    int i = 0;
+    for(i=0; i < contents.size() && contents[i] != '{'; i++);
+    contents = contents.mid(i);
+
     bool ok;
     QVariant data = QtJson::Json::parse(contents, ok);
 
     if (! ok) {
         QMessageBox::warning(this, tr("ERROR"),
-                            tr("There was a problem reading the choosen game file."));
+                            tr("The game file could not be read correctly."));
         return;
     }
 
