@@ -33,43 +33,25 @@
 	  }
 	  return -1;
 	}
-
-	game._setCurrentScene = function(scene) {
-	  if (! scene)
-	    return;
-	  if (this.paused)
-	    this.pauseScreen.scene = scene;
-	  else
-	    this.scene = scene;
-	  scene.display();
-	}
 	
 	game.goto = function(scene) {
 	  this.setCurrentScene(scene);
 	}
 	
-	game.setCurrentScene = function(scene) {
-	    var scenes = this.getScenes();
-	    if (typeof scene == "number") {
-	      if (scene >= 0 && scene < scenes.length)
-		this._setCurrentScene(scenes[scene]);
-	    }
-	    else if (scene instanceof String || typeof scene === 'string') {
-		for (var i=0; i !== scenes.length; i++) {
-		    if (scenes[i].name === scene) {
-			this._setCurrentScene(scenes[i]);
-			break;
-		    }
-		}
-	    }
-	    else if (belle.isInstance(scene, belle.Scene) && this.indexOf(scene) !== -1){
-		this._setCurrentScene(scene);
+	game.setCurrentScene = function(scene) {	    
+	    var scene = this.getScene(scene);
+	    if (scene) {
+	      if (this.paused)
+		this.pauseScreen.scene = scene;
+	      else
+		this.scene = scene;
+	      scene.display();
 	    }
 	}
 	
 	game.getScenes = function() {
 		if (this.paused)
-			return this.pauseScreen.scenes;
+		  return this.pauseScreen.scenes;
 		return this.scenes;
 	}
 	
@@ -78,9 +60,28 @@
 	}
 	
 	game.getScene = function(scene) {
-		if (this.paused)
-			return this.pauseScreen.scene;
-		return this.scene;  
+	    if (! scene) {
+	      if (this.paused)
+		return this.pauseScreen.scene;
+	      return this.scene;
+	    }
+	    var scenes = this.getScenes();
+	    if (typeof scene == "number") {
+	      if (scene >= 0 && scene < scenes.length)
+		return scenes[scene];
+	    }
+	    else if (scene instanceof String || typeof scene === 'string') {
+		for (var i=0; i !== scenes.length; i++) {
+		    if (scenes[i].name === scene) {
+			return scenes[i];
+		    }
+		}
+	    }
+	    else if (belle.isInstance(scene, belle.Scene) && scenes.indexOf(scene) !== -1){
+		return scene;
+	    }
+	    
+	    return null;
 	}
 	
 	game.nextScene = function() {
@@ -201,6 +202,28 @@
 		}
 		
 		return text;
+	}
+	
+	game.serialize = function() {
+	  var data = {};
+	  var currScene = this.getCurrentScene();
+	  data.scene = currScene.serialize();
+	  data.variables = this.variables;
+	  return data;
+	}
+	
+	game.load = function(data) {
+	  if (!data || ! data.scene || ! data.scene.name)
+	    return false;
+	  
+	  var scene = this.getScene(data.scene.name);
+	  if (scene) {
+	    scene.load(data.scene);
+	    this.setCurrentScene(scene);
+	  }
+	  this.variables = data.variables || {};	  
+	  
+	  return true;
 	}
 	
 })(game);
