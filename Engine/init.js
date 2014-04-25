@@ -8,7 +8,6 @@ belle.stateMachine = {};
 game = {
     "resources" : {},
     "customFonts" : [],
-    "currentScene" : null,
     "scenes" : [],
     "scene": null,
     "ready" : false,
