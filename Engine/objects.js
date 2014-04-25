@@ -32,8 +32,13 @@ function AnimationImage(imageData, parent)
     this.interval = null;
     this.parent = parent;
     this.animated = false;
+    
+    this.load(imageData);
+}
+
+AnimationImage.prototype.load = function (imageData) 
+{ 
     var that = this;
-      
     if (typeof imageData === "object" && "src" in imageData) {
         //activate DOM mode if game contains animated image
         if ("animated" in imageData && imageData["animated"])
@@ -46,7 +51,7 @@ function AnimationImage(imageData, parent)
         this.img.onload = function() { 
             that.imageLoaded = true;
         };
-        
+
         this.img.src = belle.game.directory + imageData;
         this.img.style.width = "100%";
         this.img.style.height = "100%";
@@ -82,6 +87,13 @@ AnimationImage.prototype.paint = function(context, x, y, width, height) {
         if (this.currentFrame >= this.frames.length)
             this.currentFrame = 0;
     }
+}
+
+AnimationImage.prototype.serialize = function() 
+{
+    var data = {};
+    data = $(this.img).attr("src");
+    return data;
 }
 
 /**** COLOR ****/
@@ -128,6 +140,11 @@ Color.prototype.alphaF = function()
     return this.alpha / 255;
 }
 
+Color.prototype.serialize = function()
+{
+    return [this.red, this.green, this.blue, this.alpha];
+}
+
 /*********** POINT **********/
 var Point = function (x, y)
 {
@@ -144,7 +161,6 @@ Point.prototype.distance = function(point)
 {
     return Math.sqrt(Math.pow(point.x-this.x, 2) + Math.pow(point.y-this.y, 2));
 }
-    
     
 /*********** BASE OBJECT ***********/
 
@@ -169,12 +185,8 @@ function Object(info)
     this.backgroundElement = document.createElement("div");
     this.element.appendChild(this.backgroundElement);
     
-    this.setX(info.x);
-    this.setY(info.y);
-    this.setWidth(info.width);
-    this.setHeight(info.height);
     this.cornerRadius = 0;
-    this.opacity = 1;
+    this.opacity = 255;
     this.roundedRect = false;
     this.paintX = false;
     this.paintY = false;
@@ -201,6 +213,7 @@ function Object(info)
     this.borderColor = null;
     this.parent = parent ? parent : null;
     this.type = info["type"];
+    this.resource = info["resource"] || "";
     this.eventListeners = {
         "mousepress" : [],
         "mouserelease" : [],
@@ -210,13 +223,6 @@ function Object(info)
     var actions;
     var action;
     var actionObject;
-    
-    if ("name" in info)
-        this.name = info["name"];
-    
-    if ("backgroundColor" in info) {
-        this.setBackgroundColor(new Color(info["backgroundColor"]));
-    }
     
     if ("onMousePress" in info) {
         this.mousePressActions = this.initActions(info["onMousePress"]);
@@ -234,30 +240,47 @@ function Object(info)
         this.mouseLeaveActions = this.initActions(info["onMouseLeave"]);
     }
     
-    if ("cornerRadius" in info && info["cornerRadius"] > 0) {
-      this.setCornerRadius(info["cornerRadius"]);
+    Object.prototype.load.call(this, info);
+}
+
+Object.prototype.load = function(data)
+{
+    this.setX(data.x);
+    this.setY(data.y);
+    this.setWidth(data.width);
+    this.setHeight(data.height);
+    
+    if ("name" in data)
+        this.name = data["name"];
+    
+    if ("backgroundColor" in data) {
+        this.setBackgroundColor(new Color(data["backgroundColor"]));
+    }
+
+    if ("cornerRadius" in data && data["cornerRadius"] > 0) {
+      this.setCornerRadius(data["cornerRadius"]);
     }
     
-    if( "backgroundImage" in info) {
-        this.backgroundImage = new AnimationImage(info["backgroundImage"], this);
+    if( "backgroundImage" in data) {
+        this.backgroundImage = new AnimationImage(data["backgroundImage"], this);
         if (this.backgroundElement)
             this.backgroundElement.appendChild(this.backgroundImage.img);
     }
     
-    if ("borderWidth" in info) {
-      this.borderWidth = info["borderWidth"];
+    if ("borderWidth" in data) {
+      this.borderWidth = data["borderWidth"];
     }
     
-    if ("borderColor" in info) {
-      this.borderColor = new Color(info["borderColor"]);
+    if ("borderColor" in data) {
+      this.borderColor = new Color(data["borderColor"]);
     }
     
-    if ("opacity" in info) {
-	this.setOpacity(info["opacity"]);
+    if ("opacity" in data) {
+	this.setOpacity(data["opacity"]);
     }
     
-    if ("visible" in info) {
-        this.visible = info["visible"];
+    if ("visible" in data) {
+        this.visible = data["visible"];
     }
 }
 
@@ -694,6 +717,28 @@ Object.prototype.initElement = function()
     this.element.style.border = this.borderWidth + "px" + " solid " + this.borderColor.toHex(); 
 }
 
+Object.prototype.serialize = function()
+{
+  var data = {};
+  var serialize = belle.serialize;
+  
+  data["name"] = this.name;
+  data["x"] = this.x;
+  data["y"] = this.y;
+  data["width"] = this.width;
+  data["height"] = this.height;
+  if (this.backgroundImage)
+    data["backgroundImage"] = serialize(this.backgroundImage);
+  data["backgroundColor"] = serialize(this.backgroundColor);
+  data["cornerRadius"] = this.cornerRadius;
+  data["borderWidth"] = this.borderWidth;
+  data["borderColor"] = serialize(this.borderColor);
+  data["opacity"] = this.opacity;
+  data["visible"] = this.visible;
+  
+  return data;
+}
+
 /*********** IMAGE OBJECT ***********/
 function Image (data)
 {
@@ -782,26 +827,28 @@ function TextBox(info)
     this.prevText = "";
     this.displayedText = "";
     this.textHeight = 0;
-    
-    if ("font" in info) 
-        this.font = info["font"];
-    this.textElement.style.font = this.font;
-        
-    if ("text" in info)
-        this.setText(info["text"]);
-    
-    if ("textColor" in info)
-        this.setTextColor(info["textColor"]);
-    
-    if ("textAlignment" in info) {
-        this.textAlignment = info["textAlignment"].split("|");
-        /*var properties = info["textAlignment"].split("|");
-        for (var i=0; i !== properties.length; i++) {
-        }*/
-    }
+
+    this.load(info);
 }
 
 belle.utils.extend(Object, TextBox);
+
+TextBox.prototype.load = function(data)
+{
+    if ("font" in data) 
+        this.font = data["font"];
+    this.textElement.style.font = this.font;
+    
+    if ("text" in data)
+        this.setText(data["text"]);
+	
+    if ("textColor" in data)
+        this.setTextColor(data["textColor"]);
+    
+    if ("textAlignment" in data) {
+        this.textAlignment = data["textAlignment"].split("|");
+    }
+}
 
 TextBox.prototype.paint = function(context)
 {
@@ -961,6 +1008,13 @@ TextBox.prototype.scale = function(widthFactor, heightFactor)
     }
   }
   this.alignText();
+}
+
+TextBox.prototype.serialize = function()
+{
+    var data = Object.prototype.serialize.call(this);
+    data["text"] = this.text;
+    return data;
 }
 
 
@@ -1182,7 +1236,6 @@ belle.utils.extend(TextBox, Button);
 objects.Point = Point;
 objects.AnimationImage = AnimationImage;
 objects.Color = Color;
-objects.AnimationImage = AnimationImage;
 objects.Object = Object;
 objects.Image = Image;
 objects.TextBox = TextBox;
