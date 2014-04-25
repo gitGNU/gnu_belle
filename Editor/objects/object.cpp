@@ -1001,7 +1001,7 @@ void Object::setProperties(const QVariantMap &data)
             mSceneRect.setHeight(data.value("height").toInt());
     }
 
-    if (data.contains("cornerRadius") && data.value("cornerRadius").type() == QVariant::Int) {
+    if (data.contains("cornerRadius") && data.value("cornerRadius").canConvert(QVariant::Int)) {
         mCornerRadius = data.value("cornerRadius").toInt();
     }
 
