@@ -25,16 +25,13 @@ function Scene(data)
     this.action = null;
     this.image = null;
     this.ready = false;
-    this.finished = false;
     this.redrawBackground = false;
     this.name = "";
     this.backgroundImage = null;
     this.backgroundColor = null;
     this.backgroundImageLoaded = false;
-    var backgroundImage = "";
-    var backgroundColor = null;
-    this.width = this.scaledWidth = belle.game.width;
-    this.height = this.scaledHeight = belle.game.height;
+    this.width = this.scaledWidth = game.width;
+    this.height = this.scaledHeight = game.height;
     this.x = this.scaledX = 0;
     this.y = this.scaledY = 0;
     data.width = this.width;
@@ -53,23 +50,61 @@ function Scene(data)
     belle.utils.initElement(this.element, data);
     belle.utils.initElement(this.backgroundElement, data);
     this.backgroundElement.style.display = "block";
-    
-    if (data) {
-        if ("backgroundImage" in data)
-            backgroundImage = data["backgroundImage"];
-        if ("backgroundColor" in data)
-            backgroundColor = new Color(data["backgroundColor"]);
-        if ("name" in data)
-            this.name = data["name"];
-    }
-    
-    if (backgroundImage)
-        this.setBackgroundImage(backgroundImage);
-    if (backgroundColor)
-        this.setBackgroundColor(backgroundColor);
-    
+
     this.loadObjects(data);
     this.loadActions(data);
+    this.load(data);
+}
+
+Scene.prototype.load = function(data)
+{
+  this.setActive(false);  
+  this.finished = false;
+  this.reloadObjects(data);
+  this.reloadActions();
+  
+  if (data) {
+      var backgroundImage, backgroundColor;
+    
+      if ("backgroundImage" in data)
+	  backgroundImage = data["backgroundImage"];
+      if ("backgroundColor" in data)
+	  backgroundColor = new Color(data["backgroundColor"]);
+      if ("name" in data)
+	  this.name = data["name"];
+      if (backgroundImage)
+	this.setBackgroundImage(backgroundImage);
+      if (backgroundColor)
+	this.setBackgroundColor(backgroundColor);
+      
+      if (data.index) {
+	var action = this.getAction(data.index-1);
+	if (action) {
+	  this.setCurrentAction(data.index);
+	  action.setFinished(true);
+	}
+      }
+  }
+}
+
+Scene.prototype.reloadObjects = function(data) 
+{
+  if (!data || ! data.objects)
+    return;
+  
+  var dataObjects = data.objects;
+  for(var i=0; i < dataObjects.length; i++) {
+    var obj = this.getObject(dataObjects[i].name);
+    if (obj)
+	obj.load(dataObjects[i]);
+  }
+}
+
+Scene.prototype.reloadActions = function() 
+{
+  for(var i=0; i < this.actions.length; i++) {
+    this.actions[i].reset();
+  }
 }
 
 Scene.prototype.loadActions = function(data) 
@@ -86,6 +121,7 @@ Scene.prototype.loadActions = function(data)
 	  actions[j].__scene = this;
 	  var actionObject = new belle.actions[actions[j].type](actions[j]);
 	  this.actions.push(actionObject);
+	  this.states.push({});
       }
   }
 }
@@ -190,13 +226,18 @@ Scene.prototype.getCurrentAction = function() {
   return this.getAction();
 }
 
-Scene.prototype.getAction = function(name) {
-    if (name) {
+Scene.prototype.getAction = function(id) {
+      
+    if (typeof id == "number") {
+      if (id >= 0 && id < this.actions.length)
+	return this.actions[id];
+    }
+    else if (typeof id == "string") {
         for (var i=0; i < this.actions.length; i++)
-            if (this.actions[i].name == name)
+            if (this.actions[i].name == id)
                 return this.actions[i];
     }
-    else if (name === undefined)
+    else if (id === undefined)
         return this.action;
     
     return null;    
@@ -361,6 +402,24 @@ Scene.prototype.setHeight = function(height)
         this.scaledHeight *= scale;
     this.element.style.height = this.scaledHeight + "px";
     this.backgroundElement.style.height = this.scaledHeight + "px";
+}
+
+Scene.prototype.serialize = function()
+{
+  var data = {};
+  var serialize = belle.serialize;
+  
+  data["name"] = this.name;
+  data["objects"] = serialize(this.objects);
+  if (this.backgroundImage)
+    data["backgroundImage"] = serialize(this.backgroundImage);
+  if (this.backgroundColor)
+    data["backgroundColor"] = serialize(this.backgroundColor);
+  data["width"] = this.width;
+  data["height"] = this.height;
+  data["index"] = this.indexOf(this.getCurrentAction());
+  
+  return data;
 }
 
 belle.Scene = Scene;
