@@ -26,6 +26,10 @@
 	  return this.finished;
 	}
 	
+	game.getSize = function() {
+	  return this.getScenes().length;
+	}
+  
 	game.indexOf = function(scene) {
 	  if (scene && belle.isInstance(scene, belle.Scene)) {
 	    var scenes = this.getScenes() || [];
