@@ -788,25 +788,47 @@ GoToLabel.prototype.resetActions = function(from, to)
 function GoToScene(data)
 {
     Action.call(this, data);
-    this.scene = "";
-    if ("scene" in data && typeof data["scene"] === "string")
-        this.scene = data["scene"];
+    
+    this.TargetType = {
+      "Name" : 0,
+      "Position": 1
+    }
+    
+    this.target = "";
+    if ("target" in data && typeof data["target"] === "string")
+        this.target = data["target"];
+    
+    this.targetType = this.TargetType.Name;
+    if ("targetType" in data && parseInt(data["targetType"]) !== NaN)
+        this.targetType = data["targetType"];
     
     this.needsRedraw = false;
 }
 
 belle.utils.extend(Action, GoToScene);
 
+GoToScene.prototype.goto = function(target)
+{
+   if (this.targetType == this.TargetType.Position) {
+     target = target.toLowerCase();
+     if(target == "next")
+       game.nextScene();
+     else if(target  == "previous")
+       game.goto(game.indexOf(game.getCurrentScene())-1);
+     else if (target == "first")
+       game.goto(0);
+     else if (target == "last")
+       game.goto(game.getSize()-1);
+   }
+   else {
+     game.goto(target);
+   }
+}
+
 GoToScene.prototype.execute = function()
 {
    this.reset();
-   
-   var scenes = game.getScenes();
-   
-   if (this.scene) {
-     game.goto(this.scene);
-   }
-
+   this.goto(this.target);
    this.setFinished(true);
 }
 
