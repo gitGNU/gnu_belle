@@ -209,6 +209,9 @@ Belle::Belle(QWidget *widget)
     //scene's buttons
     connect(mUi.upSceneBtn, SIGNAL(clicked()), this, SLOT(onSceneUpped()));
     connect(mUi.downSceneBtn, SIGNAL(clicked()), this, SLOT(onSceneDowned()));
+    connect(mUi.upPauseSceneBtn, SIGNAL(clicked()), this, SLOT(onSceneUpped()));
+    connect(mUi.downPauseSceneBtn, SIGNAL(clicked()), this, SLOT(onSceneDowned()));
+
 
     //scene's treewidget actions
     mCopyScene = new QAction(QIcon(":/media/editcopy.png"), tr("Copy"), mUi.scenesWidget);
@@ -446,7 +449,11 @@ void Belle::deleteScene()
     if (mCurrentSceneManager->count() == 1)
         return;
 
-    QTreeWidget * scenesWidget = this->scenesWidget(sender()->objectName());
+    QString senderName = sender()->objectName();
+    if (senderName.isEmpty())
+        senderName = mCurrentSceneManager->objectName();
+
+    QTreeWidget * scenesWidget = this->scenesWidget(senderName);
     int index = scenesWidget->indexOfTopLevelItem(scenesWidget->currentItem());
 
     if (index != -1)
@@ -938,12 +945,15 @@ void Belle::showAboutDialog()
 
 void Belle::onScenesWidgetCustomContextMenuRequested(const QPoint& point)
 {
-    QMenu menu;
+    QTreeWidget *treeWidget = qobject_cast<QTreeWidget*>(sender());
+    if (! treeWidget)
+        return;
 
-    SceneManager * sceneManager = this->sceneManager(sender()->objectName());
+    QMenu menu;
+    SceneManager * sceneManager = this->sceneManager(treeWidget->objectName());
     mCurrentSceneManager = sceneManager;
 
-    if (mUi.scenesWidget->itemAt(point)) {
+    if (treeWidget->itemAt(point)) {
         menu.addAction(mCopyScene);
         menu.addAction(mCutScene);
     }
@@ -954,7 +964,7 @@ void Belle::onScenesWidgetCustomContextMenuRequested(const QPoint& point)
     if (sceneManager->scenes().count() > 1)
         menu.addAction(mDeleteScene);
 
-    menu.exec(mUi.scenesWidget->mapToGlobal(point));
+    menu.exec(treeWidget->mapToGlobal(point));
 }
 
 void Belle::copyScene()
@@ -963,8 +973,10 @@ void Belle::copyScene()
     int index = 0;
     Scene* scene = 0;
 
-    foreach(QTreeWidgetItem* item , mUi.scenesWidget->selectedItems()) {
-        index = mUi.scenesWidget->indexOfTopLevelItem(item);
+    QTreeWidget * scenesWidget = this->scenesWidget(mCurrentSceneManager->objectName());
+
+    foreach(QTreeWidgetItem* item , scenesWidget->selectedItems()) {
+        index = scenesWidget->indexOfTopLevelItem(item);
         scene = mCurrentSceneManager->scene(index);
         if (scene)
             scenes.append(scene);
@@ -1045,7 +1057,7 @@ void Belle::updateScenesWidget(QTreeWidget* widget, int currIndex, bool select, 
     }
 
     if (currIndex >= 0 && currIndex < scenes.size()) {
-        QTreeWidgetItem* item = mUi.scenesWidget->topLevelItem(currIndex);
+        QTreeWidgetItem* item = widget->topLevelItem(currIndex);
         if (select)
             widget->setCurrentItem(item);
         if (edit)
