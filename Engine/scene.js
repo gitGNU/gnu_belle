@@ -25,8 +25,9 @@ function Scene(data)
     this.action = null;
     this.image = null;
     this.ready = false;
+    this.finished = false;
     this.redrawBackground = false;
-    this.name = "";
+    this.name = data.name || "";
     this.backgroundImage = null;
     this.backgroundColor = null;
     this.backgroundImageLoaded = false;
@@ -43,9 +44,10 @@ function Scene(data)
     
     this.element = document.createElement("div");
     this.backgroundElement = document.createElement("div");
-    this.element.appendChild(this.backgroundElement);
-    this.element.id = data["name"];
+    $(this.element).attr("id", data["name"]);
     $(this.element).addClass("scene");
+    $(this.element).width(this.width);
+    $(this.element).height(this.height);
     
     belle.utils.initElement(this.element, data);
     belle.utils.initElement(this.backgroundElement, data);
@@ -53,16 +55,21 @@ function Scene(data)
 
     this.loadObjects(data);
     this.loadActions(data);
-    this.load(data);
+    this.load(data, true);
+
 }
 
-Scene.prototype.load = function(data)
+Scene.prototype.load = function(data, force)
 {
+  if (! this.isFinished() && ! force)
+    return;
+  
   this.setActive(false);  
   this.finished = false;
   this.reloadObjects(data);
   this.reloadActions();
-  
+  this.action = null;
+
   if (data) {
       var backgroundImage, backgroundColor;
     
@@ -84,7 +91,7 @@ Scene.prototype.load = function(data)
 	  action.setFinished(true);
 	}
       }
-  }
+  }  
 }
 
 Scene.prototype.reloadObjects = function(data) 
@@ -149,6 +156,13 @@ Scene.prototype.addEventListener = function(event, listener)
   this.eventListeners[event] = events;
 }
 
+Scene.prototype.hide = function() {
+  this.setActive(false);
+  this.setFinished(true);
+  this.action = null;
+  belle.display.hideScene(this);
+}
+
 Scene.prototype.display = function() {
   belle.display.displayScene(this);
  
@@ -159,11 +173,11 @@ Scene.prototype.display = function() {
 
 Scene.prototype.setActive = function(active) {
   var listeners = [];
-  if(active && this.eventListeners.hasOwnProperty("onActivated")) {
-    listeners = this.eventListeners["onActivated"];
+  if(active && this.eventListeners.hasOwnProperty("activated")) {
+    listeners = this.eventListeners["activated"];
   }
-  else if(! active && this.eventListeners.hasOwnProperty("onDeactivated")) {
-    listeners = this.eventListeners["onDeactivated"];
+  else if(! active && this.eventListeners.hasOwnProperty("deactivated")) {
+    listeners = this.eventListeners["deactivated"];
   }
 
   for(var i=0; i < listeners.length; i++)
@@ -176,7 +190,11 @@ Scene.prototype.isActive = function() {
   return this.active;
 }
 
-Scene.prototype.isFinished = function(active) {
+Scene.prototype.setFinished = function(finished) {
+  this.finished = finished;
+}
+
+Scene.prototype.isFinished = function() {
   return this.finished;
 }
 
@@ -253,22 +271,25 @@ Scene.prototype.getObject = function(name) {
     return null;    
 }
 
+Scene.prototype.hasNextAction = function() {
+  var index = this.actions.indexOf(this.action) + 1;
+  if (index >= 0 && index < this.actions.length)
+    return true;
+  return false;
+}
+
 Scene.prototype.nextAction = function() {
-    if (this.finished)
-      return null;
+    if (this.finished || ! this.active)
+      return;
     
     var index = this.actions.indexOf(this.action) + 1;
-    
     if (index >= 0 && index < this.actions.length) { 
         this.action = this.actions[index];
 	this.action.execute();
-	return this.action;
     }
     else {
       this.finished = true;
     }
-
-    return null;
 }
 
 Scene.prototype.setBackgroundImage = function(background)
