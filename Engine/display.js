@@ -317,44 +317,44 @@ function initCanvas($container)
     setGameCanvas($newcanvas);
 }
 
+function hideScene(scene)
+{
+  if (! scene)
+    return;
+  var $scene = $container.find(scene.element);
+  if (! $scene.length)
+    return;
+  
+  $scene.removeClass("active");
+  $scene.empty();
+  $scene.hide();
+}
+
 function displayScene(scene) 
 {
   if (! scene)
     return;
   
-  var $container = getContainer();
-  var $oldscene = $container.find(".scene.active");
-  $oldscene.removeClass("active");
+  var $container = getContainer(); 
   
   var $scene = $(scene.element);
   $scene.addClass("active");
-  var added = false;
-  if (! $container.find("#" + scene.name).length) {
+  if (! $container.find(scene.element).length) {
     $container.append($scene);
-    added = true;
   }
     
   if (display.DOM) {
-    if (added) {
-      var objects = scene.objects;
-      for(var i=0; i < objects.length; i++)
-	$scene.append(objects[i].element);
-    }
+    $scene.append(scene.backgroundElement);
+    var objects = scene.objects;
+    for(var i=0; i < objects.length; i++)
+      $scene.append(objects[i].element);
   }
   else {
-    $scene.find("div").remove(); //remove background div for now
     initCanvas($scene);
     scene.redrawBackground = true;
     var objects = scene.objects;
     for(var i=0; i < objects.length; i++)
       objects[i].redraw = true;    
-  }
-  
-  if (added) {
-    scene.addEventListener("onActivated", function() {
-      $oldscene.find("canvas").remove();
-      $oldscene.hide();
-    });
   }
 }
 
@@ -466,6 +466,7 @@ var stopLoading = function()
 
 //Expose public functions
 display.getContainer = getContainer;
+display.hideScene = hideScene;
 display.displayScene = displayScene;
 display.scaleFont = scaleFont;
 display.draw = draw;
