@@ -58,7 +58,7 @@ belle.serialize = function(obj)
   else if (obj instanceof Array) {
     prop = [];
     for(var i=0; i < obj.length; i++)
-      prop[i] = utils.serialize(obj[i]);
+      prop[i] = belle.serialize(obj[i]);
   }
   else if (typeof obj == "object") {
     prop = {};
@@ -69,7 +69,7 @@ belle.serialize = function(obj)
     else {
       for(key in obj) {
 	if (obj.hasOwnProperty(key)) {
-	  prop[key] = utils.serialize(obj[key]);
+	  prop[key] = belle.serialize(obj[key]);
 	}
       }
     }
@@ -204,6 +204,8 @@ function initializeData(data)
         game[member] = data[member];
     }
     
+    game.data = data;
+    
     if (game.textSpeed < 0)
         game.textSpeed = 0;
     else if (game.textSpeed > 100)
@@ -248,7 +250,6 @@ function initializeData(data)
     }
 
     isGameDataReady();
-
 }
 
 function isGameDataReady() {
@@ -306,7 +307,7 @@ function isGameDataReady() {
         setTimeout(isGameDataReady, 100);
     else {
         display.init();
-	if (game.getScenes()) 
+	if (game.hasNextScene()) 
 	  game.nextScene();
         setTimeout(gameLoop, 1);
     }
@@ -333,17 +334,18 @@ function importgameData(path) {
 function gameLoop ()
 {   
     var scene = game.getScene();
-    
+        
     if (scene && scene.isActive()) {
       var action = scene.getAction();
-      
       if (! action || action.isFinished()) {
-	  action = scene.nextAction();
-	  if (! action && scene.isFinished())
-	    scene = game.nextScene();
-	  
-	  if (! scene && game.isFinished()) //game is finished
-	    return;
+	  if (scene.hasNextAction())
+	    scene.nextAction();
+	  else if (scene.isFinished()) {
+	    if (game.hasNextScene())
+	      game.nextScene();
+	    else
+	      return;
+	  }
       }
     }
     
@@ -384,7 +386,8 @@ function getSaveDate()
         hour = '0' + hour;
     if (min < 10)
         min = '0' + min;
-    date = date.getDate() + " " + months[date.getMonth()] + " " + date.getYear() + " " + hour + ":" + min;
+    
+    date = date.getDate() + " " + months[date.getMonth()] + " " + date.getFullYear() + " " + hour + ":" + min;
     return date;
 }
 
