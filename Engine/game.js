@@ -16,6 +16,12 @@
  
 (function(game) {
     
+	function getSceneData(scene) {
+	  if (this.data && this.data.scenes && scene in this.data.scenes)
+	    return this.data.scenes.scene;
+	  return {};
+	}
+
     	game.hasPauseScreen = function() {
 	  if(this.pauseScreen.scenes.length)
 	    return true;
@@ -41,14 +47,26 @@
 	game.goto = function(scene) {
 	  this.setCurrentScene(scene);
 	}
-	
-	game.setCurrentScene = function(scene) {	    
+
+	game.setCurrentScene = function(scene, data) {	    
 	    var scene = this.getScene(scene);
-	    if (scene) {
+	    if (scene) {  
+	      //hide current scene
+	      var currScene = this.getCurrentScene();
+	      if (currScene) {
+		currScene.hide();
+	      }
+	      
+	      if (data !== undefined)
+		scene.load(data, true);
+	      else
+		scene.load(getSceneData(scene.name));
+
 	      if (this.paused)
 		this.pauseScreen.scene = scene;
 	      else
 		this.scene = scene;
+
 	      scene.display();
 	    }
 	}
@@ -64,11 +82,12 @@
 	}
 	
 	game.getScene = function(scene) {
-	    if (! scene) {
+	    if (scene === null || scene === undefined) {
 	      if (this.paused)
 		return this.pauseScreen.scene;
 	      return this.scene;
 	    }
+	    
 	    var scenes = this.getScenes();
 	    if (typeof scene == "number") {
 	      if (scene >= 0 && scene < scenes.length)
@@ -88,23 +107,25 @@
 	    return null;
 	}
 	
+	game.hasNextScene = function() {
+	    var index = this.indexOf(this.getScene()) + 1;
+	    if (index >= 0 && index < this.getScenes().length)
+	      return true;
+	    return false;
+	}
+	
 	game.nextScene = function() {
 	  if (this.isFinished())
-	    return null;
+	    return;
 	  
 	  var index = this.indexOf(this.getScene()) + 1;
-	  var scenes = this.getScenes();
-	  if (index >= 0 && index < scenes.length) {
-	    var scene = scenes[index];
-	    scene.display();
-	    this.scene = scene;
-	    return this.scene;
+	  var scene = this.getScene(index);
+	  if (scene) {
+	    this.setCurrentScene(scene);
 	  }
 	  else {
 	    this.finished = true;
 	  }
-	  
-	  return null;
 	}
 	
 	game.next = function() {
