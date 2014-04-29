@@ -550,7 +550,7 @@ QVariantMap Scene::toJsonObject()
 Scene* Scene::copy()
 {
     Scene* scene = new Scene(this->toJsonObject(), this->parent());
-    scene->setObjectName(sceneManager()->validSceneName(objectName()+"_1"));
+    scene->setObjectName(sceneManager()->validSceneName(objectName()));
     return scene;
 }
 

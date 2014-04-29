@@ -964,7 +964,8 @@ void Belle::onScenesWidgetCustomContextMenuRequested(const QPoint& point)
     if (sceneManager->scenes().count() > 1)
         menu.addAction(mDeleteScene);
 
-    menu.exec(treeWidget->mapToGlobal(point));
+    if (menu.actions().size())
+        menu.exec(treeWidget->mapToGlobal(point));
 }
 
 void Belle::copyScene()
@@ -1016,7 +1017,8 @@ void Belle::pasteScene()
     }
 
     updateScenesWidget(widget, index-1, true, true);
-    SceneManager::clipboard()->clear();
+    if (op == Clipboard::Cut)
+        SceneManager::clipboard()->clear();
 }
 
 
