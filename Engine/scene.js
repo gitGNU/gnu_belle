@@ -336,13 +336,6 @@ Scene.prototype.setBackgroundColor = function(color)
 
         this.backgroundColor = color;
         
-        if (this.backgroundImage) {
-            if (this.backgroundElement.childNodes.length > 0)
-                this.backgroundElement.removeChild(this.backgroundElement.childNodes[0]);
-            this.backgroundImage.src = "";
-            this.backgroundImage = null;
-        }
-        
         if (this.backgroundColor) {
             this.redrawBackground = true;
             this.backgroundElement.style.backgroundColor = this.backgroundColor.toHex();
