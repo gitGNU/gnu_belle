@@ -184,33 +184,15 @@ function Object(info)
     this.element = document.createElement("div");
     this.backgroundElement = document.createElement("div");
     this.element.appendChild(this.backgroundElement);
-    
-    this.cornerRadius = 0;
-    this.opacity = 255;
+   
     this.roundedRect = false;
-    this.paintX = false;
-    this.paintY = false;
-    this.backgroundColor = new Color([255, 255, 255, 255]);
-    this.fillStyle = this.backgroundColor.toString();
-    this.interval = null;
     this.mousePressActions = [];
     this.mouseReleaseActions = [];
     this.mouseMoveActions = [];
     this.mouseLeaveActions = [];
-    this.backgroundImage = null;
     this.name = "";
-    this.visible = false;
-    this.context = null;
-    this.redraw = false;
-    this.redrawing = false;
-    this.partsToRedraw = [];
-    this.changing = false;
-    this.clickable = false;
     this.loaded = true;
-    this.moveToPoint = null;
     this.data = info;
-    this.borderWidth = 0;
-    this.borderColor = null;
     this.parent = parent ? parent : null;
     this.type = info["type"];
     this.resource = info["resource"] || "";
@@ -249,6 +231,17 @@ Object.prototype.load = function(data)
     this.setY(data.y);
     this.setWidth(data.width);
     this.setHeight(data.height);
+    this.backgroundColor = new Color([255, 255, 255, 255]);
+    this.backgroundImage = null;
+    this.cornerRadius = 0;
+    this.opacity = 255;
+    this.borderWidth = 0;
+    this.borderColor = null;
+    this.visible = false;
+    this.paintX = false;
+    this.paintY = false; 
+    this.redraw = false;
+    this.redrawing = false;
     
     if ("name" in data)
         this.name = data["name"];
@@ -729,10 +722,13 @@ Object.prototype.serialize = function()
   data["height"] = this.height;
   if (this.backgroundImage)
     data["backgroundImage"] = serialize(this.backgroundImage);
+  
   data["backgroundColor"] = serialize(this.backgroundColor);
   data["cornerRadius"] = this.cornerRadius;
-  data["borderWidth"] = this.borderWidth;
-  data["borderColor"] = serialize(this.borderColor);
+  if (this.borderWidth)
+    data["borderWidth"] = this.borderWidth;
+  if (this.borderColor)
+    data["borderColor"] = serialize(this.borderColor);
   data["opacity"] = this.opacity;
   data["visible"] = this.visible;
   
