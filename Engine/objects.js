@@ -372,12 +372,12 @@ Object.prototype.contains = function(px, py)
     return false;
 }
 
-Object.prototype.backgroundOpacity = function()
+Object.prototype.getBackgroundOpacity = function()
 {
   return this.backgroundColor.alpha;
 }
 
-Object.prototype.backgroundOpacityF = function()
+Object.prototype.getBackgroundOpacityF = function()
 {
   return this.backgroundColor.alphaF();
 }
@@ -386,7 +386,7 @@ Object.prototype.setBackgroundOpacity = function(alpha)
 {
     this.backgroundColor.alpha = alpha; 
     if (this.backgroundElement) {
-      $(this.backgroundElement).fadeTo(1, this.backgroundOpacityF() * this.opacityF());
+      $(this.backgroundElement).fadeTo(1, this.getBackgroundOpacityF() * this.getOpacityF());
     }
 }
 
@@ -398,12 +398,12 @@ Object.prototype.setBackgroundColor = function(color)
     this.setBackgroundOpacity(color.alpha);
 }
 
-Object.prototype.opacity = function (alpha)
+Object.prototype.getOpacity = function (alpha)
 {
   return this.opacity;
 }
 
-Object.prototype.opacityF = function (alpha)
+Object.prototype.getOpacityF = function (alpha)
 {
   return this.opacity / 255;
 }
@@ -423,7 +423,7 @@ Object.prototype.setOpacity = function (alpha)
     //always update DOM element, since this function is called on constructor
     //and then on initElement with all children added
     if (this.element)
-	$(this.element).children().fadeTo(1, this.opacityF());   
+	$(this.element).children().fadeTo(1, this.getOpacityF());   
 }
 
 Object.prototype.paint = function(context)
@@ -442,7 +442,7 @@ Object.prototype.paint = function(context)
     var x = this.globalX();
     var y = this.globalY();
     
-    context.globalAlpha = this.opacityF();
+    context.globalAlpha = this.getOpacityF();
     
     if (this.backgroundImage) {
         this.backgroundImage.paint(context, x, y, this.width, this.height);
@@ -703,8 +703,8 @@ Object.prototype.initElement = function()
     this.setOpacity(this.opacity);
   }
   
-  if (this.backgroundOpacityF() != 1)
-    this.setBackgroundOpacity(this.backgroundOpacity());
+  if (this.getBackgroundOpacityF() != 1)
+    this.setBackgroundOpacity(this.getBackgroundOpacity());
 
   if (this.borderWidth && this.borderColor)
     this.element.style.border = this.borderWidth + "px" + " solid " + this.borderColor.toHex(); 
