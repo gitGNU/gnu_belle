@@ -857,9 +857,9 @@ Branch.prototype.loadCondition = function(condition)
     var _in = "in";
     var _and = "and";
     var _or = "or";
-    var letter = /^[a-zA-Z]$/g;
+    var validchar = /^[a-zA-Z_]$/g;
     var number = /^[0-9]|([0-9]*\.[0-9]+)$/g;
-    var variable = /^[a-zA-Z]+[0-9]*$/g;
+    var variable_pattern = /^[a-zA-Z_]+[a-zA-Z_0-9]*$/;
     var c = "";
     var i = 0;
     var conditionParts = [];
@@ -879,7 +879,7 @@ Branch.prototype.loadCondition = function(condition)
             continue;
         }
 
-        if (c.search(letter) != -1 || c.search(number) != -1 || c == '"' || c == '\'') {
+        if (c.search(validchar) != -1 || c.search(number) != -1 || c == '"' || c == '\'') {
             if (! name) {
                 if (condition.slice(i, _in.length) == _in) {
                     i += _in.length;
@@ -913,8 +913,8 @@ Branch.prototype.loadCondition = function(condition)
         else {
 
             if (name) {
-                if (name.search(variable) != -1)
-                  conditionParts.push("belle.game.variables['" + name + "']");
+                if (name.search(variable_pattern) != -1)
+                  conditionParts.push("game.getValue('" + name + "')");
                 else
                   conditionParts.push(name);
                 name = "";
@@ -949,8 +949,8 @@ Branch.prototype.loadCondition = function(condition)
     }
     
     if (name) {
-        if (name.search(variable) != -1)
-          conditionParts.push("belle.game.variables['" + name + "']");
+        if (name.search(variable_pattern) != -1)
+          conditionParts.push("game.getValue('" + name + "')");
         else
           conditionParts.push(name);
     }
