@@ -131,7 +131,6 @@ Action.prototype.reset = function ()
 
 Action.prototype.execute = function() 
 {
-    this.reset();
     this.setFinished(true);
 }
 
@@ -675,8 +674,7 @@ belle.utils.extend (Action, Label);
 
 Label.prototype.reset = function()
 {
-  //prevent reset default behaviour and set as finished already
-  this.finished = true;
+  this.setFinished(true);
 }
 
 
@@ -702,24 +700,12 @@ GoToLabel.prototype.execute = function()
         return;
    }
    
-   var actions = scene.getActions();
-    
    if (this.label instanceof String || typeof this.label === 'string') {
-        for (var i=0; i !== actions.length; i++) {
-            
-            if (actions[i].name === this.label) {
-                this.resetActions(i, scene.indexOf(actions[i])-1); 
-		scene.action = actions[i];
-                break;
-            }
-        }
+      scene.setCurrentAction(this.label);
    }
-   else if (this.label instanceof Label || typeof this.object === 'label'){
-       if (actions.indexOf(this.label) != -1)
-	 scene.action = actions.indexOf(this.label);
+   else if (belle.isInstance(this.label, Label)){
+      scene.setCurrentAction(this.label.name);
    }
- 
-   this.setFinished(true);
 }
 
 GoToLabel.prototype.resetActions = function(from, to)
