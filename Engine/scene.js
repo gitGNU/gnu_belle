@@ -53,21 +53,15 @@ function Scene(data)
     belle.utils.initElement(this.backgroundElement, data);
     this.backgroundElement.style.display = "block";
 
-    this.loadObjects(data);
-    this.loadActions(data);
-    this.load(data, true);
-
+    this.load(data);
 }
 
-Scene.prototype.load = function(data, force)
+Scene.prototype.load = function(data)
 {
-  if (! this.isFinished() && ! force)
-    return;
-  
   this.setActive(false);  
   this.finished = false;
-  this.reloadObjects(data);
-  this.reloadActions();
+  this.loadObjects(data);
+  this.loadActions(data);
   this.action = null;
 
   if (data) {
@@ -110,12 +104,17 @@ Scene.prototype.reloadObjects = function(data)
 Scene.prototype.reloadActions = function() 
 {
   for(var i=0; i < this.actions.length; i++) {
-    this.actions[i].reset();
+    this.actions[i].setFinished(false);
   }
 }
 
 Scene.prototype.loadActions = function(data) 
 {
+  if (this.actions.length) {
+    this.reloadActions();
+    return;
+  }
+  
   //instanciate actions
   if (data.actions && data.actions.length > 0) {
       var actions = data.actions;
@@ -135,6 +134,10 @@ Scene.prototype.loadActions = function(data)
 
 Scene.prototype.loadObjects = function(data) 
 {
+  if (this.objects.length) {
+    this.reloadObjects(data);
+    return;
+  }
   //instanciate objects
   if (data.objects && data.objects.length > 0) {
       for(var j=0; j !== data.objects.length; j++) {
