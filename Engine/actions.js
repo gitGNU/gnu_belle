@@ -176,12 +176,10 @@ function Fade(data)
 
     if (this.fadeType == "in") {
         this.target = 255;
-        this.bgTarget = 255;
         this.increment = 1;
     }
     else if (this.fadeType == "out") {
         this.target = 0;
-        this.bgTarget = 0;
         this.increment = -1;
     }
     else {
@@ -210,11 +208,9 @@ Fade.prototype.fade = function () {
     
     if (this.timePassed >= this.duration) {
         this.object.setOpacity(this.target);
-        this.object.setBackgroundOpacity(this.bgTarget);
     }
     
-    var backgroundOpacity = this.object.backgroundOpacity();
-    var opacity = this.object.color.alpha;
+    var opacity = this.object.getOpacity();
     
     if ((this.fadeType == "in" && opacity >= this.target) ||
        (this.fadeType == "out" && opacity <= this.target)) {
@@ -230,14 +226,10 @@ Fade.prototype.fade = function () {
     if (this.fadeType == "in") {
       if (opacity < this.target)
           this.object.setOpacity(opacity + increment);
-      if (backgroundOpacity < this.bgTarget)
-          this.object.setBackgroundOpacity(backgroundOpacity + increment);
     }
     else {
       if (opacity > this.target)
-          this.object.setOpacity(opacity+increment);
-      if (backgroundOpacity > this.bgTarget)
-          this.object.setBackgroundOpacity(backgroundOpacity + increment);
+          this.object.setOpacity(opacity + increment);
     }
       
     this.object.redraw = true;
