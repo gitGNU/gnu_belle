@@ -1022,10 +1022,22 @@ function ObjectGroup(data)
     this.objects = [];
     this.hoveredObject = null;
     
-    if ("objects" in data) {
+    this.load(data);
+}
+
+belle.utils.extend(Object, ObjectGroup);
+
+ObjectGroup.prototype.load = function(data) {
+    if ("objects" in data) {	
         var obj;
         var objects = data["objects"];
         for (var i=0; i !== objects.length; i++) {
+	    obj = this.getObject(objects[i].name);
+	    if (obj) {
+	      obj.load(objects[i]);
+	      continue;
+	    }
+	    
             objects[i].__parent = this;
             obj = belle.createObject(objects[i]);
             
@@ -1054,7 +1066,12 @@ function ObjectGroup(data)
     }
 }
 
-belle.utils.extend(Object, ObjectGroup);
+ObjectGroup.prototype.serialize = function()
+{
+    var data = Object.prototype.serialize.call(this);
+    data["objects"] = belle.serialize(this.objects);
+    return data;
+}
 
 ObjectGroup.prototype.objectAt = function(x, y)
 {
@@ -1159,6 +1176,18 @@ ObjectGroup.prototype.isReady = function()
   }
   
   return ready;
+}
+
+ObjectGroup.prototype.getObject = function(name)
+{
+  if (name) {
+    for (var i=0; i !== this.objects.length; i++) {
+      if (this.objects[i].name == name)
+	return this.objects[i];
+    }
+  }
+  
+  return null;
 }
 
 /*********** DIALOGUE BOX ***********/
