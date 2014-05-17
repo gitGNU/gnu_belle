@@ -222,7 +222,9 @@ Fade.prototype.fade = function () {
     }
     
     passed = passed > this.intervalDuration ? passed : this.intervalDuration;
-    var increment = passed * this.increment / this.intervalDuration; 
+    var increment = this.increment;
+    if (this.intervalDuration)
+      increment = passed * this.increment / this.intervalDuration; 
     if (this.fadeType == "in") {
       if (opacity < this.target)
           this.object.setOpacity(opacity + increment);
@@ -306,8 +308,14 @@ Slide.prototype.slide = function ()
     }
     
     passed = passed > this.intervalDuration ? passed : this.intervalDuration;
-    var incX = passed * this.incX / this.intervalDuration;
-    var incY = passed * this.incY / this.intervalDuration;
+    var incX = this.incX;
+    var incY = this.incY;
+    
+    if (this.intervalDuration) {
+      incX = parseInt(passed * this.incX / this.intervalDuration);
+      incY = parseInt(passed * this.incY / this.intervalDuration);
+    }
+    
     var x = this.object.x, y = this.object.y;
     
     if ((incX > 0 && this.object.x < this.endPoint.x) ||
