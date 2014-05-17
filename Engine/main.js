@@ -359,11 +359,9 @@ function pause()
       return;
   
     if (game.paused) {
-        display.hidePauseScreen();
 	game.resume();
     }
     else {
-        display.showPauseScreen();
 	game.pause();
     }
 }

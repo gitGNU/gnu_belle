@@ -27,6 +27,10 @@
 	    return true;
 	  return false;
 	}
+  
+	game.setFinished = function(finished) {
+	    this.finished = finished;
+	}
 	
   	game.isFinished = function() {
 	  return this.finished;
@@ -48,20 +52,20 @@
 	  this.setCurrentScene(scene);
 	}
 
-	game.setCurrentScene = function(scene, data) {	    
+	game.setCurrentScene = function(scene, data) {	     
 	    var scene = this.getScene(scene);
 	    if (scene) {  
 	      //hide current scene
 	      var currScene = this.getCurrentScene();
-	      if (currScene) {
+	      if (currScene && currScene != scene) {
 		currScene.hide();
 	      }
 	      
-	      if (data !== undefined)
-		scene.load(data, true);
-	      else
-		scene.load(getSceneData(scene.name));
-
+	      if (data === undefined)
+		data = getSceneData(scene.name)
+	      
+	      scene.load(data);
+	      
 	      if (this.paused)
 		this.pauseScreen.scene = scene;
 	      else
@@ -168,9 +172,15 @@
 		game.variables[variable] = value;
 	}
 	
+	game.isPaused = function() {
+	  return this.paused;
+	}
+	
 	game.pause = function() {
-	  if (! this.pauseScreen.scenes.length) 
+	  if (this.paused || ! this.hasPauseScreen())
 	    return;
+
+	  belle.display.showPauseScreen();
 	  var scene = game.pauseScreen.scenes[0];
 	  this.pauseScreen.scene = scene;
 	  scene.action = null;
@@ -179,7 +189,10 @@
 	}
 	
 	game.resume = function() {
-	  this.paused = false;
+	  if (this.paused) {
+	    belle.display.hidePauseScreen();
+	    this.paused = false;
+	  }
 	}
 
 	game.replaceVariables = function(text) {
@@ -231,8 +244,7 @@
 	
 	game.serialize = function() {
 	  var data = {};
-	  var currScene = this.getCurrentScene();
-	  data.scene = currScene.serialize();
+	  data.scene = this.scene.serialize();
 	  data.variables = this.variables;
 	  return data;
 	}
