@@ -225,6 +225,7 @@ Scene.prototype.getActions = function() {
 }
 
 Scene.prototype.setCurrentAction = function(action) {
+  var oldAction = this.action;
   var actions = this.getActions();
   if (typeof action == "number") {
     if (action >= 0 && action < actions.length)
@@ -240,6 +241,14 @@ Scene.prototype.setCurrentAction = function(action) {
   }
   else if (belle.isInstance(action, belle.actions.Action) && this.indexOf(action) !== -1){
       this.action = action;
+  }
+  
+  if (oldAction != this.action) {
+    if (oldAction)
+      oldAction.setFinished(false);
+  
+    if (this.action && this.action)  
+      this.action.execute();
   }
 }
 
@@ -287,8 +296,7 @@ Scene.prototype.nextAction = function() {
     
     var index = this.actions.indexOf(this.action) + 1;
     if (index >= 0 && index < this.actions.length) { 
-        this.action = this.actions[index];
-	this.action.execute();
+	this.setCurrentAction(this.actions[index]);
     }
     else {
       this.finished = true;
