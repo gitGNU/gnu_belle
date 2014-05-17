@@ -489,6 +489,10 @@ function ChangeVisibility(data)
     Action.call(this, data);
     this.transitions = [];
     this.duration = 0;
+    this.show = null;
+    
+    if ("show" in data)
+      this.show = data.show;
     
     if ("transitions" in data) {
         var transitions = data["transitions"];
@@ -501,6 +505,7 @@ function ChangeVisibility(data)
             transitions[i].__scene = data.__scene;
             var transitionAction = belle.getActionPrototype([transitions[i].type]);
             var action = new transitionAction(transitions[i]);
+	    action.skippable = this.skippable;
             this.transitions.push(action);
 
             if (transitions[i].duration && transitions[i].duration > this.duration )
@@ -515,48 +520,63 @@ belle.utils.extend(Action, ChangeVisibility);
 
 ChangeVisibility.prototype.execute = function () 
 {
-    //if (this.object.visible)
-    //    return;
+    if (! this.object || this.object.visible == this.show) {
+      this.setFinished(true);
+      return;
+    }
     
-    this.reset();
+    this.initObjectForTransitions();
+    if (this.show)
+      this.object.visible = true;
+    
     
     var that = this;
     for (var i=0; i < this.transitions.length; i++) {
         this.transitions[i].execute();
     }
     
-    this.object.setVisible(true);
-    
     if (this.transitions.length === 0)
         this.setFinished(true);
     else
-        this.interval = setInterval(function(){ that.check(); }, this.duration);
+        this.interval = setTimeout(function(){ that.check(); }, this.duration);
 }
 
 ChangeVisibility.prototype.check = function () 
 {
-    for (var i=0; i < this.transitions.length; i++) 
-        if (! this.transitions[i].isFinished())
-            return;
+    if (this.isFinished())
+      return;
     
-    clearInterval(this.interval);
-    this.setFinished(true);
+    var finish = true;
+    for (var i=0; i < this.transitions.length; i++) {
+        if (! this.transitions[i].isFinished()) {
+            finish = false;
+	    break;
+	}
+    }
+    
+    if (finish) {
+      this.setFinished(true);
+      this.object.visible = this.show;
+    }
+    else {
+      var that = this;
+      setTimeout(function(){ that.check(); }, 10);
+    }
 }
 
 ChangeVisibility.prototype.skip = function ()
 {
     for (var i=0; i !== this.transitions.length; i++)
         this.transitions[i].skip();
+    this.check();
 }
 
 ChangeVisibility.prototype.reset = function () 
 {
     Action.prototype.reset.call(this);
-    this.object.setVisible(false);
-    this.object.redraw = true;
     
     for (var i=0; i !== this.transitions.length; i++)
-        this.transitions[i].reset();
+        this.transitions[i].setFinished(false);
 }
 
 ChangeVisibility.prototype.scale = function (widthFactor, heightFactor) 
@@ -567,106 +587,37 @@ ChangeVisibility.prototype.scale = function (widthFactor, heightFactor)
         this.transitions[i].scale(widthFactor, heightFactor);
 }
 
+ChangeVisibility.prototype.initObjectForTransitions = function () 
+{
+    for (var i=0; i < this.transitions.length; i++) {
+	if (belle.isInstance(this.transitions[i], Fade)) {
+	  if (this.show && ! this.object.visible)
+	    this.object.setOpacity(0);
+	}
+    }
+}
+
 /*********** Show Action ***********/
 
 function Show(data)
 {
+    data.show = true;
     ChangeVisibility.call(this, data);
     this.characterState = "";
-    
 }
 
 belle.utils.extend(ChangeVisibility, Show);
-
-Show.prototype.execute = function () 
-{
-    //if (this.object.visible)
-    //    return;
-    
-    this.reset();
-    
-    var that = this;
-    for (var i=0; i < this.transitions.length; i++) {
-        this.transitions[i].execute();
-    }
-    
-    this.object.setVisible(true);
-    
-    if (this.transitions.length === 0)
-        this.setFinished(true);
-    else
-        this.interval = setInterval(function(){ that.check(); }, this.duration);
-}
-
-Show.prototype.check = function () 
-{
-   
-    for (var i=0; i < this.transitions.length; i++) 
-        if (! this.transitions[i].isFinished())
-            return;
-    
-    clearInterval(this.interval);
-    this.setFinished(true);
-}
-
-Show.prototype.skip = function ()
-{
-    ChangeVisibility.prototype.skip.call(this);
-}
-
-Show.prototype.reset = function () 
-{
-    Action.prototype.reset.call(this);
-    this.object.setVisible(false);
-    this.object.redraw = true;
-    
-    for (var i=0; i !== this.transitions.length; i++)
-        this.transitions[i].reset();
-}
 
 /*********** HIDE CHARACTER ACTION ***********/
 
 function Hide(data)
 {
+    data.show = false;
     ChangeVisibility.call(this, data);
 }
 
 belle.utils.extend(ChangeVisibility, Hide);
 
-Hide.prototype.execute = function () 
-{
-    //this.reset();
-    
-    var that = this;
-    for (var i=0; i < this.transitions.length; i++) {
-        this.transitions[i].execute();
-    }
-    
-    if (this.transitions.length === 0) {
-        this.setFinished(true);
-        this.object.setVisible(false);
-    }
-    else
-        this.interval = setInterval(function(){ that.check(); }, this.duration);
-}
-
-Hide.prototype.check = function () 
-{
-    for (var i=0; i < this.transitions.length; i++) 
-        if (! this.transitions[i].isFinished())
-            return;
-    
-    clearInterval(this.interval);
-    this.object.setVisible(false);
-    this.setFinished(true);
-}
-
-Hide.prototype.reset = function () 
-{
-    ChangeVisibility.prototype.reset.call(this);
-    this.object.setVisible(true);
-    this.object.redraw = true;
-}
 
 /************* Change Background *****************/
 
