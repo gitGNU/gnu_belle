@@ -199,18 +199,20 @@ Fade.prototype.execute = function () {
 }
 
 Fade.prototype.fade = function () {
+    if (this.isFinished())
+      return;
     
     var now = new Date().getTime();
     var passed = now - this.prevTime;
     this.timePassed += passed;
     this.prevTime = now;
-    
+   
     if (this.timePassed >= this.duration) {
         this.object.setOpacity(this.target);
     }
     
     var opacity = this.object.getOpacity();
-    
+  
     if ((this.fadeType == "in" && opacity >= this.target) ||
        (this.fadeType == "out" && opacity <= this.target)) {
         clearInterval(this.interval);
@@ -223,7 +225,8 @@ Fade.prototype.fade = function () {
     passed = passed > this.intervalDuration ? passed : this.intervalDuration;
     var increment = this.increment;
     if (this.intervalDuration)
-      increment = passed * this.increment / this.intervalDuration; 
+      increment = parseInt(passed * this.increment / this.intervalDuration) || 1; 
+    
     if (this.fadeType == "in") {
       if (opacity < this.target)
           this.object.setOpacity(opacity + increment);
@@ -237,11 +240,9 @@ Fade.prototype.fade = function () {
 }
 
 Fade.prototype.skip = function () {
-    if (! this.skippable)
-        return;
-    this.object.setOpacity(this.target);
-    this.object.setBackgroundOpacity(this.bgTarget);
+    clearInterval(this.interval);
     Action.prototype.skip.call(this);
+    this.object.setOpacity(this.target);
 }
 
 Fade.prototype.reset = function () {
@@ -527,6 +528,10 @@ belle.utils.extend(Action, ChangeVisibility);
 
 ChangeVisibility.prototype.execute = function () 
 {
+    if (this.isFinished()) {
+      return;
+    }
+    
     if (! this.object || this.object.visible == this.show) {
       this.setFinished(true);
       return;
@@ -535,7 +540,6 @@ ChangeVisibility.prototype.execute = function ()
     this.initObjectForTransitions();
     if (this.show)
       this.object.visible = true;
-    
     
     var that = this;
     for (var i=0; i < this.transitions.length; i++) {
@@ -573,15 +577,17 @@ ChangeVisibility.prototype.check = function ()
 
 ChangeVisibility.prototype.skip = function ()
 {
+    clearTimeout(this.interval);
     for (var i=0; i !== this.transitions.length; i++)
         this.transitions[i].skip();
+
     this.check();
 }
 
 ChangeVisibility.prototype.reset = function () 
 {
     Action.prototype.reset.call(this);
-    
+
     for (var i=0; i !== this.transitions.length; i++)
         this.transitions[i].setFinished(false);
 }
@@ -602,6 +608,11 @@ ChangeVisibility.prototype.initObjectForTransitions = function ()
 	    this.object.setOpacity(0);
 	}
     }
+}
+ChangeVisibility.prototype.setFinished = function(finished) {
+      Action.prototype.setFinished.call(this, finished);
+      for (var i=0; i !== this.transitions.length; i++)
+	this.transitions[i].setFinished(finished);
 }
 
 /*********** Show Action ***********/
