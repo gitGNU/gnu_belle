@@ -85,52 +85,50 @@ SlideEditorWidget::SlideEditorWidget(QWidget *parent) :
 
 void SlideEditorWidget::updateData(Action * action)
 {
-    /*if (mCurrentSlide) {
-        mCurrentSlide->finishedEditing();
-        //disconnect(mCurrentSlide, SIGNAL(startPositionChanged(int, int)), this, SLOT(updateStartPosition(int, int)));
-    }*/
-
-    mCurrentSlide = qobject_cast<Slide*>(action);
-    if (! mCurrentSlide || ! mCurrentSlide->scene())
+    Slide * slide  = qobject_cast<Slide*>(action);
+    if (! slide || ! slide->scene())
         return;
 
-    mStartXSlider->setValue(mCurrentSlide->startX());
-    mStartYSlider->setValue(mCurrentSlide->startY());
+    mCurrentSlide = 0;
 
-    mEndXSlider->setValue(mCurrentSlide->endX());
-    mEndYSlider->setValue(mCurrentSlide->endY());
+    mStartXSlider->setValue(slide->startX());
+    mStartYSlider->setValue(slide->startY());
 
-    mDurationSpinBox->setValue(mCurrentSlide->duration());
+    mEndXSlider->setValue(slide->endX());
+    mEndYSlider->setValue(slide->endY());
+
+    mDurationSpinBox->setValue(slide->duration());
 
     mObjectChooser->clear();
 
-    mObjectChooser->blockSignals(true);
-    Object* currObj = mCurrentSlide->sceneObject();
-
+    Object* currObj = slide->sceneObject();
     QList<Object*> objects;
     if (currObj) {
         mObjectChooser->addItem(currObj->objectName());
         objects.append(currObj);
     }
 
-    QList<Object*> objs = mCurrentSlide->scene()->objects();
+    QList<Object*> objs = slide->scene()->objects();
     for (int i=0; i < objs.size(); i++) {
         if (objs[i] && objs[i] != currObj) {
             mObjectChooser->addItem(objs[i]->objectName());
             objects.append(objs[i]);
         }
     }
-    mObjectChooser->blockSignals(false);
+
+    this->setObjects(objects);
 
     if (! currObj && ! objects.isEmpty())
-        mCurrentSlide->setSceneObject(objects[0]);
+        slide->setSceneObject(objects[0]);
 
-    if (mCurrentSlide->sceneObject()) {
-        mStartXSlider->setRange(-mCurrentSlide->sceneObject()->width(), Scene::width());
-        mStartYSlider->setRange(-mCurrentSlide->sceneObject()->height(), Scene::height());
-        mEndXSlider->setRange(-mCurrentSlide->sceneObject()->width(), Scene::width());
-        mEndYSlider->setRange(-mCurrentSlide->sceneObject()->height(), Scene::height());
+    if (slide->sceneObject()) {
+        mStartXSlider->setRange(-slide->sceneObject()->width(), Scene::width());
+        mStartYSlider->setRange(-slide->sceneObject()->height(), Scene::height());
+        mEndXSlider->setRange(-slide->sceneObject()->width(), Scene::width());
+        mEndYSlider->setRange(-slide->sceneObject()->height(), Scene::height());
     }
+
+    mCurrentSlide = slide;
 }
 
 void SlideEditorWidget::onButtonClicked()
@@ -195,6 +193,9 @@ void SlideEditorWidget::onDurationChanged(double dur) {
 
 void SlideEditorWidget::onResourceChanged(int index)
 {
+    if (! mCurrentSlide)
+        return;
+
     if (index >= 0 && index < objects().size()) {
         Object* obj = objects()[index];
 
