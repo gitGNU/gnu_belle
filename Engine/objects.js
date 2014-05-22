@@ -643,6 +643,11 @@ Object.prototype.hide = function()
         this.element.style.display = "none";
 }
 
+Object.prototype.isVisible = function()
+{
+    return this.visible;
+}
+
 Object.prototype.setVisible = function(visible)
 {
     if (visible)
@@ -699,7 +704,7 @@ Object.prototype.initElement = function()
   $children.css("display", "block");
   $children.css("filter", "inherit");
     
-  if (this.opacityF() != 1) {
+  if (this.getOpacityF() != 1) {
     this.setOpacity(this.opacity);
   }
   
