@@ -392,10 +392,8 @@ var addObject = function(object, container)
     
     if (display.DOM) {
         if (! container)
-            container = document.getElementById("belle");
-        if (object.visible)
-            object.element.style.display = "block";
-        container.appendChild(object.element);
+            container = getContainer();
+        $(container).append(object.element);
     }
 }
 
