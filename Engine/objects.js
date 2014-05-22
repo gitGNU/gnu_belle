@@ -444,18 +444,20 @@ Object.prototype.paint = function(context)
     
     context.globalAlpha = this.getOpacityF();
     
-    if (this.backgroundImage) {
-        this.backgroundImage.paint(context, x, y, this.width, this.height);
+    if (this.borderWidth > 0) {
+      	context.lineWidth = this.borderWidth;
+	context.strokeStyle = this.borderColor ? this.borderColor.toString() : 'black';
     }
-    else if (this.roundedRect) {
+    
+    context.fillStyle  = this.backgroundColor.toString();
+
+    if (this.roundedRect) {
         
         var width = this.width;
         var height = this.height;
         var xradius = this.cornerRadius;
         var yradius = this.cornerRadius;
-    
-        context.fillStyle  = this.backgroundColor.toString();
-        context.strokeStyle = this.borderColor.toString();
+	
         context.beginPath();
        
         context.moveTo(x+xradius, y);
@@ -480,18 +482,24 @@ Object.prototype.paint = function(context)
         
         context.closePath();
         
-        if (this.borderWidth > 0 ) {
-            context.lineWidth = this.borderWidth;
-            context.stroke();
-        }
-        context.fill();
+	context.stroke();
+	context.clip();
+    }
+    else if (this.borderWidth > 0) {
+	context.beginPath();
+	context.rect(x, y, this.width, this.height);
+	context.stroke();
+	context.closePath();
+    }
         
+    if (this.backgroundImage) {
+        this.backgroundImage.paint(context, x, y, this.width, this.height);
     }
     else {
-        context.fillStyle  = this.backgroundColor.toString();
+        
         context.fillRect(x, y, this.width, this.height);
     }
-        
+    
     this.paintX = x;
     this.paintY = y;
     
