@@ -204,7 +204,7 @@ Scene.prototype.isFinished = function() {
 Scene.prototype.addObject = function(object) {
     this.objects.push(object);
     if (game.getScene() == this) {
-        belle.display.addObject(object);
+        belle.display.addObject(object, this.element);
     }
 }
 
