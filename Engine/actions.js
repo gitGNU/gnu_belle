@@ -539,7 +539,7 @@ ChangeVisibility.prototype.execute = function ()
     
     this.initObjectForTransitions();
     if (this.show)
-      this.object.visible = true;
+      this.object.show();
     
     var that = this;
     for (var i=0; i < this.transitions.length; i++) {
@@ -567,7 +567,7 @@ ChangeVisibility.prototype.check = function ()
     
     if (finish) {
       this.setFinished(true);
-      this.object.visible = this.show;
+      this.object.setVisible(this.show);
     }
     else {
       var that = this;
@@ -604,7 +604,7 @@ ChangeVisibility.prototype.initObjectForTransitions = function ()
 {
     for (var i=0; i < this.transitions.length; i++) {
 	if (belle.isInstance(this.transitions[i], Fade)) {
-	  if (this.show && ! this.object.visible)
+	  if (this.show && ! this.object.isVisible())
 	    this.object.setOpacity(0);
 	}
     }
