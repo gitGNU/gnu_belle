@@ -283,6 +283,22 @@ utils.getNewName = function(name) {
     return name;
 }
 
+utils.getSaveDate = function()
+{
+    var date = new Date();
+    var months = [ "January", "February", "March", "April", "May", "June", 
+                    "July", "August", "September", "October", "November", "December" ];
+    var hour = date.getHours();
+    var min = date.getMinutes();
+    if (hour < 10)
+        hour = '0' + hour;
+    if (min < 10)
+        min = '0' + min;
+    
+    date = date.getDate() + " " + months[date.getMonth()] + " " + date.getFullYear() + " " + hour + ":" + min;
+    return date;
+}
+
 utils.setBorderRadius = function(elem, radius) {
     elem.style.borderRadius = radius + "px"; // standard
     elem.style.MozBorderRadius = radius + "px"; // Mozilla
