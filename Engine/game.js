@@ -151,25 +151,22 @@
 		return null;
 	}
 	
-	game.hasVariable = function(variable) {
-		if (variable.startsWith("$"))
-			variable = variable.slice(1);
+	game.getValue = function(variable) {
+		if (! variable.length)
+		  return "say what";
+	  
+		if (variable[0] == "$")
+		  variable = variable.slice(1);
 		
-		return (variable in game.variables);
+		return this.variables[variable] || "";
 	}
 
-	game.getValue = function(variable) {
-		if (! this.hasVariable(variable))
-			return "";
-			
-		if (variable.startsWith("$"))
-			variable = variable.slice(1);
-		
-		return this.variables[variable];
+	game.hasVariable = function(variable) {	
+		return !! (this.getValue(variable));
 	}
 
 	game.addVariable = function (variable, value) {
-		game.variables[variable] = value;
+	    this.variables[variable] = value;
 	}
 	
 	game.isPaused = function() {
@@ -202,7 +199,7 @@
 		if (! text.contains("$"))
 			return text;
 		
-		var validChar = /^[a-zA-Z]+[0-9]*$/g;
+		var validChar = /^[a-zA-Z_]+[a-zA-Z_0-9]*$/;
 		var variable = "";
 		var variables = [];
 		var values = [];
@@ -226,12 +223,12 @@
 			variable += text.charAt(i);
 		}
 		
+		if (variable)
+		  variables.push(variable);
+
 		//replace variables with the respective values and append them to the values list
 		for(var i=0; i != variables.length; i++) {
-			if (this.containsVariable(variables[i]))
-			  values.push(this.getValue(variables[i]));
-			else //if the variable is not found, still add an empty value to the values so we have an equal number of elements in both lists
-			  values.push("");
+		  values.push(this.getValue(variables[i]));
 		}
 		
 		//replace variables with the values previously extracted
@@ -313,7 +310,7 @@
 		alert("You don't have any saved games.");
 		return;
 	    }
-
+	    
 	    if (typeof id == "number") {
 		if (id >= 0 && id < savedGames.length)
 		    entry = savedGames[id];
