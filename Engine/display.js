@@ -18,7 +18,7 @@
 
 //private variables
 var _drawFPS = false;
-var drawTimeout = 50;
+var drawTimeout = 1000/40;
 var fps = 0;
 var elapsed = 0;
 var before = 0;
@@ -46,7 +46,13 @@ var getContainer = function() {
     return $('#belle .container.active');
 }
 
-var requestAnimationFrame = (function(){
+window.requestAnimationFrame = (function(){
+  if (display.DOM) {
+      return function( callback ){
+            window.setTimeout(callback, drawTimeout);
+          };
+  }
+  
   return  window.requestAnimationFrame       || 
           window.webkitRequestAnimationFrame || 
           window.mozRequestAnimationFrame    || 
@@ -191,13 +197,12 @@ var showPauseScreen = function()
     $container.addClass("active");
 }
 
-var _draw = function()
+var draw = function(scene)
 {
     //if (drawing)
       //return;
     
     drawing = true;
-    var scene = game.getScene();
 
     if (! scene) {
       drawing = false;
@@ -252,16 +257,8 @@ var _draw = function()
     drawing = false;
 }
 
-var draw = function()
+var needsRedraw = function(scene) 
 {
-    if (! display.DOM && display.needsRedraw())
-        requestAnimationFrame(_draw);
-}
-
-var needsRedraw = function() 
-{
-    var scene = game.getScene();
-
     if (scene && scene.redrawBackground) {
         return true;
     }

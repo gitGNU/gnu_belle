@@ -309,7 +309,7 @@ function isGameDataReady() {
         display.init();
 	if (game.hasNextScene()) 
 	  game.nextScene();
-        setTimeout(gameLoop, 1);
+        gameLoop();
     }
 }
 
@@ -334,7 +334,10 @@ function importgameData(path) {
 function gameLoop ()
 {   
     var scene = game.getScene();
-        
+    var draw = (!display.DOM && display.needsRedraw(scene));
+    
+    requestAnimationFrame(gameLoop);
+ 
     if (scene && scene.isActive()) {
       var action = scene.getAction();
       if (! action || action.isFinished()) {
@@ -349,8 +352,8 @@ function gameLoop ()
       }
     }
     
-    display.draw();
-    setTimeout(gameLoop, timeout);
+    if (draw)
+      display.draw(scene);
 }
 
 function pause()
