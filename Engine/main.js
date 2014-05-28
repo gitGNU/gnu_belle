@@ -373,98 +373,6 @@ function getGame()
     return game;
 }
 
-function getSaveDate()
-{
-    var date = new Date();
-    var months = [ "January", "February", "March", "April", "May", "June", 
-                    "July", "August", "September", "October", "November", "December" ];
-    var hour = date.getHours();
-    var min = date.getMinutes();
-    if (hour < 10)
-        hour = '0' + hour;
-    if (min < 10)
-        min = '0' + min;
-    
-    date = date.getDate() + " " + months[date.getMonth()] + " " + date.getFullYear() + " " + hour + ":" + min;
-    return date;
-}
-
-function saveGame(id)
-{
-    if (! game)
-      return;
-
-    if (! id)
-      id = 0;
-    
-    var scene = game.getCurrentScene();
-    var name = scene.name;
-    var title = game.title;
-    var gameData = $.jStorage.get(title, {});
-    var savedGames = gameData["savedGames"] || [];
-    var i = 0;
-
-    //if string passed, search for an empty slot for the savegame
-    if (typeof id == "string") {
-        for(i=0; i < savedGames.length; i++) {
-            if (savedGames[i] === null) {
-                id = i;
-                break;
-            }
-        }
-        name = id;
-        id = i;
-    }
-   
-    var entry = game.serialize();
-    entry.date = getSaveDate();
-    entry.name = name;
-       
-    if (id >= savedGames.length)
-        for(var i=savedGames.length; i <= id; i++)
-            savedGames.push(null);
-    
-    savedGames[id] = entry;
-    gameData["savedGames"] = savedGames;
-    
-    $.jStorage.set(title, gameData, {TTL: 0});
-    
-    return {name: entry.name, date: entry.date};
-}
-
-function loadGame(id)
-{
-    var title = game.title;
-    var gameData = $.jStorage.get(title, {});
-    var savedGames = gameData["savedGames"] || [];
-    var entry = null;
-
-    if (! savedGames) {
-        alert("You don't have any saved games.");
-        return;
-    }
-    
-    if (typeof id == "number") {
-        if (id >= 0 && id < savedGames.length)
-            entry = savedGames[i];
-    }
-    else if (typeof id == "string") {
-        for(var i=0; i < savedGames.length; i++) {
-            var _entry = savedGames[i];
-            if (_entry && _entry.name == id) {
-               entry = _entry;
-               break;
-            }
-        }
-    }
-   
-    if (entry) {
-        game.load(entry);
-    }
-    else
-        alert('Game "'+ id +'" could not be loaded');      
-} 
-
 //Expose public properties
 belle.setGameFile = setGameFile;
 belle.setGameDirectory = setGameDirectory;
@@ -477,7 +385,5 @@ belle.game = game;
 belle.getObjectPrototype = getObjectPrototype;
 belle.getActionPrototype = getActionPrototype;
 belle.pause = pause;
-belle.saveGame = saveGame;
-belle.loadGame = loadGame;
 
 }(belle));

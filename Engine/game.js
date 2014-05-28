@@ -249,18 +249,97 @@
 	  return data;
 	}
 	
-	game.load = function(data) {
-	  if (!data || ! data.scene || ! data.scene.name)
+	game._load = function(data) {
+	  if (!data || ! data.scene || ! data.scene.name) {
+	    alert("Couldn't load game data");
 	    return false;
+	  }
 	  
+	  this.resume();
 	  var scene = this.getScene(data.scene.name);
 	  if (scene) {
-	    scene.load(data.scene);
-	    this.setCurrentScene(scene);
+	    this.setCurrentScene(scene, data.scene);
 	  }
 	  this.variables = data.variables || {};	  
 	  
 	  return true;
+	}
+	
+	game.save = function(id) {
+	    if (! id)
+	      id = 0;
+	    
+	    var scene = this.scene;
+	    var name = scene.name;
+	    var title = this.title;
+	    var gameData = $.jStorage.get(title, {});
+	    var savedGames = gameData["savedGames"] || [];
+	    var i = 0;
+
+	    //if string passed, search for an empty slot for the savegame
+	    if (typeof id == "string") {
+		for(i=0; i < savedGames.length; i++) {
+		    if (savedGames[i] === null) {
+			id = i;
+			break;
+		    }
+		}
+		name = id;
+		id = i;
+	    }
+	  
+	    var entry = this.serialize();
+	    entry.date = belle.utils.getSaveDate();
+	    entry.name = name;
+	      
+	    if (id >= savedGames.length)
+		for(var i=savedGames.length; i <= id; i++)
+		    savedGames.push(null);
+	    
+	    savedGames[id] = entry;
+	    gameData["savedGames"] = savedGames;
+	    
+	    $.jStorage.set(title, gameData, {TTL: 0});
+	    
+	    return {name: entry.name, date: entry.date};
+	}
+	
+	game.load = function(id) {
+	    var title = this.title;
+	    var savedGames = this.getSavedGames();
+	    var entry = null;
+
+	    if (! savedGames) {
+		alert("You don't have any saved games.");
+		return;
+	    }
+
+	    if (typeof id == "number") {
+		if (id >= 0 && id < savedGames.length)
+		    entry = savedGames[id];
+	    }
+	    else if (typeof id == "string") {
+		for(var i=0; i < savedGames.length; i++) {
+		    var _entry = savedGames[i];
+		    if (_entry && _entry.name == id) {
+		      entry = _entry;
+		      break;
+		    }
+		}
+	    }
+	  
+	    if (entry) {
+		this._load(entry);
+	    }
+	    else
+		alert('Game "'+ id +'" could not be loaded');      
+	}
+	
+	game.getSavedGames =  function() {
+	    var title = this.title;
+	    var gameData = $.jStorage.get(title, {});
+	    var savedGames = gameData["savedGames"] || [];
+	    return savedGames;
 	}
 	
 })(game);
