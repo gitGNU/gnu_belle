@@ -1265,13 +1265,15 @@ GetUserInput.prototype.execute = function()
         this.setFinished(true);
         return;
     }
+    var self = this;
+    setTimeout(function() {
+      var value = prompt(self.message, self.defaultValue);
+      if (! value)
+	value = self.defaultValue;
+      game.addVariable(self.variable, value);
     
-    var value = prompt(this.message, this.defaultValue);
-    if (! value)
-        value = this.defaultValue;
-    game.addVariable(this.variable, value);
-    
-    this.setFinished(true);
+      self.setFinished(true);
+    }, 1);
 }
 
 GetUserInput.prototype.reset = function()
