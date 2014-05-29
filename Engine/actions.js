@@ -1314,8 +1314,8 @@ ChangeGameVariable.prototype.execute = function()
 {   
     var currValue = "";
     var newValue = this.value;
-    if (belle.containsVariable(this.variable))
-        currValue = belle.value(this.variable);
+    if (game.hasVariable(this.variable))
+        currValue = game.getValue(this.variable);
     
     //if arithmetic operation
     if (this.validOperators.slice(1,5).contains(this.operator)) {
@@ -1354,7 +1354,7 @@ ChangeGameVariable.prototype.execute = function()
             break;
     }
     
-    belle.insertVariable(this.variable, currValue);
+    game.addVariable(this.variable, currValue);
 
     this.setFinished(true);
 }
