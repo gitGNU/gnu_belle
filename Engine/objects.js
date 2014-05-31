@@ -417,10 +417,13 @@ Object.prototype.setBackgroundOpacity = function(alpha)
 
 Object.prototype.setBackgroundColor = function(color)
 {
-    this.backgroundColor = color;
-    if (this.backgroundElement)
-        this.backgroundElement.style.backgroundColor = color.toHex();
-    this.setBackgroundOpacity(color.alpha);
+    if (color != this.color) {
+      this.backgroundColor = color;
+      if (this.backgroundElement)
+	  this.backgroundElement.style.backgroundColor = color.toHex();
+      this.setBackgroundOpacity(color.alpha);
+      this.update();
+    }
 }
 
 Object.prototype.getOpacity = function (alpha)
