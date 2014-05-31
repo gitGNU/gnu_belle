@@ -1126,7 +1126,9 @@ ObjectGroup.prototype.paint = function(context)
     
     for(var i=0; i !== this.objects.length; i++) {
         this.objects[i].redraw = true;
+	context.save();
         this.objects[i].paint(context);
+	context.restore();
     }
     
     this.redraw = false;
