@@ -223,7 +223,7 @@
 		if (! text.contains("$"))
 			return text;
 		
-		var validChar = /^[a-zA-Z_]+[a-zA-Z_0-9]*$/;
+		var validChar = /^[a-zA-Z_0-9]$/;
 		var variable = "";
 		var variables = [];
 		var values = [];
