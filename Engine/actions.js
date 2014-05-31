@@ -998,26 +998,18 @@ function ChangeColor(data)
 belle.utils.extend(Action, ChangeColor);
 
 ChangeColor.prototype.execute = function()
-{
-    this.reset();
-    
+{    
     if (! this.object) {
         this.setFinished(true);
         return;
     }
     
     if (this.changeObjectColor) {
-        this.previousObjectColor = this.object.color;
         this.object.color = this.color;
     }
     
     if (this.changeObjectBackgroundColor) {
-        this.previousObjectBackgroundColor = this.object.backgroundColor;
         this.object.setBackgroundColor(this.color);
-    }
-    
-    if (this.changeObjectColor || this.changeObjectBackgroundColor) {
-        this.object.redraw = true;
     }
     
     this.setFinished(true);
