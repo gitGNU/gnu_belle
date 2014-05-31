@@ -191,6 +191,7 @@ function Object(info)
     this.mouseMoveActions = [];
     this.mouseLeaveActions = [];
     this.name = "";
+    this.defaultState = null;
     this.loaded = true;
     this.data = info;
     this.parent = parent ? parent : null;
@@ -545,12 +546,17 @@ Object.prototype.isReady = function()
     return true;
 }
 
-Object.prototype.mouseLeaveEvent = function(event)
- {
-    var actions = this.mouseMoveActions;
-    for(var i =0; i !== actions.length; i++) 
-        actions[i].reset();
- }
+Object.prototype.mouseLeaveEvent = function()
+{
+    if (this.defaultState)
+      this.load(this.defaultState);
+}
+
+Object.prototype.mouseEnterEvent = function()
+{
+    if (this.mouseMoveActions || this.eventListeners["mousemove"])
+      this.defaultState = this.serialize();
+}
 
 Object.prototype.addEventListener = function(event, listener)
 {
