@@ -501,7 +501,7 @@ function ChangeVisibility(data)
     
     if ("show" in data)
       this.show = data.show;
-    
+
     if ("transitions" in data) {
         var transitions = data["transitions"];
         for(var i=0; i !== transitions.length; i++) {
@@ -546,8 +546,10 @@ ChangeVisibility.prototype.execute = function ()
         this.transitions[i].execute();
     }
     
-    if (this.transitions.length === 0)
+    if (this.transitions.length === 0) {
+	this.object.setVisible(this.show);
         this.setFinished(true);
+    }
     else
         this.interval = setTimeout(function(){ that.check(); }, this.duration);
 }
@@ -566,8 +568,8 @@ ChangeVisibility.prototype.check = function ()
     }
     
     if (finish) {
-      this.setFinished(true);
       this.object.setVisible(this.show);
+      this.setFinished(true);
     }
     else {
       var that = this;
