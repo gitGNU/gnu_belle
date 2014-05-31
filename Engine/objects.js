@@ -240,6 +240,8 @@ Object.prototype.load = function(data)
     this.visible = false;
     this.paintX = false;
     this.paintY = false; 
+    this.paintWidth = false;
+    this.paintHeight = false;
     this.redraw = false;
     this.redrawing = false;
     
@@ -304,33 +306,56 @@ Object.prototype.globalY = function()
     return this.y
 }
 
+Object.prototype.globalOuterX = function()
+{
+  return this.globalX() - this.borderWidth;
+}
+
+Object.prototype.globalOuterY = function()
+{
+  return this.globalY() - this.borderWidth;
+}
+
+Object.prototype.outerX = function()
+{
+  return this.x - this.borderWidth;
+}
+
+Object.prototype.outerY = function()
+{
+  return this.y - this.borderWidth;
+}
+
+Object.prototype.outerWidth = function()
+{
+  return this.width + this.borderWidth * 2;
+}
+
+Object.prototype.outerHeight = function()
+{
+  return this.height + this.borderWidth * 2;
+}
+
 Object.prototype.overlaps = function(object)
 {
-    var width = this.width;
-    var height = this.height;
-    var x = this.x;
-    var y = this.y;
-    var otherWidth = object.width;
-    var otherHeight = object.height;
-    var otherX = object.x;
-    var otherY = object.y;
-    var style = this.element.style;
-    var paintX = this.paintX;
-    var paintY = this.paintY;
-    
-    if ( otherX > x + width || otherY > y + height || x > otherX + otherWidth || y > otherY + otherHeight ) 
+    if ( object.outerX() > this.outerX() + this.outerWidth() || object.outerY() > this.outerY() + this.outerHeight() || 
+      this.outerX() > object.outerX() + object.outerWidth() || this.outerY() > object.outerY() + object.outerHeight() )
         return false;
-    
-    //if ( otherX > paintX + width || otherY > paintY + height || paintX > otherX + otherWidth || paintY > otherY + otherHeight ) 
-    //    return false;
         
     return true;
 }
 
-Object.prototype.overlapedRect = function(object) {
-    var x=0, y=0, width=0, height=0;
-   
-    return null;
+Object.prototype.overlaped = function(object)
+{
+    if (object.paintX === false || this.paintX === false)
+      return false;
+    
+    //paint* variables already contain the proper position and size values
+    if ( object.paintX > this.paintX + this.paintWidth || object.paintY > this.paintY + this.paintHeight ||
+      this.paintX > object.paintX + object.paintWidth || this.paintY > object.paintY + object.paintHeight ) 
+	return false;
+        
+    return true;
 }
 
 Object.prototype.setX = function(x)
@@ -496,12 +521,13 @@ Object.prototype.paint = function(context)
         this.backgroundImage.paint(context, x, y, this.width, this.height);
     }
     else {
-        
         context.fillRect(x, y, this.width, this.height);
     }
     
-    this.paintX = x;
-    this.paintY = y;
+    this.paintX = this.globalOuterX();
+    this.paintY = this.globalOuterY();
+    this.paintWidth = this.outerWidth();
+    this.paintHeight = this.outerHeight();
     
     this.redrawing = false;
     this.redraw = false;
@@ -580,30 +606,11 @@ Object.prototype.needsRedraw = function()
 
 Object.prototype.clear = function (context)
 {
+    //paint* variables already contain the proper position and size values
     if (this.paintX !== false && this.paintY !== false) {
-        //context.clearRect(this.globalX()-this.borderWidth, this.globalY()-this.borderWidth, this.width+this.borderWidth*2, this.height+this.borderWidth*2);
-        context.clearRect(this.paintX-this.borderWidth, this.paintY-this.borderWidth, this.width+this.borderWidth*2, this.height+this.borderWidth*2);
-        this.paintX = false;
-        this.paintY = false;
+        context.clearRect(this.paintX, this.paintY, this.paintWidth, this.paintHeight);
+        this.paintX = this.paintY = this.paintWidth = this.paintHeight = false;
     }
-}
-
-Object.prototype.contentWidth = function()
-{
-}
-
-Object.prototype.contentHeight = function()
-{
-}
-
-Object.prototype.fullWidth = function()
-{
-  return this.width + this.borderWidth + this.paddingLeft + this.paddingRight;
-}
-
-Object.prototype.fullHeight = function()
-{
-  return this.width + this.borderWidth + this.paddingLeft + this.paddingRight;
 }
 
 Object.prototype.setWidth = function(width)
@@ -1157,8 +1164,7 @@ ObjectGroup.prototype.processEvent = function(event)
 ObjectGroup.prototype.clear = function (context)
 {
   Object.prototype.clear.call(this, context);
-  //context.clearRect(this.globalX()-this.borderWidth, this.globalY()-this.borderWidth, this.width+this.borderWidth*2, this.height+this.borderWidth*2);
-  
+
   for(var i=0; i !== this.objects.length; i++) {
       this.objects[i].clear(context);
   }

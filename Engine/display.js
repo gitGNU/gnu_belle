@@ -199,60 +199,53 @@ var showPauseScreen = function()
 
 var draw = function(scene)
 {
-    //if (drawing)
-      //return;
+    if (display.DOM || drawing || ! scene)
+      return;
     
     drawing = true;
 
-    if (! scene) {
-      drawing = false;
-      return;
-    }
-    
-    var objectsToDraw = scene.objects;
+    var objects = scene.objects;
     var rect = null;
     var obj = null;
-    var i, j;
+    var i, j, redraw=false;
     var length = 0;
 
     display.context.font = game.font;
     if (scene.redrawBackground)
         scene.paint(display.bgContext);
 
-    for(i=objectsToDraw.length-1; i !== -1; --i) {
-        if (! objectsToDraw[i].redraw)
-            continue;
-            
-        for(j=objectsToDraw.length-1; j !== -1; --j) {
-            if (objectsToDraw[j].redraw || i == j)
-                continue;
+    for(i=objects.length-1; i !== -1; --i) {
+	obj = objects[i];
+        if (obj.redraw) {
+	  redraw = true;
+	  
+	  for(j=objects.length-1; j !== -1; --j) {
+	      if (objects[j].redraw || i == j)
+		  continue;
+    
+	      if (obj.overlaped(objects[j]))
+		  objects[j].redraw = true;
+	  }
+	}
+    }
+    
+    if (redraw) {
+      length = objects.length;
+      for(j=0; j !== length; j++)
+	  if (objects[j].redraw)
+	    objects[j].clear(display.context);
   
-            if (objectsToDraw[i].overlaps(objectsToDraw[j]))
-                objectsToDraw[j].redraw = true;
-            /*rect = objectsToDraw[i].overlapedRect(objectsToDraw[j]);
-            if (rect)
-                objectsToDraw[j].partsToRedraw.push(rect);*/
-        }
+      for(j=0; j !== length; j++) {        
+	  obj = objects[j];
+	  
+	  if (obj.redraw) {
+	    display.context.save();
+	    obj.paint(display.context);
+	    obj.redraw = false;
+	    display.context.restore();
+	  }
+      }
     }
-    
-    length = objectsToDraw.length;
-    for(j=0; j !== length; j++)
-        if (objectsToDraw[j].redraw)
-          objectsToDraw[j].clear(display.context);
- 
-    for(j=0; j !== length; j++) {
-        
-        obj = objectsToDraw[j];
-
-        if (! obj.redraw)
-            continue;
-	display.context.save();
-        obj.paint(display.context);
-	display.context.restore();
-    }
-    
-    if (_drawFPS) 
-        drawFPS();
     
     drawing = false;
 }

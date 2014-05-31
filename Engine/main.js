@@ -333,11 +333,9 @@ function importgameData(path) {
 //game's main loop
 function gameLoop ()
 {   
-    var scene = game.getScene();
-    var draw = (!display.DOM && display.needsRedraw(scene));
-    
     requestAnimationFrame(gameLoop);
- 
+    
+    var scene = game.getScene();
     if (scene && scene.isActive()) {
       var action = scene.getAction();
       if (! action || action.isFinished()) {
@@ -352,8 +350,7 @@ function gameLoop ()
       }
     }
     
-    if (draw)
-      display.draw(scene);
+    display.draw(scene);
 }
 
 function pause()
