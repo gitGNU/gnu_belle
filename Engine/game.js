@@ -21,7 +21,28 @@
 	    return this.data.scenes.scene;
 	  return {};
 	}
-
+	
+	game.addEventListener = function(event, obj, callback) {
+	  if (typeof callback != "function" || ! event)
+	    return;
+	  
+	  obj = obj || null;
+	  var listeners = this.eventListeners[event] || [];
+	  
+	  var _callback = function() {
+	    callback.call(obj);
+	  }
+	  
+	  listeners.push(_callback);
+	  this.eventListeners[event] = listeners;
+	}
+	
+	game.triggerEvent = function(event) {
+	  var listeners = this.eventListeners[event] || [];
+	  for(var i=0; i < listeners.length; i++)
+	    listeners[i].call(this);
+	}
+	
     	game.hasPauseScreen = function() {
 	  if(this.pauseScreen.scenes.length)
 	    return true;
@@ -152,8 +173,8 @@
 	}
 	
 	game.getValue = function(variable) {
-		if (! variable.length)
-		  return "say what";
+		if (! variable)
+		  return "";
 	  
 		if (variable[0] == "$")
 		  variable = variable.slice(1);
@@ -166,7 +187,10 @@
 	}
 
 	game.addVariable = function (variable, value) {
-	    this.variables[variable] = value;
+	    if (this.getValue(variable) != value) {
+	      this.variables[variable] = value;
+	      this.triggerEvent("variableChanged");
+	    }
 	}
 	
 	game.isPaused = function() {
