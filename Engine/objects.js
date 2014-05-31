@@ -191,7 +191,7 @@ function Object(info)
     this.mouseMoveActions = [];
     this.mouseLeaveActions = [];
     this.name = "";
-    this.defaultState = null;
+    this.defaultState = null; 
     this.loaded = true;
     this.data = info;
     this.parent = parent ? parent : null;
@@ -222,12 +222,13 @@ function Object(info)
     if ("onMouseLeave" in info) {
         this.mouseLeaveActions = this.initActions(info["onMouseLeave"]);
     }
-    
-    Object.prototype.load.call(this, info);
 }
 
 Object.prototype.load = function(data)
 {
+    if (! data)
+      return false;
+  
     this.setX(data.x);
     this.setY(data.y);
     this.setWidth(data.width);
@@ -278,6 +279,8 @@ Object.prototype.load = function(data)
     if ("visible" in data) {
         this.visible = data["visible"];
     }
+    
+    return true;
 }
 
 Object.prototype.frameChanged = function()
@@ -860,14 +863,17 @@ function TextBox(info)
     this.displayedText = "";
     this.textHeight = 0;
     game.addEventListener("variableChanged", this, this.update);
-
-    this.load(info);
 }
 
 belle.utils.extend(Object, TextBox);
 
 TextBox.prototype.load = function(data)
-{
+{   
+    var loaded = Object.prototype.load.call(this, data);
+    
+    if (! loaded)
+      return false;
+    
     if ("font" in data) 
         this.font = data["font"];
     this.textElement.style.font = this.font;
@@ -881,6 +887,8 @@ TextBox.prototype.load = function(data)
     if ("textAlignment" in data) {
         this.textAlignment = data["textAlignment"].split("|");
     }
+    
+    return true;
 }
 
 TextBox.prototype.paint = function(context)
@@ -1064,13 +1072,17 @@ function ObjectGroup(data)
     Object.call(this, data);
     this.objects = [];
     this.hoveredObject = null;
-    
-    this.load(data);
 }
 
 belle.utils.extend(Object, ObjectGroup);
 
 ObjectGroup.prototype.load = function(data) {
+    
+    var loaded = Object.prototype.load.call(this, data);
+    
+    if (! loaded)
+      return false;
+    
     if ("objects" in data) {	
         var obj;
         var objects = data["objects"];
@@ -1107,6 +1119,8 @@ ObjectGroup.prototype.load = function(data) {
             this.objects.push(obj);
         }
     }
+    
+    return true;
 }
 
 ObjectGroup.prototype.serialize = function()
@@ -1164,7 +1178,7 @@ ObjectGroup.prototype.processEvent = function(event)
 
     if (this.hoveredObject && this.hoveredObject != object)
         this.hoveredObject.mouseLeaveEvent(event);
-    
+
     if (event.type == "mousemove")
         this.hoveredObject = object;
     

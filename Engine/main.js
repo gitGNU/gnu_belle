@@ -104,6 +104,7 @@ var createObject = function (data)
     }
 
     var obj = new _Object(data);
+    obj.load(data);
     if (belle.display.DOM)
       obj.initElement();
     return obj;
