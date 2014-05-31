@@ -411,7 +411,7 @@ Object.prototype.setBackgroundOpacity = function(alpha)
 {
     this.backgroundColor.alpha = alpha; 
     if (this.backgroundElement) {
-      $(this.backgroundElement).fadeTo(1, this.getBackgroundOpacityF() * this.getOpacityF());
+      $(this.backgroundElement).css("opacity", this.getBackgroundOpacityF() * this.getOpacityF());
     }
 }
 
@@ -448,7 +448,7 @@ Object.prototype.setOpacity = function (alpha)
     //always update DOM element, since this function is called on constructor
     //and then on initElement with all children added
     if (this.element)
-	$(this.element).children().fadeTo(1, this.getOpacityF());   
+	$(this.element).children().css("opacity", this.getOpacityF());   
 }
 
 Object.prototype.paint = function(context)
