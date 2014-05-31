@@ -748,6 +748,11 @@ Object.prototype.serialize = function()
   return data;
 }
 
+Object.prototype.update = function()
+{
+  this.redraw = true;
+}
+
 /*********** IMAGE OBJECT ***********/
 function Image (data)
 {
@@ -836,6 +841,7 @@ function TextBox(info)
     this.prevText = "";
     this.displayedText = "";
     this.textHeight = 0;
+    game.addEventListener("variableChanged", this, this.update);
 
     this.load(info);
 }
@@ -1026,6 +1032,12 @@ TextBox.prototype.serialize = function()
     return data;
 }
 
+TextBox.prototype.update = function()
+{
+    Object.prototype.update.call(this);
+    if (this.textElement)
+      this.textElement.innerHTML = game.replaceVariables(this.text);
+}
 
 /*********** Object Group ***********/
 
