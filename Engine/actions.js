@@ -47,8 +47,7 @@ function Action(data)
                     this.object = scene.getObject(data["object"].name);
 
                 if (! this.object && belle.objects[data["object"].type])  {
-                    var _Object = belle.getObjectPrototype(data["object"].type);
-                    this.object = new _Object(data["object"]);
+		    this.object = belle.createObject(data["object"]);
                 }
             }
         }
