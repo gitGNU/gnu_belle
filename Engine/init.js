@@ -23,7 +23,10 @@ game = {
     "directory" : "",
     "states" : {},
     "data" : null,
-    "paused": false
+    "paused": false,
+    "eventListeners" : {
+      "variableChanged" : []
+    }
 };
 
 game.pauseScreen = {
