@@ -1185,6 +1185,16 @@ ObjectGroup.prototype.paint = function(context)
     return true;
 }
 
+ObjectGroup.prototype.mouseLeaveEvent = function(event)
+{
+  Object.prototype.mouseLeaveEvent.call(this, event);
+  
+  if (this.hoveredObject) {
+    this.hoveredObject.mouseLeaveEvent(event);
+    this.hoveredObject = null;
+  }
+}
+
 ObjectGroup.prototype.processEvent = function(event)
 {
     var x = event.canvasX;
