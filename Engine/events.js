@@ -108,6 +108,9 @@ document.onmouseup = function(event)
     var ev = event || window.event || window.Event;
     var processed = false;
     
+    if (detectbutton(ev) != "left")
+      return;
+    
     if (! mapToDisplay(ev))
         return;
     
@@ -127,6 +130,9 @@ document.onmousedown = function(event)
 {
     var ev = event || window.event || window.Event;
     
+    if (detectbutton(ev) != "left")
+      return;
+      
     pressedObject = hoveredObject;
     
     if (hoveredObject) {
@@ -152,6 +158,23 @@ document.onkeyup = function(event)
     }
 }
 
+function detectbutton(e)
+{
+    var button = "";
+
+    if (e.which == null)
+    {
+        button = (e.button < 2) ? 'left' :
+            ((e.button == 4) ? 'middle' : 'right');
+    }
+    else
+    {
+        button = (e.which < 2) ? 'left' :
+            ((e.which == 2) ? 'middle' : 'right');
+    }
+
+    return button;
+}
 
 }(EventDispatcher));
 
