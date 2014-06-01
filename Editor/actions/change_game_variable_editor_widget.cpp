@@ -22,7 +22,7 @@ ChangeGameVariableEditorWidget::ChangeGameVariableEditorWidget(ActionEditorWidge
     ActionEditorWidget(parent)
 {
     mVariableEdit = new QLineEdit(this);
-    QRegExpValidator* validator = new QRegExpValidator(QRegExp("(([a-zA-Z]+_)+[0-9]*)*"), this);
+    QRegExpValidator* validator = new QRegExpValidator(QRegExp("^[a-zA-Z_]+[a-zA-Z_0-9]*$"), this);
     mVariableEdit->setValidator(validator);
 
     mOperatorChooser = new QComboBox(this);
