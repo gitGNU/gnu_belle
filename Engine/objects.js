@@ -862,13 +862,8 @@ function TextBox(info)
     this.textAlignment = [];
     this.textParts = [];
     this.textElement = document.createElement("div");
-    belle.utils.initElement(this.textElement, info);
-    this.textElement.style.display = "block";
     this.element.appendChild(this.textElement);
-    this.font = belle.game.font;
-    this.prevText = "";
     this.displayedText = "";
-    this.textHeight = 0;
     game.addEventListener("variableChanged", this, this.update);
 }
 
@@ -882,18 +877,18 @@ TextBox.prototype.load = function(data)
       return false;
     
     if ("font" in data) 
-        this.font = data["font"];
-    this.textElement.style.font = this.font;
+	this.setFont(data["font"]);
+    else
+	this.setFont(game.font);
+  
+    if ("textAlignment" in data)
+        this.textAlignment = data["textAlignment"].split("|");
     
     if ("text" in data)
         this.setText(data["text"]);
 	
     if ("textColor" in data)
         this.setTextColor(data["textColor"]);
-    
-    if ("textAlignment" in data) {
-        this.textAlignment = data["textAlignment"].split("|");
-    }
     
     return true;
 }
@@ -948,12 +943,13 @@ TextBox.prototype.alignText = function(text, size)
         else
             this.textElement.style.textAlign = "left"; 
         
-        if (this.textAlignment.contains("VCenter"))
-            this.textElement.style.lineHeight = this.scaledHeight + "px";
+        if (this.textAlignment.contains("VCenter")) {
+	    this.textElement.style.top = "0";
+	    this.textElement.style.verticalAlign = "middle";
+	}
         else if (this.textAlignment.contains("Bottom")) {
-            this.textElement.style.lineHeight = 1;
-            this.textElement.style.bottom = 0;
-            this.textElement.style.height = "auto";
+	  this.textElement.style.top = "auto";
+	  this.textElement.style.bottom = "0";
         }
     }
     else {    
@@ -1021,6 +1017,17 @@ TextBox.prototype.appendText = function(text)
     this.setText(this.text + text);
 }
 
+TextBox.prototype.setFont = function(font)
+{
+    if (font && this.font != font) {
+	this.font = font;
+	if (this.textElement)
+	  this.textElement.style.font = font;
+        this.alignText();
+        this.update();
+    }
+}
+
 TextBox.prototype.setText = function(text)
 {
     if (this.text != text) {
@@ -1070,6 +1077,14 @@ TextBox.prototype.update = function()
     Object.prototype.update.call(this);
     if (this.textElement)
       this.textElement.innerHTML = game.replaceVariables(this.text);
+}
+
+TextBox.prototype.initElement = function() 
+{
+  Object.prototype.initElement.call(this);
+  
+  this.textElement.style.display = "table-cell";
+  this.textElement.style.position = "relative";
 }
 
 /*********** Object Group ***********/
