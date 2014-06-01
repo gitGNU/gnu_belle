@@ -568,7 +568,8 @@ Object.prototype.mouseEnterEvent = function()
     if (! this.visible)
       return;
       
-    if (this.mouseMoveActions || this.eventListeners["mousemove"])
+    if (this.mouseMoveActions && this.mouseMoveActions.length || 
+      this.eventListeners["mousemove"] && this.eventListeners["mousemove"].length)
       this.defaultState = this.serialize();
 }
 
