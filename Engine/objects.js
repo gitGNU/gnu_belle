@@ -1334,6 +1334,8 @@ function Button(data)
 {
     TextBox.call(this, data);
     this.visible = true;
+    if (this.element)
+      this.element.style.cursor = "pointer";
 }
 
 belle.utils.extend(TextBox, Button);
