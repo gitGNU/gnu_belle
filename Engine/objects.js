@@ -551,15 +551,22 @@ Object.prototype.isReady = function()
 
 Object.prototype.mouseLeaveEvent = function()
 {
+    if (! this.visible)
+      return;
+    
     if (this.defaultState)
       this.load(this.defaultState);
 }
 
 Object.prototype.mouseEnterEvent = function()
 {
+    if (! this.visible)
+      return;
+      
     if (this.mouseMoveActions || this.eventListeners["mousemove"])
       this.defaultState = this.serialize();
 }
+
 
 Object.prototype.addEventListener = function(event, listener)
 {
@@ -1156,14 +1163,6 @@ ObjectGroup.prototype.paint = function(context)
     
     this.redraw = false;
     return true;
-}
-
-ObjectGroup.prototype.mouseLeaveEvent = function(event)
-{
-    Object.prototype.mouseLeaveEvent.call(this, event);
-    if (this.hoveredObject) {
-        this.hoveredObject.mouseLeaveEvent(event);
-    }
 }
 
 ObjectGroup.prototype.processEvent = function(event)
