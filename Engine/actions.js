@@ -1184,7 +1184,8 @@ function ShowMenu(data)
       var buttons = this.object.objects;
       for(var i=0; i < buttons.length; i++) {
 	buttons[i].addEventListener("mouserelease", function() {
-	    self.object.setVisible(false);
+	    var scene = game.getScene();
+	    scene.removeObject(self.object);
 	    self.setFinished(true);
 	});
       }
