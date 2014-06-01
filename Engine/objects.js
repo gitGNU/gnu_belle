@@ -454,8 +454,13 @@ Object.prototype.setOpacity = function (alpha)
     
     //always update DOM element, since this function is called on constructor
     //and then on initElement with all children added
-    if (this.element)
-	$(this.element).children().css("opacity", this.getOpacityF());   
+    if (this.element) {
+	var opacityF = this.getOpacityF();
+	$(this.element).children().each(function(index) {
+	  var childOpacity = $(this).css("opacity") || 0;
+	  $(this).css("opacity", opacityF * childOpacity);
+	});   
+    }
 }
 
 Object.prototype.paint = function(context)
