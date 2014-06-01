@@ -31,6 +31,7 @@ var height = 0;
 var loader = null;
 var progress = null;
 var container = null;
+var clearObjects = [];
 
 //public variables
 display.view = "portrait";
@@ -204,7 +205,7 @@ var draw = function(scene)
     
     drawing = true;
 
-    var objects = scene.objects;
+    var objects = scene.objects.concat(clearObjects);
     var rect = null;
     var obj = null;
     var i, j, redraw=false;
@@ -245,6 +246,7 @@ var draw = function(scene)
 	    display.context.restore();
 	  }
       }
+      clearObjects.length = 0;
     }
     
     drawing = false;
@@ -387,6 +389,17 @@ var addObject = function(object, container)
     }
 }
 
+var removeObject = function(object)
+{
+    if (display.DOM) {
+      $(object.element).detach();
+    }
+    else {
+      object.redraw = true;
+      object.setVisible(false);
+      clearObjects.push(object);
+    }
+}
 
 var isCanvasSupported = function() {
   var elem = document.createElement("canvas");
@@ -461,6 +474,7 @@ display.draw = draw;
 display.clear = clear;
 display.isCanvasSupported = isCanvasSupported;
 display.addObject = addObject;
+display.removeObject = removeObject;
 display.addObjects = addObjects;
 display.needsRedraw = needsRedraw;
 display.drawFPS = drawFPS;
