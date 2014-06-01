@@ -94,9 +94,12 @@ document.onmousemove = function(event)
         }
     }
 
-    if (prevHoveredObject && prevHoveredObject != hoveredObject) {
-        ev.mouseleave = true;
-        prevHoveredObject.mouseLeaveEvent(ev);
+    if (prevHoveredObject != hoveredObject) {
+      if (prevHoveredObject)
+	prevHoveredObject.mouseLeaveEvent(ev);
+      
+      if (hoveredObject)
+	hoveredObject.mouseEnterEvent(ev);
     }
 }
 

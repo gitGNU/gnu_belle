@@ -1176,8 +1176,13 @@ ObjectGroup.prototype.processEvent = function(event)
     var result = Object.prototype.processEvent.call(this, event);
     var object = this.objectAt(x, y);
 
-    if (this.hoveredObject && this.hoveredObject != object)
-        this.hoveredObject.mouseLeaveEvent(event);
+    if (this.hoveredObject != object) {
+      if (this.hoveredObject)
+	this.hoveredObject.mouseLeaveEvent(event);
+      
+      if (object)
+	object.mouseEnterEvent(event);
+    }
 
     if (event.type == "mousemove")
         this.hoveredObject = object;
