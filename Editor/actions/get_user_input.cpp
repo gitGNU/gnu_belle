@@ -76,7 +76,10 @@ QString GetUserInput::variable()
 
 void GetUserInput::setVariable(const QString & var)
 {
-    mVariable = var;
+    if (var != mVariable) {
+        mVariable = var;
+        emit dataChanged();
+    }
 }
 
 QString GetUserInput::message()
@@ -86,7 +89,10 @@ QString GetUserInput::message()
 
 void GetUserInput::setMessage(const QString & msg)
 {
-    mMessage = msg;
+    if (msg != mMessage) {
+        mMessage = msg;
+        emit dataChanged();
+    }
 }
 
 QString GetUserInput::defaultValue()
@@ -96,7 +102,25 @@ QString GetUserInput::defaultValue()
 
 void GetUserInput::setDefaultValue(const QString & value)
 {
-    mDefaultValue = value;
+    if (value != mDefaultValue) {
+        mDefaultValue = value;
+        emit dataChanged();
+    }
+}
+
+QString GetUserInput::displayText() const
+{
+    QString var("");
+    QString text(tr("Prompt") + " ");
+
+    text += QString("\"%1\"").arg(mMessage);
+
+    if (mVariable.size())
+        var = " " + tr("and store reply in") + " $" + mVariable;
+
+    text += var;
+
+    return text;
 }
 
 QVariantMap GetUserInput::toJsonObject()

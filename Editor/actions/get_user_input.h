@@ -44,11 +44,16 @@ public:
     QString defaultValue();
     void setDefaultValue(const QString&);
 
+    virtual QString displayText() const;
+
     virtual QVariantMap toJsonObject();
     
 signals:
     
 public slots:
+
+private:
+    void rebuildDisplayText();
 
 private:
     QString mVariable;
