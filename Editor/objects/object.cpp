@@ -1049,7 +1049,7 @@ void Object::setProperties(const QVariantMap &data)
         mEventToActions.insert(Interaction::MouseRelease, actions);
     }
 
-    if (data.contains("boderWidth") && data.value("borderWidth").canConvert(QVariant::Int))
+    if (data.contains("borderWidth") && data.value("borderWidth").canConvert(QVariant::Int))
         mBorderWidth = data.value("borderWidth").toInt();
     if (data.contains("borderColor") && data.value("borderColor").type() == QVariant::List)
         mBorderColor = Utils::listToColor(data.value("borderColor").toList());
