@@ -34,6 +34,7 @@ Image::Image(const QString& path, QObject *parent, const QString& name) :
 {
     init();
     setImage(path);
+    setName(QFileInfo(ResourceManager::mediaName(path)).baseName());
 }
 
 Image::Image(const QVariantMap& data, QObject* parent):
