@@ -241,7 +241,7 @@ void DialogueEditorWidget::setTextInOutputBox()
     else {
         TextBox* textBox = qobject_cast<TextBox*>(mCurrentAction->sceneObject());
         if (textBox) {
-            textBox->setText(mCurrentAction->text());
+            textBox->setPlaceholderText(mCurrentAction->text());
         }
     }
 }
