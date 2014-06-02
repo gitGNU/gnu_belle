@@ -88,12 +88,7 @@ TextBox::TextBox(const QVariantMap & data, QObject * parent):
 
 void TextBox::init(const QString& text)
 {
-
-    QString newText(text);
-    if (text.isNull() || text.isEmpty())
-        newText = tr("The text goes here");
-
-    mText = newText;
+    mText = text;
     mTextColor = QColor(Qt::black);
     mTextRect = sceneRect();
     mPlaceholderText = "";
@@ -124,8 +119,11 @@ QString TextBox::text()
 
 void TextBox::setText(const QString & text)
 {
-    mText = text;
-    emit dataChanged();
+    if (text != mText) {
+        mPlaceholderText.clear();
+        mText = text;
+        emit dataChanged();
+    }
 }
 
 
@@ -225,8 +223,10 @@ QString TextBox::placeholderText() const {
 
 void TextBox::setPlaceholderText(const QString& text)
 {
-    mPlaceholderText = text;
-    emit dataChanged();
+    if (text != mPlaceholderText) {
+        mPlaceholderText = text;
+        emit dataChanged();
+    }
 }
 
 void TextBox::paint(QPainter & painter)
