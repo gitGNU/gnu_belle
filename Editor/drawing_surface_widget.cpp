@@ -142,6 +142,7 @@ void DrawingSurfaceWidget::setObject(Object* obj)
     if (mObject) {
         adjustSize();
         update();
+        connect(mObject, SIGNAL(dataChanged()), this, SLOT(update()));
         connect(mObject, SIGNAL(destroyed()), this, SLOT(onObjectDestroyed()));
     }
     else {
