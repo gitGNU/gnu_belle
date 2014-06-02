@@ -77,23 +77,27 @@ void TextPropertiesWidget::onColorChosen(const QColor& color)
 
 void TextPropertiesWidget::updateData(Object *obj)
 {
-    if (obj == mCurrentObject)
+    TextBox* textbox = qobject_cast<TextBox*>(obj);
+
+    if (! textbox)
         return;
+
+    if (! textbox->text().isEmpty())
+        textbox->setPlaceholderText("");
+
+    if (textbox == mCurrentObject)
+        return;
+
+    mCurrentObject = 0;
 
     ObjectEditorWidget::updateData(obj);
 
-    mCurrentObject = qobject_cast<TextBox*>(obj);
-    if (! mCurrentObject)
-        return;
-
     mChooseFontWidget->loadFonts();
-    mHorizontalAlignmentComboBox->blockSignals(true);
-    mVerticalAlignmentComboBox->blockSignals(true);
 
     mHorizontalAlignmentComboBox->setCurrentIndex(mHorizontalAlignmentComboBox->count()-1);
     mVerticalAlignmentComboBox->setCurrentIndex(mVerticalAlignmentComboBox->count()-1);
 
-    QStringList alignment = mCurrentObject->textAlignmentAsString().toLower().split("|");
+    QStringList alignment = textbox->textAlignmentAsString().toLower().split("|");
 
     if (alignment.size() >= 1) {
         int index = mHorizontalAlignmentComboBox->findData(alignment[0], Qt::UserRole, Qt::MatchFixedString);
@@ -107,15 +111,13 @@ void TextPropertiesWidget::updateData(Object *obj)
             mVerticalAlignmentComboBox->setCurrentIndex(index);
     }
 
-    mHorizontalAlignmentComboBox->blockSignals(false);
-    mVerticalAlignmentComboBox->blockSignals(false);
+    mTextEdit->setText(textbox->text());
+    mColorButton->setText(textbox->textColor().name());
+    mColorButton->setColor(textbox->textColor());
+    mChooseFontWidget->setCurrentFontFamily(textbox->fontFamily());
+    mFontSizeSpin->setValue(textbox->fontSize());
 
-    mCurrentObject->setPlaceholderText("");
-    mTextEdit->setText(mCurrentObject->text());
-    mColorButton->setText(mCurrentObject->textColor().name());
-    mColorButton->setColor(mCurrentObject->textColor());
-    mChooseFontWidget->setCurrentFontFamily(mCurrentObject->fontFamily());
-    mFontSizeSpin->setValue(mCurrentObject->fontSize());
+    mCurrentObject = textbox;
 }
 
 void TextPropertiesWidget::onAlignmentChanged(int index)
