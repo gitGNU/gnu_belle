@@ -27,14 +27,16 @@ DialogueBox::DialogueBox(QObject *parent, const QString& name) :
 
     setY(Scene::height()- (Scene::height()/3));
 
-    TextBox *speakerTextBox = new TextBox("Narrator", this);
+    TextBox *speakerTextBox = new TextBox("", this);
+    speakerTextBox->setPlaceholderText("Narrator");
     speakerTextBox->setObjectName("speakerTextBox");
     speakerTextBox->setEditableName(false);
     speakerTextBox->setHeight(30);
     this->append(speakerTextBox);
 
     QString text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus.";
-    TextBox *dialogueTextBox = new TextBox(text, this);
+    TextBox *dialogueTextBox = new TextBox("", this);
+    dialogueTextBox->setPlaceholderText(text);
     dialogueTextBox->setEditableName(false);
     dialogueTextBox->setObjectName("dialogueTextBox");
     dialogueTextBox->setHeight(Scene::height()/3);
@@ -70,7 +72,7 @@ void DialogueBox::setText(const QString & text)
 {
     TextBox *textBox = this->textBox("dialogueTextBox");
     if (textBox) {
-        textBox->setText(text);
+        textBox->setPlaceholderText(text);
         emit dataChanged();
     }
 }
@@ -79,7 +81,7 @@ void DialogueBox::setSpeakerName(const QString & speaker)
 {
     TextBox *textBox = this->textBox("speakerTextBox");
     if (textBox) {
-        textBox->setText(speaker);
+        textBox->setPlaceholderText(speaker);
         emit dataChanged();
     }
 }
