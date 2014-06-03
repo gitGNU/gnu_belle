@@ -51,10 +51,10 @@ public:
     virtual void setSceneObject(Object *);
 
     void setFadeAction(Fade*);
-    Fade* fadeAction();
+    Fade* fadeAction() const;
 
     void setSlideAction(Slide*);
-    Slide* slideAction();
+    Slide* slideAction() const;
 
 private:
     void init(bool);

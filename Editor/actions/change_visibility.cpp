@@ -60,6 +60,9 @@ void ChangeVisibility::init(bool show)
     mFadeAction->setDuration(0);
     mSlideAction->setDuration(0);
 
+    connect(mFadeAction, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()));
+    connect(mSlideAction, SIGNAL(dataChanged()), this, SIGNAL(dataChanged()));
+
     if (show) {
         setName(tr("Show"));
         setType("Show");
@@ -123,7 +126,7 @@ void ChangeVisibility::setFadeAction(Fade* action)
     mFadeAction = action;
 }
 
-Fade* ChangeVisibility::fadeAction()
+Fade* ChangeVisibility::fadeAction() const
 {
     return mFadeAction;
 }
@@ -133,7 +136,7 @@ void ChangeVisibility::setSlideAction(Slide* action)
     mSlideAction = action;
 }
 
-Slide* ChangeVisibility::slideAction()
+Slide* ChangeVisibility::slideAction() const
 {
     return mSlideAction;
 }
