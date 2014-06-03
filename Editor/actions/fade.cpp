@@ -70,6 +70,11 @@ Fade::Type Fade::fadeType()
     return mFadeType;
 }
 
+QString Fade::fadeTypeString() const
+{
+    return fadeTypeToString(mFadeType);
+}
+
 void Fade::setFadeType(Fade::Type type)
 {
     mFadeType = type;
@@ -88,7 +93,6 @@ void Fade::setFadeType(const QString& type)
         mFadeType = Fade::Out;
 }
 
-
 QString Fade::fadeTypeToString(Fade::Type type) const
 {
     if (type == 0)
@@ -97,23 +101,24 @@ QString Fade::fadeTypeToString(Fade::Type type) const
     return "out";
 }
 
-double Fade::duration()
+double Fade::duration() const
 {
     return mDuration;
 }
 
 void Fade::setDuration(double duration)
 {
-    mDuration = duration;
+    if (duration != mDuration) {
+        mDuration = duration;
+        emit dataChanged();
+    }
 }
 
 QString Fade::displayText() const
 {
-    QString objectsName(tr("None"));
-    if (sceneObject())
-        objectsName = sceneObject()->objectName();
-
-    return QString("'%2'").arg(objectsName);//fadeTypeToString(mFadeType));
+    if (! this->sceneObject())
+        return "";
+    return QString("\"%1\" %2 %3s").arg(sceneObject()->objectName()).arg(tr("in")).arg(duration());
 }
 
 QVariantMap Fade::toJsonObject()

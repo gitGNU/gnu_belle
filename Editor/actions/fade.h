@@ -44,11 +44,12 @@ public:
     QString displayText() const;
 
     Fade::Type fadeType();
+    QString fadeTypeString() const;
     void setFadeType(Fade::Type);
     void setFadeType(const QString&);
     QString fadeTypeToString(Fade::Type) const;
 
-    double duration();
+    double duration() const;
     void setDuration(double);
 signals:
 
