@@ -38,7 +38,6 @@ public:
     virtual ActionEditorWidget* editorWidget();
     void setCharacterState(const QString&);
     QString characterState();
-    virtual QString displayText() const;
     QVariantMap toJsonObject();
 
 private:

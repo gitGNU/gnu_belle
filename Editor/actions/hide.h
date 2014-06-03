@@ -33,7 +33,6 @@ public:
     static HideEditorWidget* hideEditorWidget();
     static void setHideEditorWidget(HideEditorWidget*);
     virtual ActionEditorWidget* editorWidget();
-    virtual QString displayText() const;
 
 private:
     void init();

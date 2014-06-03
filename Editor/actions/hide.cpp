@@ -52,11 +52,3 @@ ActionEditorWidget* Hide::editorWidget()
 {
     return mHideEditorWidget;
 }
-
-QString Hide::displayText() const
-{
-    if (sceneObject())
-        return sceneObject()->objectName();
-
-    return "";
-}

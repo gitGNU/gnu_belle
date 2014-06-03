@@ -94,6 +94,47 @@ ActionEditorWidget* ChangeVisibility::editorWidget()
     return mEditorWidget;
 }
 
+QString ChangeVisibility::displayText() const
+{
+    if (! sceneObject())
+        return "";
+
+    QString text("");
+    if (sceneObject())
+        text += sceneObject()->objectName() + " ";
+
+    Character* character = qobject_cast<Character*>(sceneObject());
+    if (character)
+        text += QString(" (%1)").arg(character->currentState());
+
+    const Fade* fade = fadeAction();
+    const Slide* slide = slideAction();
+
+    float duration = 0.0;
+
+    if (fade && fade->duration() || slide && slide->duration()) {
+        text += tr("with") + " ";
+
+        if (fade && fade->duration()) {
+            text += QString("%1%2").arg("fade").arg(fade->fadeTypeString());
+            if (fade->duration() > duration)
+                duration = fade->duration();
+        }
+
+        if (fade && fade->duration() && slide && slide->duration())
+            text += " " + tr("and") + " ";
+
+        if (slide && slide->duration()) {
+            text += tr("slide");
+            if (slide->duration() > duration)
+                duration = slide->duration();
+        }
+        text += QString(" %1 %2s").arg(tr("in")).arg(QString::number(duration,'f', 2));
+    }
+
+    return text;
+}
+
 void ChangeVisibility::setSceneObject(Object* obj)
 {
     if (! obj)

@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2013 Carlos Pais 
+/* Copyright (C) 2012, 2013 Carlos Pais
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,19 +66,6 @@ ShowEditorWidget* Show::showEditorWidget()
 ActionEditorWidget* Show::editorWidget()
 {
     return mShowEditorWidget;
-}
-
-QString Show::displayText() const
-{
-    QString text("");
-    if (sceneObject())
-        text += sceneObject()->objectName();
-
-    Character* character = qobject_cast<Character*>(sceneObject());
-    if (character)
-        text += QString(" (%1)").arg(character->currentState());
-
-    return text;
 }
 
 QVariantMap Show::toJsonObject()

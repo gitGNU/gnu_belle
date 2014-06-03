@@ -43,6 +43,7 @@ public:
     static ChangeVisibilityEditorWidget* changeVisibilityEditorWidget();
     static void setChangeVisibilityEditorWidget(ChangeVisibilityEditorWidget*);
     virtual ActionEditorWidget* editorWidget();
+    virtual QString displayText() const;
     void setCharacter(Character*);
     Character* character() const;
     virtual QVariantMap toJsonObject();
