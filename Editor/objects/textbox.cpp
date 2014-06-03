@@ -84,6 +84,9 @@ TextBox::TextBox(const QVariantMap & data, QObject * parent):
         mFont.setFamily(Utils::fontFamily(font));
         mFont.setPixelSize(Utils::fontSize(font));
     }
+
+    if (data.contains("placeholderText") && data.value("placeholderText").type() == QVariant::String)
+        this->setPlaceholderText(data.value("placeholderText").toString());
 }
 
 void TextBox::init(const QString& text)
@@ -256,6 +259,11 @@ QVariantMap TextBox::toJsonObject(bool internal)
     object.insert("textAlignment", textAlignmentAsString());
     if (mFont != Object::defaultFont())
         object.insert("font", Utils::font(mFont.pixelSize(), mFont.family()));
+
+    if (internal) {
+        if (! placeholderText().isEmpty())
+            object.insert("placeholderText", placeholderText());
+    }
 
     filterResourceData(object);
 
