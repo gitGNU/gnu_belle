@@ -64,7 +64,7 @@ public:
     static void setTextEditorWidget(TextPropertiesWidget *);
     virtual ObjectEditorWidget* editorWidget();
     virtual void paint(QPainter &);
-    virtual QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true);
 
     void setX(int);
     void setY(int);

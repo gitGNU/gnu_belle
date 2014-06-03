@@ -244,9 +244,9 @@ void TextBox::paint(QPainter & painter)
     painter.restore();
 }
 
-QVariantMap TextBox::toJsonObject()
+QVariantMap TextBox::toJsonObject(bool internal)
 {
-    QVariantMap object = Object::toJsonObject();
+    QVariantMap object = Object::toJsonObject(internal);
     QVariantList color;
     color << mTextColor.red() << mTextColor.green() << mTextColor.blue()
              << mTextColor.alpha();

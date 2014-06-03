@@ -126,9 +126,9 @@ void Image::hide()
         mImage->movie()->stop();
 }
 
-QVariantMap Image::toJsonObject()
+QVariantMap Image::toJsonObject(bool internal)
 {
-    QVariantMap object = Object::toJsonObject();
+    QVariantMap object = Object::toJsonObject(internal);
 
     if (mImage)
         object.insert("image", mImage->name());

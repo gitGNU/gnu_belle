@@ -120,9 +120,9 @@ void DialogueBox::setSpeakerColor(const QColor & color)
     }
 }
 
-QVariantMap DialogueBox::toJsonObject()
+QVariantMap DialogueBox::toJsonObject(bool internal)
 {
-    return ObjectGroup::toJsonObject();
+    return ObjectGroup::toJsonObject(internal);
 }
 
 TextBox* DialogueBox::textBox(const QString& name)

@@ -907,13 +907,13 @@ void Belle::exportGameFile(const QString& path)
 
     QVariantMap res;
     for (int i=0; i < ResourceManager::instance()->resources().size(); i++) {
-        res.insert(ResourceManager::instance()->resources().at(i)->objectName(), ResourceManager::instance()->resources().at(i)->toJsonObject());
+        res.insert(ResourceManager::instance()->resources().at(i)->objectName(), ResourceManager::instance()->resources().at(i)->toJsonObject(false));
     }
     jsonFile.insert("resources", res);
 
     QVariantList scenes;
     for (int i=0; i < mDefaultSceneManager->size(); i++) {
-        scenes.append(mDefaultSceneManager->scene(i)->toJsonObject());
+        scenes.append(mDefaultSceneManager->scene(i)->toJsonObject(false));
     }
 
     jsonFile.insert("scenes", scenes);
@@ -921,7 +921,7 @@ void Belle::exportGameFile(const QString& path)
     //export pause screen scenes
     scenes.clear();
     for (int i=0; i < mPauseSceneManager->size(); i++) {
-        scenes.append(mPauseSceneManager->scene(i)->toJsonObject());
+        scenes.append(mPauseSceneManager->scene(i)->toJsonObject(false));
     }
 
     QVariantMap pauseScreen;

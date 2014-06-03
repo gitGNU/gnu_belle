@@ -43,7 +43,7 @@ public:
     QList<Object*> objects();
     virtual void paint(QPainter&);
     virtual void move(int x, int y);
-    virtual QVariantMap toJsonObject();
+    virtual QVariantMap toJsonObject(bool internal=true);
     virtual Object* objectAt(qreal, qreal);
     void resize();
     Object* removeObjectAt(int);

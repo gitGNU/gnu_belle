@@ -103,7 +103,7 @@ class Scene : public QObject
         QList<Action*> actions() const;
         void appendAction(Action*);
 
-        virtual QVariantMap toJsonObject();
+        virtual QVariantMap toJsonObject(bool internal=true);
         QIcon icon();
         QPixmap* pixmap();
 

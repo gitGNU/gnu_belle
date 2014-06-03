@@ -526,7 +526,7 @@ QList<Action*> Object::actionsForEvent(Interaction::InputEvent event)
     return mEventToActions.value(event);
 }
 
-QVariantMap Object::toJsonObject()
+QVariantMap Object::toJsonObject(bool internal)
 {
     QVariantMap object;
     object.insert("name", objectName());

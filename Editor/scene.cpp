@@ -155,7 +155,7 @@ void Scene::addCopyOfObject(Object* object, bool select)
     if (! object)
         return;
 
-    QVariantMap data(object->toJsonObject());
+    QVariantMap data(object->toJsonObject(true));
     Object * obj = ResourceManager::instance()->createResource(data, false);
     appendObject(obj, select);
     obj->setResource(object);
@@ -514,7 +514,7 @@ QPixmap* Scene::pixmap()
     return mScenePixmap;
 }
 
-QVariantMap Scene::toJsonObject()
+QVariantMap Scene::toJsonObject(bool internal)
 {
     QVariantMap scene;
 
@@ -533,7 +533,7 @@ QVariantMap Scene::toJsonObject()
 
     QVariantList objects;
     for(int i=0; i < mObjects.size(); i++) {
-        objects.append(mObjects[i]->toJsonObject());
+        objects.append(mObjects[i]->toJsonObject(internal));
     }
     scene.insert("objects", objects);
 
