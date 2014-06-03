@@ -77,7 +77,11 @@ ActionEditorWidget* Slide::editorWidget()
 
 QString Slide::displayText() const
 {
-    return QString("From (%1, %2) to (%3, %4)").arg(mStartPoint.x())
+    if (! this->sceneObject())
+        return "";
+
+    return QString("\"%1\" from (%2, %3) to (%4, %5)").arg(this->sceneObject()->objectName())
+                                                .arg(mStartPoint.x())
                                                 .arg(mStartPoint.y())
                                                 .arg(mEndPoint.x())
                                                 .arg(mEndPoint.y());
@@ -187,7 +191,10 @@ float Slide::duration() const{
 }
 
 void Slide::setDuration(float dur) {
-    mDuration = dur;
+    if (mDuration != dur) {
+        mDuration = dur;
+        emit dataChanged();
+    }
 }
 
 
