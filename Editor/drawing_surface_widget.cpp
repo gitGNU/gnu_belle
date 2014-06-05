@@ -407,22 +407,24 @@ void DrawingSurfaceWidget::performOperation(Clipboard::Operation op)
 
 void DrawingSurfaceWidget::onPasteTriggered()
 {
-    if (mSceneManager->currentScene()) {
+    Scene * destScene = mSceneManager->currentScene();
+
+    if (destScene) {
         QList<Object*> objects = mSceneManager->clipboard()->objects();
         Clipboard::Operation op = mSceneManager->clipboard()->operation();
         Scene * srcScene = 0;
 
         foreach(Object* obj, objects) {
-            srcScene = qobject_cast<Scene*>(obj->parent());
+            srcScene = obj->scene();
 
             if (op == Clipboard::Copy) {
                 obj = obj->copy();
+                destScene->appendObject(obj);
             }
-            else if (op == Clipboard::Cut && srcScene) {
-                srcScene->removeObject(obj, true);
+            else if (op == Clipboard::Cut && srcScene && srcScene != destScene) {
+                srcScene->removeObject(obj);
+                destScene->appendObject(obj);
             }
-
-            mSceneManager->currentScene()->appendObject(obj);
         }
 
         mSceneManager->clipboard()->clear();
