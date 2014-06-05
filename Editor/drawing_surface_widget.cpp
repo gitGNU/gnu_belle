@@ -58,25 +58,25 @@ DrawingSurfaceWidget::DrawingSurfaceWidget(SceneManager *sceneManager, QWidget *
     mMoveDown = new QAction(QIcon(":/media/go-down.png"), tr("Move to back"), this);
     mFillWidth = new QAction(QIcon(":/media/fit-width.png"), tr("Fill scene's width"), this);
 
-    mCopyObject = new QAction(QIcon(":/media/editcopy.png"), tr("Copy"), this);
+    mCopyObject = new QAction(QIcon(":/media/editcopy.png"), tr("Copy"), parent);
     mCopyObject->setShortcut(QKeySequence("Ctrl+C"));
     mCopyObject->setShortcutContext(Qt::WidgetShortcut);
-    addAction(mCopyObject);
+    parent->addAction(mCopyObject);
 
-    mCutObject = new QAction(QIcon(":/media/editcut.png"), tr("Cut"), this);
+    mCutObject = new QAction(QIcon(":/media/editcut.png"), tr("Cut"), parent);
     mCutObject->setShortcut(QKeySequence("Ctrl+X"));
     mCutObject->setShortcutContext(Qt::WidgetShortcut);
-    addAction(mCutObject);
+    parent->addAction(mCutObject);
 
-    mPasteObject = new QAction(QIcon(":/media/editpaste.png"), tr("Paste"), this);
+    mPasteObject = new QAction(QIcon(":/media/editpaste.png"), tr("Paste"), parent);
     mPasteObject->setShortcut(QKeySequence("Ctrl+V"));
     mPasteObject->setShortcutContext(Qt::WidgetShortcut);
-    addAction(mPasteObject);
+    parent->addAction(mPasteObject);
 
-    mDeleteObject = new QAction(QIcon(":/media/delete.png"), tr("Remove"), this);
+    mDeleteObject = new QAction(QIcon(":/media/delete.png"), tr("Remove"), parent);
     mDeleteObject->setShortcut(QKeySequence::Delete);
     mDeleteObject->setShortcutContext(Qt::WidgetShortcut);
-    addAction(mDeleteObject);
+    parent->addAction(mDeleteObject);
 
     mClearBackground = new QAction(tr("Clear Background"), this);
 

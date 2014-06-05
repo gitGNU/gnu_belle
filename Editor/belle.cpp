@@ -91,7 +91,7 @@ Belle::Belle(QWidget *widget)
     //init drawing widget
     QLayout *vLayout = centralWidget()->layout();
     QScrollArea * scrollArea = new QScrollArea(mUi.centralwidget);
-    mDrawingSurfaceWidget = new DrawingSurfaceWidget(mDefaultSceneManager);
+    mDrawingSurfaceWidget = new DrawingSurfaceWidget(mDefaultSceneManager, scrollArea);
     connect(mDrawingSurfaceWidget, SIGNAL(selectionChanged(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
     scrollArea->setWidget(mDrawingSurfaceWidget);
     scrollArea->setContentsMargins(0, 0, 0, 0);
