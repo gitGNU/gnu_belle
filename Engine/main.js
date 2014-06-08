@@ -334,19 +334,25 @@ function importgameData(path) {
 //game's main loop
 function gameLoop ()
 {   
+    if (game.isFinished()) {
+      alert("Game finished.\nRefresh page to play again.");
+      return;
+    }
+   
     requestAnimationFrame(gameLoop);
     
     var scene = game.getScene();
     if (scene && scene.isActive()) {
       var action = scene.getAction();
       if (! action || action.isFinished()) {
-	  if (scene.hasNextAction())
+	  if (scene.hasNextAction()) {
 	    scene.nextAction();
-	  else if (scene.isFinished()) {
+          }
+	  else {
 	    if (game.hasNextScene())
 	      game.nextScene();
 	    else
-	      return;
+              game.setFinished(true);
 	  }
       }
     }
