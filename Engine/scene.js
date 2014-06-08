@@ -264,7 +264,7 @@ Scene.prototype.getCurrentAction = function() {
   return this.getAction();
 }
 
-Scene.prototype.getAction = function(id) {
+Scene.prototype.getAction = function(id, type) {
       
     if (typeof id == "number") {
       if (id >= 0 && id < this.actions.length)
@@ -272,7 +272,7 @@ Scene.prototype.getAction = function(id) {
     }
     else if (typeof id == "string") {
         for (var i=0; i < this.actions.length; i++)
-            if (this.actions[i].name == id)
+            if (this.actions[i].name == id && (! type || type == this.actions[i].type))
                 return this.actions[i];
     }
     else if (id === undefined)
