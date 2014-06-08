@@ -479,7 +479,6 @@ belle.utils.extend(Action, Wait);
 Wait.prototype.execute = function ()
 {
     var t = this;
-    this.reset();
     
     if (isNaN(this.time) || this.time < 0)
       this.time = 0;
@@ -1073,34 +1072,21 @@ function PlaySound(data)
 belle.utils.extend(Action, PlaySound);
 
 PlaySound.prototype.execute = function()
-{
-    this.reset();
-   
+{   
     if (! this.soundPath) {
         this.setFinished(true);
         return;
     }
     
-    this.sound = new buzz.sound(this.soundPath);
-    this.sound.setVolume(this.volume);
+    var options = {
+        "loop" : this.loop,
+        "volume" : this.volume
+    }
     
-    if (this.loop)
-        this.sound.play().loop();
-    else
-        this.sound.play();
+    game.playSound(this.soundPath, options);
     
     this.setFinished(true);
 }
-
-PlaySound.prototype.reset = function () {
-    
-    Action.prototype.reset.call();
-    
-    if (this.sound) {
-        this.sound.stop();
-    }
-}
-
 
 /************* Stop Sound *****************/
 
@@ -1124,49 +1110,11 @@ belle.utils.extend(Action, StopSound);
 
 StopSound.prototype.execute = function()
 {
-    this.reset();
-
-    this.sound = this.getSound(this.soundPath);
+    if (this.soundPath)
+        game.stopSound(this.soundPath, this.fade);
     
-    if (this.sound) {
-        if (this.fade > 0)
-            this.sound.fadeOut(this.fade);
-        else
-            this.sound.stop();
-    }
-            
     this.setFinished(true);
 }
-
-StopSound.prototype.getSound = function (name) { 
-    /*
-    *  If name is null, this function returns the last PlaySound action from the current scene. 
-    *  If name is a valid string, it's matched against previous PlaySound actions' names.
-    *  If the above fails, it attempts to match PlaySound's sound name.
-    */
-    
-    var game = belle.game;
-    var actions = game.actions;
- 
-    for (var i=game.nextAction-2; i >= 0; i--) {
-        //The sound can be matched by either 
-        if (actions[i].type == "PlaySound" && (! name || actions[i].name == name || actions[i].soundName == name) ) {
-            return actions[i].sound;
-        }
-    }
-    
-    return null;
-}
-
-StopSound.prototype.reset = function () {
-    
-    Action.prototype.reset.call();
-    
-    if (this.sound) {
-        this.sound.play();
-    }
-}
-
 
 /************* Show Menu *****************/
 
