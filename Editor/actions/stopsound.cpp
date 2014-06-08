@@ -65,26 +65,8 @@ ActionEditorWidget* StopSound::editorWidget()
     return mEditorWidget;
 }
 
-void StopSound::setSound(const QString & name)
+void StopSound::setSound(const QString & sound)
 {
-    Scene* scene = this->scene();
-    if (! scene)
-        return;
-
-    QList<Action*> actions = scene->actions();
-    QString sound = "";
-    int i = 0;
-
-    if (! name.isEmpty()) {
-        for(i=actions.size()-1; i >= 0; i--) {
-            if (actions[i]->type() == "PlaySound" && actions[i]->objectName() == name)
-                break;
-        }
-
-        if (i != -1)
-            sound = name;
-    }
-
     if (mSound != sound) {
         mSound = sound;
         setDisplayText(sound);
@@ -105,7 +87,6 @@ double StopSound::fadeTime()
 {
     return mFadeTime;
 }
-
 
 QVariantMap StopSound::toJsonObject()
 {

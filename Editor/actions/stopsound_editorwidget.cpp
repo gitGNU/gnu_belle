@@ -18,20 +18,24 @@
 
 #include <QDebug>
 
+#include "resource_manager.h"
+
 StopSoundEditorWidget::StopSoundEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-    mTargetSoundEdit = new QLineEdit(this);
+    mSoundEdit = new QComboBox(this);
+    mSoundEdit->setEditable(true);
+
     mFadeOutSpinBox = new QDoubleSpinBox(this);
     mFadeOutSpinBox->setMaximum(10);
     mFadeOutSpinBox->setSingleStep(0.1);
 
     beginGroup(tr("Stop Sound Editor"));
-    appendRow(tr("Target sound"), mTargetSoundEdit);
+    appendRow(tr("Sound"), mSoundEdit);
     appendRow(QString("%1 %2").arg(tr("Fade out duration")).arg("(s)") , mFadeOutSpinBox);
     endGroup();
 
-    connect(mTargetSoundEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onTargetSoundEdited(const QString&)));
+    connect(mSoundEdit, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(onSoundChanged(const QString&)));
     connect(mFadeOutSpinBox, SIGNAL(valueChanged(double)), this, SLOT(onFadeChanged(double)));
 
     resizeColumnToContents(0);
@@ -39,28 +43,43 @@ StopSoundEditorWidget::StopSoundEditorWidget(QWidget *parent) :
 
 void StopSoundEditorWidget::updateData(Action * action)
 {
-    ActionEditorWidget::updateData(action);
-
-    mCurrentStopSoundAction = qobject_cast<StopSound*>(action);
-    if (! mCurrentStopSoundAction)
+    StopSound * stopSound = qobject_cast<StopSound*>(action);
+    if (! stopSound)
         return;
 
-    mTargetSoundEdit->setText(mCurrentStopSoundAction->sound());
-    mFadeOutSpinBox->setValue(mCurrentStopSoundAction->fadeTime());
+    mCurrentStopSoundAction = 0;
+
+    ActionEditorWidget::updateData(stopSound);
+
+    QString sound = stopSound->sound();
+    QStringList sounds = ResourceManager::sounds();
+    if (! sound.isEmpty()) {
+        int index = sounds.indexOf(sound);
+        if (index != -1) {
+            sounds.removeAt(index);
+            sounds.prepend(sound);
+        }
+    }
+
+    mSoundEdit->clear();
+    for(int i=0; i < sounds.size(); i++)
+        mSoundEdit->insertItem(i, sounds[i]);
+    mSoundEdit->setCurrentIndex(0);
+    mFadeOutSpinBox->setValue(stopSound->fadeTime());
+
+    if (stopSound->sound().isEmpty() && ! sounds.isEmpty())
+        stopSound->setSound(sounds.first());
+
+    mCurrentStopSoundAction = stopSound;
 }
 
 
-void StopSoundEditorWidget::onTargetSoundEdited(const QString& text)
+void StopSoundEditorWidget::onSoundChanged(const QString& text)
 {
     if (! mCurrentStopSoundAction)
         return;
 
     mCurrentStopSoundAction->setSound(text);
-
-    if (mCurrentStopSoundAction->sound() != text)
-        mTargetSoundEdit->setStyleSheet("background-color: rgba(255, 0, 0, 100);");
-    else
-        mTargetSoundEdit->setStyleSheet("background-color: rgba(0, 255, 0, 100);");
 }
 
 

@@ -26,7 +26,7 @@ class StopSoundEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-    QLineEdit * mTargetSoundEdit;
+    QComboBox * mSoundEdit;
     QDoubleSpinBox* mFadeOutSpinBox;
     StopSound* mCurrentStopSoundAction;
 
@@ -39,7 +39,7 @@ signals:
 public slots:
 
 private slots:
-    void onTargetSoundEdited(const QString&);
+    void onSoundChanged(const QString&);
     void onFadeChanged(double);
 
 };
