@@ -26,7 +26,8 @@ game = {
     "paused": false,
     "eventListeners" : {
       "variableChanged" : []
-    }
+    },
+    "soundManager": {}
 };
 
 game.pauseScreen = {

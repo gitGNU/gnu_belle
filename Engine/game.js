@@ -51,6 +51,8 @@
   
 	game.setFinished = function(finished) {
 	    this.finished = finished;
+            if (finished)
+              this.soundManager.stopAll();
 	}
 	
   	game.isFinished = function() {
@@ -149,7 +151,7 @@
 	    this.setCurrentScene(scene);
 	  }
 	  else {
-	    this.finished = true;
+	    this.setFinished(true);
 	  }
 	}
 	
@@ -162,7 +164,7 @@
 		}
 			
 		if (! action)
-			this.finished = true;
+			this.setFinished(true);
 		return action;
 	}
 	
@@ -362,5 +364,13 @@
 	    var savedGames = gameData["savedGames"] || [];
 	    return savedGames;
 	}
+	
+	game.playSound = function(sound, options) {
+            this.soundManager.play(sound, "sound", options);
+        }
+        
+        game.stopSound = function(sound, fade) {
+            this.soundManager.stop(sound, "sound", fade);
+        }
 	
 })(game);
