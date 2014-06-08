@@ -71,7 +71,7 @@ ActionEditorWidget* PlaySound::editorWidget()
 
 void PlaySound::setSoundPath(const QString & path)
 {
-    mSoundName = ResourceManager::newMedia(path);
+    mSoundName = ResourceManager::newSound(path);
     if (! path.isEmpty()) {
         QString name = "";
         if (! objectName().isEmpty())
