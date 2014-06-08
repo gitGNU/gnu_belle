@@ -498,3 +498,15 @@ QStringList ResourceManager::customFonts()
 
     return fonts;
 }
+
+QString ResourceManager::newSound(const QString& path)
+{
+    QString name = ResourceManager::newMedia(path);
+    mSounds.insert(name, path);
+    return name;
+}
+
+QStringList ResourceManager::sounds()
+{
+    return mSounds.keys();
+}

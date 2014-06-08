@@ -69,6 +69,8 @@ public:
     static QString absolutePath(const QString&);
     static void importResources(const QVariantMap&);
     static QString display();
+    static QString newSound(const QString&);
+    static QStringList sounds();
 
     static void incrementReference(ImageFile*);
     static void decrementReference(ImageFile*);
