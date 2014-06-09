@@ -782,7 +782,7 @@ Object.prototype.serialize = function()
 
 Object.prototype.update = function()
 {
-  if (this.parent)
+  if (this.parent && typeof this.parent.update == "function")
     this.parent.update();
   this.redraw = true;
 }
