@@ -33,7 +33,7 @@
 #include "playsound.h"
 #include "stopsound.h"
 #include "show_menu.h"
-#include "end_novel.h"
+#include "end.h"
 #include "change_game_variable.h"
 #include "change_background.h"
 #include "runscript.h"
@@ -54,7 +54,7 @@ ActionCatalogWidget::ActionCatalogWidget(QWidget *parent) :
     appendRow(GoToScene::Info.icon, GoToScene::Info.name);
     appendRow(Branch::Info.icon, Branch::Info.name);
     appendRow(ShowMenu::Info.icon, ShowMenu::Info.name);
-    appendRow(EndNovel::Info.icon, EndNovel::Info.name);
+    appendRow(End::Info.icon, End::Info.name);
     endGroup();
 
     beginGroup(tr("Transform"));
@@ -115,7 +115,7 @@ void ActionCatalogWidget::onDoubleClick(const QModelIndex & index)
     case Actions::ChangeColor: action = new ChangeColor(); break;
     case Actions::PlaySound: action = new PlaySound(); break;
     case Actions::StopSound: action = new StopSound(); break;
-    case Actions::EndNovel: action = new EndNovel(); break;
+    case Actions::End: action = new End(); break;
     case Actions::GetUserInput: action = new GetUserInput(); break;
     case Actions::ChangeGameVariable: action = new ChangeGameVariable(); break;
     case Actions::RunScript: action = new RunScript(); break;

@@ -32,7 +32,7 @@ namespace Actions {
         GoToScene,
         Branch,
         ShowMenu,
-        EndNovel,
+        End,
         Slide,   
         Fade,
         ChangeColor,

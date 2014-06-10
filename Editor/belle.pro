@@ -93,7 +93,6 @@ HEADERS      += belle.h\
     actions/hide.h \
     actions/show_editor_widget.h \
     actions/hide_editor_widget.h \
-    actions/end_novel.h \
     actions/change_game_variable.h \
     actions/change_game_variable_editor_widget.h \
     actions/change_background.h \
@@ -114,7 +113,8 @@ HEADERS      += belle.h\
     update_elements_dialog.h \
     objects/background.h \
     imagefile.h \
-    imagetransform.h
+    imagetransform.h \
+    actions/end.h
                 
 
 SOURCES      += main.cpp\
@@ -190,7 +190,6 @@ SOURCES      += main.cpp\
     actions/hide.cpp \
     actions/show_editor_widget.cpp \
     actions/hide_editor_widget.cpp \
-    actions/end_novel.cpp \
     actions/change_game_variable.cpp \
     actions/change_game_variable_editor_widget.cpp \
     actions/change_background.cpp \
@@ -211,6 +210,7 @@ SOURCES      += main.cpp\
     update_elements_dialog.cpp \
     objects/background.cpp \
     imagefile.cpp \
-    imagetransform.cpp
+    imagetransform.cpp \
+    actions/end.cpp
 
 RESOURCES += media.qrc

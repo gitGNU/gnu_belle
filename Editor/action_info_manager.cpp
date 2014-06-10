@@ -35,7 +35,7 @@
 #include "stopsound.h"
 #include "change_game_variable.h"
 #include "change_background.h"
-#include "end_novel.h"
+#include "end.h"
 #include "runscript.h"
 
 QList<Action*> mActionsCatalog = QList<Action*>();
@@ -100,7 +100,7 @@ void ActionInfoManager::init()
     StopSound::Info = ActionInfo(QIcon(":/media/no-sound.png"), "StopSound", tr("Stop Sound"));
     ChangeGameVariable::Info = ActionInfo(QIcon(":/media/script.png"), "ChangeGameVariable", tr("Change Game Variable"));
     ChangeBackground::Info = ActionInfo(QIcon(":/media/image.png"), "ChangeBackground", tr("Change Background"));
-    EndNovel::Info = ActionInfo(QIcon(":/media/end-novel.png"), "EndNovel", tr("End Novel"));
+    End::Info = ActionInfo(QIcon(":/media/end-novel.png"), "EndNovel", tr("End"));
     RunScript::Info = ActionInfo(QIcon(":/media/script.png"), "RunScript", tr("Run Script"));
 
     mTypeToIcon.insert("Action", QIcon());

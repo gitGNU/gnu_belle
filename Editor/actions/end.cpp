@@ -14,25 +14,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef END_NOVEL_H
-#define END_NOVEL_H
+#include "end.h"
 
-#include "action.h"
+ActionInfo End::Info;
 
-class EndNovel : public Action
+End::End(QObject *parent) :
+    Action(parent)
 {
-    Q_OBJECT
-
-public:
-    static ActionInfo Info;
-
-public:
-    explicit EndNovel(QObject *parent = 0);
-
-signals:
-    
-public slots:
-    
-};
-
-#endif // END_NOVEL_H
+    setType(Info.type);
+    setName(Info.name);
+    setIcon(Info.icon);
+}
