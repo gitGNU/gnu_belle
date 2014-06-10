@@ -1161,16 +1161,16 @@ ShowMenu.prototype.scale = function(widthFactor, heightFactor)
 
 /************* End Novel *****************/
 
-function EndNovel(data)
+function End(data)
 {
     Action.call(this, data);
 }
 
-belle.utils.extend(Action, EndNovel);
+belle.utils.extend(Action, End);
 
-EndNovel.prototype.execute = function()
+End.prototype.execute = function()
 {
-    game.finished = true;
+    game.setFinished(true);
     this.setFinished(true);
 }
 
@@ -1334,6 +1334,7 @@ actions.Label = Label;
 actions.GoToLabel = GoToLabel;
 actions.GoToScene = GoToScene;
 actions.Branch = Branch;
+actions.End = End;
 actions.ChangeColor = ChangeColor;
 actions.PlaySound = PlaySound;
 actions.StopSound = StopSound;
