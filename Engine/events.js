@@ -89,7 +89,6 @@ document.onmousemove = function(event)
     for (var i=objects.length-1; i !== -1; --i) {
         if (objects[i].contains(ev.canvasX, ev.canvasY)) {
             hoveredObject = objects[i];
-	    hoveredObject.processEvent(ev);
             break;
         }
     }
@@ -101,6 +100,8 @@ document.onmousemove = function(event)
       if (hoveredObject)
 	hoveredObject.mouseEnterEvent(ev);
     }
+    else if (hoveredObject)
+      hoveredObject.processEvent(ev);
 }
 
 document.onmouseup = function(event)

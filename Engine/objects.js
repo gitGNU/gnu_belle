@@ -246,6 +246,7 @@ Object.prototype.load = function(data)
     this.paintHeight = false;
     this.redraw = false;
     this.redrawing = false;
+    this.hovering = false;
     
     if ("name" in data)
         this.name = data["name"];
@@ -554,16 +555,18 @@ Object.prototype.isReady = function()
     return true;
 }
 
-Object.prototype.mouseLeaveEvent = function()
+Object.prototype.mouseLeaveEvent = function(ev)
 {
     if (! this.visible)
       return;
     
     if (this.defaultState)
       this.load(this.defaultState);
+
+    this.hovering = false;
 }
 
-Object.prototype.mouseEnterEvent = function()
+Object.prototype.mouseEnterEvent = function(ev)
 {
     if (! this.visible)
       return;
@@ -571,8 +574,10 @@ Object.prototype.mouseEnterEvent = function()
     if (this.mouseMoveActions && this.mouseMoveActions.length || 
       this.eventListeners["mousemove"] && this.eventListeners["mousemove"].length)
       this.defaultState = this.serialize();
+    
+    this.processEvent(ev);
+    this.hovering = true;
 }
-
 
 Object.prototype.addEventListener = function(event, listener)
 {
@@ -589,7 +594,7 @@ Object.prototype.processEvent = function(event)
     var x = event.canvasX;
     var y = event.canvasY;
 
-    if (! this.contains(x, y))
+    if ((this.hovering && event.type == "mousemove") || ! this.contains(x, y))
         return false;
     
     var actions = [];
@@ -1205,21 +1210,20 @@ ObjectGroup.prototype.processEvent = function(event)
     
     var result = Object.prototype.processEvent.call(this, event);
     var object = this.objectAt(x, y);
-
+    
     if (this.hoveredObject != object) {
       if (this.hoveredObject)
 	this.hoveredObject.mouseLeaveEvent(event);
-      
-      if (object)
+        
+      if (object) 
 	object.mouseEnterEvent(event);
     }
-
-    if (event.type == "mousemove")
-        this.hoveredObject = object;
+    
+    this.hoveredObject = object;
     
     if (object)
-        result = object.processEvent(event);
-
+      result = object.processEvent(event);
+        
     return result;
 }
 
