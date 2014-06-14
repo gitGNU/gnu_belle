@@ -51,6 +51,7 @@ function _addSound(sound, channel, options) {
   if (! sound && typeof src == "string") {
     sound = new buzz.sound(src);
     sounds[src] = sound;
+    sound.src = src;
     if (channel)
       channels[channel] = sound;
   }
@@ -60,7 +61,7 @@ function _addSound(sound, channel, options) {
       sound.loop();
     if (belle.utils.isNumber(options.volume) && options.volume != sound.getVolume())
       sound.setVolume(options.volume);
-
+    
     return sound;
   }
   
@@ -136,5 +137,18 @@ soundManager.unmuteAll = function(channel) {
 soundManager.load = function(sound, channel, options) {
   _addSound(sound, channel, options);
 }
+
+soundManager.getSounds = function(channel) {
+  return _getSounds(channel).getSounds();
+};
+
+soundManager.getPlayingSounds = function(channel) {
+  var sounds = this.getSounds();
+  for(var i=0; i < sounds.length; i++) {
+      if (sounds[i].isEnded())
+        sounds.splice(i, 1);
+  }
+  return sounds;
+};
   
 })(game.soundManager);

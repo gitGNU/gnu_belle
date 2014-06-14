@@ -269,6 +269,17 @@
 	  var data = {};
 	  data.scene = this.scene.serialize();
 	  data.variables = this.variables;
+          var sounds = this.soundManager.getPlayingSounds();
+          data.sounds = [];
+          for(var i=0; i < sounds.length; i++) {
+            var snd = sounds[i];
+            var sound = {
+              "src": snd.src,
+              "volume": snd.volume,
+              "loop": snd.sound.loop
+            }
+            data.sounds.push(sound);
+          }
 	  return data;
 	}
 	
@@ -283,7 +294,12 @@
 	  if (scene) {
 	    this.setCurrentScene(scene, data.scene);
 	  }
-	  this.variables = data.variables || {};	  
+	  this.variables = data.variables || {};
+          if (data.sounds) {
+            var sounds = data.sounds;
+            for(var i=0; i < sounds.length; i++)
+              this.soundManager.play(sounds[i].src, "sound", sounds[i]);
+          }
 	  
 	  return true;
 	}
