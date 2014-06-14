@@ -23,7 +23,7 @@
 
 static QString mPath = "";
 static QString mBrowserPath = "";
-static bool mUseBuiltinBrowser = true;
+static bool mUseBuiltinBrowser = false;
 static bool mPathChanged = false;
 
 bool Engine::isValidPath(const QString & path)
@@ -34,8 +34,9 @@ bool Engine::isValidPath(const QString & path)
     QDir dir(path);
 
     QStringList engineComponents;
-    engineComponents << "index.html" << "display.js" << "actions.js" << "objects.js" << "utils.js"
-                     << "buzz.js" << "style.css" << "events.js" << "jquery.js" << "consolelog.js";
+    engineComponents << "index.html" << "style.css" << "display.js" << "init.js" << "main.js" << "actions.js"
+                     << "objects.js" << "scene.js" << "utils.js" << "game.js" << "buzz.js" << "sound_manager.js"
+                     << "events.js" << "jquery.js" << "consolelog.js" << "jstorage.js";
 
     //check if all necessary files seem to be present
     QStringList missingFiles;
