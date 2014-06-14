@@ -1152,7 +1152,7 @@ void Belle::setNovelProperties(const QVariantMap& _data)
     if (data.contains("width") && data.value("width").canConvert(QVariant::Int)) {
         int width = data.value("width").toInt();
         mNovelData.insert("width", width);
-        mWebView->resize(width, mWebView->height());
+        mWebView->setFixedWidth(width);
         Scene::setWidth(width);
         //SceneManager::setSceneWidth(width);
         mDrawingSurfaceWidget->setFixedWidth(width);
@@ -1161,7 +1161,7 @@ void Belle::setNovelProperties(const QVariantMap& _data)
     if (data.contains("height") && data.value("height").canConvert(QVariant::Int)) {
         int height = data.value("height").toInt();
         mNovelData.insert("height", height);
-        mWebView->resize(mWebView->width(), height);
+        mWebView->setFixedHeight(height);
         Scene::setHeight(height);
         //SceneManager::setSceneHeight(height);
         mDrawingSurfaceWidget->setFixedHeight(height);
