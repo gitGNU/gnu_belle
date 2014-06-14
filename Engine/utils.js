@@ -95,78 +95,52 @@ utils.textWidth = function(text, font)
     return dummy.offsetWidth;
 }
 
-utils.splitText = function(text, font, maxWidth) 
-{
-    if (! text)
+utils.splitText = function(text, font, maxWidth) {
+     if (! text)
         return [];
-    
-    if (! dummy)
-        dummy = document.getElementById("dummy");
+     
+    var dummy = document.getElementById("dummy");
     dummy.style.font = font;
     dummy.innerHTML = text;
-    var width = dummy.offsetWidth;
-    maxWidth -= 4;
-    text = text.trim();
+    var textSplit = [];
     
-    if (width > maxWidth || text.contains("\n")) {
-        var breaks = Math.ceil(width / maxWidth);
-        var textSplitted = [];
-        var textsize = Math.floor(text.length / breaks);
-        var txt = "";
-        var textLength = text.length;
-        var i, j = 0;
-        var start = 0;
-        var breakLine = false;
-        
-        for(; j < textLength;) { 
-            
-            txt = text.substr(j, textsize);
-            if (txt.indexOf("\n") !== -1) {
-               txt = txt.substring(0, txt.indexOf("\n"));
-               j++;
-               breakLine = true;
-            }
-            j += txt.length;
-            
-            //fix split words
-            if (j < textLength && j+1 < textLength && ! text.hasBreakPointAt(j) && ! text.hasBreakPointAt(j+1))
-                while(j < textLength && ! text.hasBreakPointAt(j)) {
-                    txt += text[j];
-                    j++;
-                }
-                
-            dummy.innerHTML = txt;
-            
-            //test if the text really fits in a line and correct it if it doesn't
-            if (! breakLine && dummy.offsetWidth < maxWidth){        
-                while(dummy.offsetWidth < maxWidth && j < textLength) {
-                    txt += text[j];
-                    dummy.innerHTML = txt;
-                    j++;
-                }
-            }
-            
-            if (dummy.offsetWidth >= maxWidth) {
-                var txtLength = txt.length;
-                i = txt.length - 1;
-                while(i > 0 && (dummy.offsetWidth >= maxWidth || ! txt.hasBreakPointAt(i))) {
-                    txt = txt.substring(0, i);
-                    dummy.innerHTML = txt;
-                    --i;
-                    --j;
-                }
-            }
-
-            textSplitted.push(txt);
-            txt = "";
-            breakLine = false;
-        }
-
-        return textSplitted;
-        
+    if (text.contains("\n")) {
+      textSplit = text.split("\n");
+      for(var i=0; i < textSplit.length; i++) {
+          
+          text = utils.splitText(textSplit[i], maxWidth);
+          textSplit.splice(i, 1);
+          for(var j=0; j < text.length; j++) {
+            textSplit.splice(i+j, 0, text[j]);
+          }
+      }
+      
+      return textSplit;
     }
     
-    return [text];
+    if (dummy.offsetWidth > maxWidth) {
+      var words = text.split(" ");
+        
+      var line="";
+      for(var i=0; i < words.length; i++) {
+          word = words[i];
+          dummy.innerHTML = line.length ? line + " " + word : word;;
+          if (dummy.offsetWidth > maxWidth) {
+            line = line.length ? line : word;
+            textSplit.push(line);
+            line = "";
+          }
+          line = line.length ? line + " " + word : word;
+      }
+        
+      if (line.length) {
+        textSplit.push(line);
+      }
+      
+      return textSplit;
+    }
+    
+    return [text];   
 }
 
 utils.extendJsonObject = function (a, b)
