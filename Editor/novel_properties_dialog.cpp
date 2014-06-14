@@ -37,7 +37,7 @@ NovelPropertiesDialog::NovelPropertiesDialog(QVariantMap& data, QWidget *parent)
     mUi.heightCombo->setEditText(data.value("height").toString());
     mUi.fontFamilyChooser->setCurrentFontFamily(mNovelData.value("fontFamily").toString());
     mUi.fontSizeSpinner->setValue(data.value("fontSize").toInt());
-    setEnginePath(Engine::path());
+    setEnginePath(Engine::path(), false);
     mUi.textSpeedSlider->setValue(data.value("textSpeed").toInt());
     mUi.textSpeedValueLabel->setText(data.value("textSpeed").toString());
     mUi.browserEdit->setText(Engine::browserPath());
@@ -111,7 +111,7 @@ void NovelPropertiesDialog::onEnginePathChangeRequest()
     setEnginePath(path);
 }
 
-void NovelPropertiesDialog::setEnginePath(const QString & path)
+void NovelPropertiesDialog::setEnginePath(const QString & path, bool showError)
 {
     if (path.isEmpty())
         return;
@@ -124,7 +124,8 @@ void NovelPropertiesDialog::setEnginePath(const QString & path)
         mUi.engineDirectoryEdit->setToolTip(tr("Valid engine folder"));
     }
     else {
-        QMessageBox::critical(this, tr("Invalid engine directory"), tr("The directory you choose doesn't seem to be a valid engine directory."));
+        if (showError)
+            QMessageBox::critical(this, tr("Invalid engine directory"), tr("The directory you choose doesn't seem to be a valid engine directory."));
         mUi.buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
         mUi.engineDirectoryEdit->setToolTip(tr("Not a valid engine folder"));
         mUi.engineDirectoryEdit->setStyleSheet("background-color: rgba(255, 0, 0, 100);");

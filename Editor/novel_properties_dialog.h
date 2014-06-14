@@ -33,7 +33,7 @@ public:
     QString enginePath();
     QString browserPath();
     bool useBuiltinBrowser();
-    void setEnginePath(const QString&);
+    void setEnginePath(const QString&, bool showError=true);
 
 signals:
     
