@@ -222,6 +222,8 @@ function Object(info)
     if ("onMouseLeave" in info) {
         this.mouseLeaveActions = this.initActions(info["onMouseLeave"]);
     }
+    
+    Object.prototype.load.call(this, info);
 }
 
 Object.prototype.load = function(data)
@@ -876,6 +878,8 @@ function TextBox(info)
     this.element.appendChild(this.textElement);
     this.displayedText = "";
     game.addEventListener("variableChanged", this, this.update);
+    
+    TextBox.prototype.load.call(this, info);
 }
 
 belle.utils.extend(Object, TextBox);
@@ -1105,6 +1109,8 @@ function ObjectGroup(data)
     Object.call(this, data);
     this.objects = [];
     this.hoveredObject = null;
+    
+    ObjectGroup.prototype.load.call(this, data);
 }
 
 belle.utils.extend(Object, ObjectGroup);
