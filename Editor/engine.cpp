@@ -21,7 +21,7 @@
 #include <QObject>
 #include <QMessageBox>
 
-static QString mPath = "";
+static QString mPath = ENGINE_DEFAULT_PATH;
 static QString mBrowserPath = "";
 static bool mUseBuiltinBrowser = false;
 static bool mPathChanged = false;
@@ -74,19 +74,9 @@ bool Engine::isValid()
     return isValidPath(mPath);
 }
 
-void Engine::guessPath()
+QString Engine::defaultPath()
 {
-    QString enginePath("Engine");
-    QDir currDir = QDir::current();
-
-    if (currDir.cd(enginePath) || currDir.cd(enginePath.toLower()))
-        mPath = currDir.absolutePath();
-
-    if (! isValidPath(mPath)) {
-        currDir.cdUp();
-        if (currDir.cd(enginePath) || currDir.cd(enginePath.toLower()))
-            mPath = currDir.absolutePath();
-    }
+    return ENGINE_DEFAULT_PATH;
 }
 
 QString Engine::browserPath()

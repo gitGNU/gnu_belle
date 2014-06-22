@@ -19,6 +19,12 @@
 
 #include <QString>
 
+#ifdef Q_WS_X11
+    #define ENGINE_DEFAULT_PATH "/usr/share/belle/engine"
+#else
+    #define ENGINE_DEFAULT_PATH  "engine"
+#endif
+
 class Engine {
 
 public:
@@ -26,9 +32,9 @@ public:
     static bool isValidPath(const QString&);
     static bool isValid();
     static QString path();
+    static QString defaultPath();
     static void setPath(const QString&);
     static bool pathChanged();
-    static void guessPath();
     static QString browserPath();
     static void setBrowserPath(const QString&);
     static void setUseBuiltinBrowser(bool);
