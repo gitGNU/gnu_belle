@@ -107,7 +107,7 @@ void NovelPropertiesDialog::onFontSizeChanged(int size)
 
 void NovelPropertiesDialog::onEnginePathChangeRequest()
 {
-    QString path = QFileDialog::getExistingDirectory(this, tr("Choose engine directory"), QDir::homePath());
+    QString path = QFileDialog::getExistingDirectory(this, tr("Choose engine directory"), Engine::defaultPath());
     setEnginePath(path);
 }
 

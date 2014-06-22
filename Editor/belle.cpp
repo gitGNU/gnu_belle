@@ -108,7 +108,6 @@ Belle::Belle(QWidget *widget)
     data.insert("fontSize", 18);
     data.insert("fontFamily", QFontInfo(QFont()).family());
     setNovelProperties(data);
-    Engine::guessPath();
 
     mUi.scenesWidget->setIconSize(QSize(64, 48));
     mUi.pauseScenesWidget->setIconSize(QSize(64, 48));
@@ -239,6 +238,13 @@ Belle::Belle(QWidget *widget)
     connect(mDeleteScene, SIGNAL(triggered()), this, SLOT(deleteScene()));
 
     restoreSettings();
+
+    //load default game
+    QDir def(Engine::defaultPath());
+    if (def.exists(GAME_FILENAME)) {
+        openFileOrProject(def.absoluteFilePath(GAME_FILENAME));
+        mSavePath = "";
+    }
 }
 
 void Belle::saveSettings()
@@ -266,8 +272,10 @@ void Belle::restoreSettings()
         this->restoreGeometry(mSettings->value("Window/Geometry").toByteArray());
     if (mSettings->contains("Window/State"))
         this->restoreState(mSettings->value("Window/State").toByteArray());
-    if (mSettings->contains("Project/enginePath"))
-        Engine::setPath(mSettings->value("Project/enginePath").toString());
+    if (mSettings->contains("Project/enginePath")) {
+        if (Engine::isValidPath(mSettings->value("Project/enginePath").toString()))
+            Engine::setPath(mSettings->value("Project/enginePath").toString());
+    }
     if (mSettings->contains("Project/browser"))
         Engine::setBrowserPath(mSettings->value("Project/browser").toString());
     if (mSettings->contains("Project/useBuiltinBrowser"))
@@ -783,19 +791,20 @@ void Belle::saveProject()
     }
 }
 
-void Belle::openFileOrProject()
+void Belle::openFileOrProject(QString filepath)
 {
     QStringList filters;
     filters << tr("All supported files ") + "(*.js *.json)"
             << "Javascript (*.js)"
             << "JSON (*.json)";
 
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Select project file"), QDir::currentPath(), filters.join(";;"));
+    if (filepath.isEmpty())
+        filepath = QFileDialog::getOpenFileName(this, tr("Select project file"), QDir::currentPath(), filters.join(";;"));
 
-    if (fileName.isEmpty())
+    if (filepath.isEmpty())
         return;
 
-    QFile file(fileName);
+    QFile file(filepath);
     if (! file.open(QFile::ReadOnly))
         return;
 
@@ -822,8 +831,8 @@ void Belle::openFileOrProject()
     mDefaultSceneManager->removeScenes(true);
     mPauseSceneManager->removeScenes(true);
     ResourceManager::instance()->removeResources(true);
-    ResourceManager::setRelativePath(QFileInfo(fileName).absolutePath());
-    mSavePath = QFileInfo(fileName).absolutePath();
+    ResourceManager::setRelativePath(QFileInfo(filepath).absolutePath());
+    mSavePath = QFileInfo(filepath).absolutePath();
     mCurrentRunDirectory = "";
 
     QVariantMap object = data.toMap();
@@ -1095,7 +1104,7 @@ bool Belle::checkEnginePath()
     QString path("");
 
     if (! Engine::isValid())
-        path = QFileDialog::getExistingDirectory(this, tr("Choose engine directory"), QDir::currentPath());
+        path = QFileDialog::getExistingDirectory(this, tr("Choose engine directory"), Engine::defaultPath());
     else
         path = Engine::path();
 

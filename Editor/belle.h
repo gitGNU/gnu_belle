@@ -78,7 +78,7 @@ class Belle : public QMainWindow
         void onNewAction(Action*);
         void exportGameFile(const QString& fileName="");
         void onRunTriggered();
-        void openFileOrProject();
+        void openFileOrProject(QString filepath="");
         void updateActions();
         void onResourcesDoubleClicked(const QModelIndex&);
         void showAboutDialog();
