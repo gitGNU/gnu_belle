@@ -60,8 +60,10 @@ AboutDialog::AboutDialog(QWidget *parent) :
                 << "<a  href='mailto:freemind@live.com.pt'>Carlos Pais</a>"
                 << ""
                 << "Thanks to:"
-                << "<a href='http://qt-project.org'>Qt4 library</a>"
-                << "<a href='http://jquery.com'>jQuery library</a>"
+                << "<a href='http://qt-project.org'>Qt4</a>"
+                << "<a href='http://jquery.com'>jQuery</a>"
+                << "<a href='http://buzz.jaysalvat.com/'>Buzz</a>"
+                << "<a href='http://www.jstorage.info/'>jStorage</a>"
                 << "<a href='https://github.com/ereilin/qt-json'>Eeli Reilin, Luis Gustavo S., Stephen Kockentiedt</a>";
 
     mUi.creditsBrowser->setOpenExternalLinks(true);
