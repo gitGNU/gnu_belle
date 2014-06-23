@@ -17,6 +17,12 @@
 #ifndef RESOURCE_MANAGER_H
 #define RESOURCE_MANAGER_H
 
+#ifdef Q_WS_X11
+    #define RESOURCES_DEFAULT_PATH "/usr/share/belle/resources"
+#else
+    #define RESOURCES_DEFAULT_PATH  "resources"
+#endif
+
 #include <QObject>
 #include <QList>
 #include <QDir>
