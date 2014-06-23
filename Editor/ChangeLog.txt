@@ -1,3 +1,23 @@
+Belle's Editor 0.4a | 15/06/2014
+---------------------
+-Added integrated browser window (not active by default).
+-Added support for animated images as background.
+-Added (new) opacity property to objects.
+-Improved rounded corners editing options.
+-Fixed rounded corners when using an image as background.
+-Added option to maintain images' aspect ratio.
+-Added Save Project option.
+-Added pause screen scenes' manager.
+-Improved presentation of some actions in the actions' window.
+-Improved StopSound properties editor.
+-Added (new) RunScript action.
+-Fixed resources not being updated when being edited some times.
+-Added possibility to edit actions already assigned to an object's event.
+-Set initial name for Images equal to their file name.
+-Fixed some issues with placeholder text in TextBoxes.
+-Fixed shortcuts not working in scene view.
+-Fixed some crashes and other bugs.
+
 Belle's Editor 0.3a | 05/03/2013
 ---------------------
 -Added support for animated images (e.g. gifs).
