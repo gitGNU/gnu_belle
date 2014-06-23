@@ -523,6 +523,7 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
     Object *resource = 0;
     Object *object = 0;
     int accepted = 0;
+    QString startPath = QDir::currentPath();
     QString filter = tr("Images(*.png *.xpm *.jpg *.jpeg *.gif)");
     QString path;
     AddCharacterDialog *dialog = 0;
@@ -547,7 +548,9 @@ void Belle::onTwObjectsDoubleClicked(QTreeWidgetItem *item, int column)
 
         //Image
     case 2:
-        path = QFileDialog::getOpenFileName(this, tr("Choose Image"), QDir::currentPath(), filter);
+        if (QDir(RESOURCES_DEFAULT_PATH).exists())
+            startPath = RESOURCES_DEFAULT_PATH;
+        path = QFileDialog::getOpenFileName(this, tr("Choose Image"), startPath, filter);
         if (path.isEmpty())
             break;
         resource = new Image(path, ResourceManager::instance());
