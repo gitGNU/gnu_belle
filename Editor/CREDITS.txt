@@ -1,5 +1,5 @@
 Main Developer:
-    Carlos Pais <freemind@lavabit.com>
+    Carlos Pais <freemind@live.com.pt>
     
 Thanks To:
     Qt4 Libraries <http://qt-project.org/>
