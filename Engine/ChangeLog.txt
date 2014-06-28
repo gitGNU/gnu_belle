@@ -1,3 +1,17 @@
+Belle's Engine 0.4a | 28/05/2014
+-----------------------
+-Added pause screen.
+-Fixed offline distribution.
+-Added RunScript action.
+-Added save/load mechanism using browser's local storage.
+-Improved DOM and canvas rendering.
+-Improved sound management.
+-Fixed issue when skipping Slide action.
+-Improved overall code structure.
+-Improved display in smaller screens.
+-Renamed EndNovel action to End.
+-Fixed many bugs.
+
 Belle's Engine 0.3a | 05/03/2013
 -----------------------
 -Added DOM mode.

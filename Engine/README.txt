@@ -1,9 +1,9 @@
 Belle's Engine
 This project is part of Belle. 
-Belle is a cross-platform Visual Novel maker focused on being user friendly. It uses C++ with Qt4 for the editor and HTML5, CSS and Javascript for the engine.
+Belle is a cross-platform visual novel maker focused on being user friendly. It uses C++ with Qt4 for the editor and HTML5, CSS and Javascript for the engine.
 
 Requirements:
--A browser that supports canvas tag, which should be any latest version of any browser.
+-A recent browser, preferably that supports HTML5 features like canvas and audio tag.
 -A game file that contains the description of the game. The game file must be named "game.json".
 
 Running:
