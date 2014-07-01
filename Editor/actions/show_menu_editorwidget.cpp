@@ -58,15 +58,17 @@ ShowMenuEditorWidget::ShowMenuEditorWidget(QWidget *parent) :
         connect(mEventChoosers.last(), SIGNAL(itemActivated(int)), this, SLOT(onItemActivated(int)));
     }
 
-    mCurrentShowMenu = 0;
     resizeColumnToContents(0);
 }
 
 void ShowMenuEditorWidget::updateData(Action * action)
 {
-    mCurrentShowMenu = qobject_cast<ShowMenu*>(action);
-    if (! mCurrentShowMenu)
+    ShowMenu* showMenu = qobject_cast<ShowMenu*>(action);
+    if (! showMenu)
         return;
+
+    ActionEditorWidget::updateData(action);
+    mAction = 0;
 
     //clear all data
     foreach(QLineEdit* lineEditor, mTextEdits)
@@ -76,11 +78,11 @@ void ShowMenuEditorWidget::updateData(Action * action)
     foreach(ComboBox* eventChooser, mEventChoosers)
         eventChooser->clear();
 
-    if (! mCurrentShowMenu->sceneObject())
+    if (! showMenu->sceneObject())
         return;
 
 
-    Menu* menu = static_cast<Menu*>(mCurrentShowMenu->sceneObject());
+    Menu* menu = static_cast<Menu*>(showMenu->sceneObject());
     QList<Object*> objects = menu->objects();
     QList<Action*> actions;
 
@@ -100,11 +102,13 @@ void ShowMenuEditorWidget::updateData(Action * action)
                 mEventChoosers[i]->addItem(actions[j]->icon(), actions[j]->toString());
         }
     }
+
+    mAction = action;
 }
 
 void ShowMenuEditorWidget::onTextEdited(const QString & text)
 {
-    if (!mCurrentShowMenu || !mCurrentShowMenu->sceneObject())
+    if (!mAction || !mAction->sceneObject())
         return;
 
     QLineEdit* lineEdit = static_cast<QLineEdit*>(sender());
@@ -113,16 +117,16 @@ void ShowMenuEditorWidget::onTextEdited(const QString & text)
     if (index == -1)
         return;
 
-    Menu* menu = static_cast<Menu*>(mCurrentShowMenu->sceneObject());
+    Menu* menu = static_cast<Menu*>(mAction->sceneObject());
     menu->setOptionText(index, text);
 }
 
 void ShowMenuEditorWidget::onAddItemActivated()
 {
-    if (! mCurrentShowMenu || ! mCurrentShowMenu->sceneObject())
+    if (! mAction || ! mAction->sceneObject())
         return;
 
-    Menu* menu = static_cast<Menu*>(mCurrentShowMenu->sceneObject());
+    Menu* menu = static_cast<Menu*>(mAction->sceneObject());
 
     AddActionDialog dialog(Interaction::MouseRelease, this);
     dialog.exec();
@@ -141,10 +145,10 @@ void ShowMenuEditorWidget::onAddItemActivated()
 
 void ShowMenuEditorWidget::onItemRemoved(int actionIndex)
 {
-    if (! mCurrentShowMenu || ! mCurrentShowMenu->sceneObject())
+    if (! mAction || ! mAction->sceneObject())
         return;
 
-    Menu* menu = static_cast<Menu*>(mCurrentShowMenu->sceneObject());
+    Menu* menu = static_cast<Menu*>(mAction->sceneObject());
     ComboBox *comboBox = qobject_cast<ComboBox*>(sender());
     if (! menu || ! comboBox)
         return;
@@ -156,10 +160,10 @@ void ShowMenuEditorWidget::onItemRemoved(int actionIndex)
 
 void ShowMenuEditorWidget::onItemActivated(int actionIndex)
 {
-    if (! mCurrentShowMenu || ! mCurrentShowMenu->sceneObject())
+    if (! mAction || ! mAction->sceneObject())
         return;
 
-    Menu* menu = static_cast<Menu*>(mCurrentShowMenu->sceneObject());
+    Menu* menu = static_cast<Menu*>(mAction->sceneObject());
     if (! menu)
         return;
 
@@ -189,10 +193,10 @@ int ShowMenuEditorWidget::widgetIndex(QObject* objectComboBox)
 
 void ShowMenuEditorWidget::onNumberOfOptionsChanged(int index)
 {
-    if (! sender() || ! mCurrentShowMenu || ! mCurrentShowMenu->sceneObject())
+    if (! sender() || ! mAction || ! mAction->sceneObject())
         return;
 
-    Menu* menu = static_cast<Menu*>(mCurrentShowMenu->sceneObject());
+    Menu* menu = static_cast<Menu*>(mAction->sceneObject());
     QComboBox *comboBox = static_cast<QComboBox*>(sender());
 
     bool ok;
@@ -213,14 +217,14 @@ void ShowMenuEditorWidget::onNumberOfOptionsChanged(int index)
 
 void ShowMenuEditorWidget::onConditionChanged()
 {
-    if (! sender() || ! mCurrentShowMenu || ! mCurrentShowMenu->sceneObject())
+    if (! sender() || ! mAction || ! mAction->sceneObject())
         return;
 
     QTextEdit* textEdit = static_cast<QTextEdit*>(sender());
     int index = mConditionEdits.indexOf(textEdit);
 
     if (index != -1) {
-        Menu* menu = static_cast<Menu*>(mCurrentShowMenu->sceneObject());
+        Menu* menu = static_cast<Menu*>(mAction->sceneObject());
         menu->setCondition(index, textEdit->toPlainText());
     }
 }

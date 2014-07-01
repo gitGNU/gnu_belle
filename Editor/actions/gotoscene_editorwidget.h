@@ -26,7 +26,6 @@ class GoToSceneEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-    GoToScene * mCurrentGoToScene;
     QComboBox* mSceneEdit;
 
 public:

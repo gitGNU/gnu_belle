@@ -41,8 +41,6 @@ private:
     QLineEdit* mMessageEdit;
     QLineEdit* mVariableEdit;
     QLineEdit* mDefaultValueEdit;
-    GetUserInput* mCurrentAction;
-    
 };
 
 #endif // GET_USER_INPUT_EDITOR_WIDGET_H

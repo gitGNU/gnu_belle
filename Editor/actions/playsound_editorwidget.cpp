@@ -40,31 +40,36 @@ PlaySoundEditorWidget::PlaySoundEditorWidget(QWidget *parent) :
 
 void PlaySoundEditorWidget::updateData(Action * action)
 {
-    ActionEditorWidget::updateData(action);
-
-    mCurrentPlaySoundAction = qobject_cast<PlaySound*>(action);
-    if (! mCurrentPlaySoundAction)
+    PlaySound* playSound = qobject_cast<PlaySound*>(action);
+    if (! playSound)
         return;
 
-    mChooseFileButton->setFilePath(mCurrentPlaySoundAction->soundPath());
-    mVolumeSlider->setValue(mCurrentPlaySoundAction->volume());
-    mLoopCheckBox->setChecked(mCurrentPlaySoundAction->loop());
+    ActionEditorWidget::updateData(action);
+    mAction = 0;
+
+    mChooseFileButton->setFilePath(playSound->soundPath());
+    mVolumeSlider->setValue(playSound->volume());
+    mLoopCheckBox->setChecked(playSound->loop());
+    mAction = action;
 }
 
 void PlaySoundEditorWidget::onFileSelected(const QString & path)
 {
-    if (mCurrentPlaySoundAction)
-        mCurrentPlaySoundAction->setSoundPath(path);
+    PlaySound* playSound = qobject_cast<PlaySound*>(mAction);
+    if (playSound)
+        playSound->setSoundPath(path);
 }
 
 void PlaySoundEditorWidget::onVolumeChanged(int vol)
 {
-    if (mCurrentPlaySoundAction)
-        mCurrentPlaySoundAction->setVolume(vol);
+    PlaySound* playSound = qobject_cast<PlaySound*>(mAction);
+    if (playSound)
+        playSound->setVolume(vol);
 }
 
 void PlaySoundEditorWidget::onLoopToggled(bool checked)
 {
-    if (mCurrentPlaySoundAction)
-        mCurrentPlaySoundAction->setLoop(checked);
+    PlaySound* playSound = qobject_cast<PlaySound*>(mAction);
+    if (playSound)
+        playSound->setLoop(checked);
 }

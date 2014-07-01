@@ -24,8 +24,6 @@
 LabelEditorWidget::LabelEditorWidget(QWidget *parent) :
     ActionEditorWidget(parent)
 {
-    mCurrentLabel = 0;
-
     mLabelEdit = new QLineEdit(this);
     connect(mLabelEdit, SIGNAL(textEdited(const QString&)), this, SLOT(onLabelEdited(const QString&)));
 
@@ -36,21 +34,22 @@ LabelEditorWidget::LabelEditorWidget(QWidget *parent) :
 
 void LabelEditorWidget::updateData(Action * action)
 {
-    mCurrentLabel = qobject_cast<Label*>(action);
-
-    if (! mCurrentLabel)
+    Label* label = qobject_cast<Label*>(action);
+    if (! label)
         return;
 
-    mLabelEdit->setText(mCurrentLabel->objectName());
-
+    ActionEditorWidget::updateData(action);
+    mAction = 0;
+    mLabelEdit->setText(label->objectName());
+    mAction = action;
 }
 
 void LabelEditorWidget::onLabelEdited(const QString & text)
 {
-    if (! mCurrentLabel)
+    if (! mAction)
         return;
 
-    Scene* scene = qobject_cast<Scene*>(mCurrentLabel->parent());
+    Scene* scene = qobject_cast<Scene*>(mAction->parent());
     if (! scene)
         return;
 
@@ -64,7 +63,7 @@ void LabelEditorWidget::onLabelEdited(const QString & text)
     }
 
     if (validName) {
-        mCurrentLabel->setObjectName(text);
+        mAction->setObjectName(text);
         mLabelEdit->setStyleSheet("");
     }
     else

@@ -32,7 +32,6 @@ class PlaySoundEditorWidget : public ActionEditorWidget
     ChooseFileButton* mChooseFileButton;
     QSlider * mVolumeSlider;
     QCheckBox* mLoopCheckBox;
-    PlaySound* mCurrentPlaySoundAction;
 
 public:
     explicit PlaySoundEditorWidget(QWidget *parent = 0);

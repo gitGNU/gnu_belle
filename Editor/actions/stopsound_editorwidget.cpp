@@ -47,9 +47,8 @@ void StopSoundEditorWidget::updateData(Action * action)
     if (! stopSound)
         return;
 
-    mCurrentStopSoundAction = 0;
-
     ActionEditorWidget::updateData(stopSound);
+    mAction = 0;
 
     QString sound = stopSound->sound();
     QStringList sounds = ResourceManager::sounds();
@@ -70,21 +69,23 @@ void StopSoundEditorWidget::updateData(Action * action)
     if (stopSound->sound().isEmpty() && ! sounds.isEmpty())
         stopSound->setSound(sounds.first());
 
-    mCurrentStopSoundAction = stopSound;
+    mAction = action;
 }
 
 
 void StopSoundEditorWidget::onSoundChanged(const QString& text)
 {
-    if (! mCurrentStopSoundAction)
+    StopSound * stopSound = qobject_cast<StopSound*>(mAction);
+    if (! stopSound)
         return;
 
-    mCurrentStopSoundAction->setSound(text);
+    stopSound->setSound(text);
 }
 
 
 void StopSoundEditorWidget::onFadeChanged(double val)
 {
-    if (mCurrentStopSoundAction)
-        mCurrentStopSoundAction->setFadeTime(val);
+    StopSound * stopSound = qobject_cast<StopSound*>(mAction);
+    if (stopSound)
+        stopSound->setFadeTime(val);
 }

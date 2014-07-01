@@ -58,30 +58,31 @@ BranchEditorWidget::BranchEditorWidget(QWidget *parent) :
     endGroup();
 
     resizeColumnToContents(0);
-
-    mCurrentBranch = 0;
 }
 
 void BranchEditorWidget::updateData(Action * action)
 {
     ActionEditorWidget::updateData(action);
+    mAction = 0;
+
+    Branch* branch = qobject_cast<Branch*>(action);
+    if (! branch)
+        return;
 
     mTrueActionsChooser->clear();
     mFalseActionsChooser->clear();
 
-    mCurrentBranch = qobject_cast<Branch*>(action);
-    if (! mCurrentBranch)
-        return;
+    mConditionEdit->setText(branch->condition());
 
-    mConditionEdit->setText(mCurrentBranch->condition());
-
-    QList<Action*> actions = mCurrentBranch->actions(true);
+    QList<Action*> actions = branch->actions(true);
     foreach(Action* action,  actions)
         mTrueActionsChooser->addItem(action->icon(), action->toString());
 
-    actions = mCurrentBranch->actions(false);
+    actions = branch->actions(false);
     foreach(Action* action,  actions)
         mFalseActionsChooser->addItem(action->icon(), action->toString());
+
+    mAction = action;
 }
 
 void BranchEditorWidget::onConditionsClicked()
@@ -98,7 +99,8 @@ bool BranchEditorWidget::eventFilter(QObject * obj, QEvent * event)
 
 void BranchEditorWidget::onAddItemActivated()
 {
-    if (! mCurrentBranch)
+    Branch *branch = qobject_cast<Branch*>(mAction);
+    if (! branch)
         return;
 
     AddActionDialog dialog(Interaction::MouseRelease);
@@ -111,9 +113,9 @@ void BranchEditorWidget::onAddItemActivated()
         if(comboBox && action) {
             comboBox->addItem(action->icon(), action->toString());
             if (sender()->objectName() == "true")
-                mCurrentBranch->appendAction(action, true);
+                branch->appendAction(action, true);
             else
-                mCurrentBranch->appendAction(action, false);
+                branch->appendAction(action, false);
         }
     }
 }
@@ -121,11 +123,15 @@ void BranchEditorWidget::onAddItemActivated()
 void BranchEditorWidget::onItemActivated(int index)
 {
     Action* action = 0;
+    Branch *branch = qobject_cast<Branch*>(mAction);
+
+    if (! branch)
+        return;
 
     if (sender()->objectName() == "true")
-        action = mCurrentBranch->action(index, true);
+        action = branch->action(index, true);
     else
-        action = mCurrentBranch->action(index, false);
+        action = branch->action(index, false);
 
     if (! action)
         return;
@@ -142,14 +148,18 @@ void BranchEditorWidget::onItemActivated(int index)
 
 void BranchEditorWidget::onItemRemoved(int index)
 {
-    if (sender()->objectName() == "true")
-        mCurrentBranch->removeAction(index, true, true);
-    else
-        mCurrentBranch->removeAction(index, false, true);
+    Branch *branch = qobject_cast<Branch*>(mAction);
+    if (branch) {
+        if (sender()->objectName() == "true")
+            branch->removeAction(index, true, true);
+        else
+            branch->removeAction(index, false, true);
+    }
 }
 
 void BranchEditorWidget::onConditionChanged()
 {
-    if (mCurrentBranch)
-        mCurrentBranch->setCondition(mConditionEdit->toPlainText());
+    Branch *branch = qobject_cast<Branch*>(mAction);
+    if (branch)
+        branch->setCondition(mConditionEdit->toPlainText());
 }

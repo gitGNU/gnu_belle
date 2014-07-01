@@ -32,7 +32,6 @@ class SlideEditorWidget : public ActionEditorWidget
     Q_OBJECT
 
     ResourceManager * mResources;
-    Slide * mCurrentSlide;
     QSpinBox* mStartXSlider;
     QSpinBox* mStartYSlider;
     QSpinBox* mEndXSlider;

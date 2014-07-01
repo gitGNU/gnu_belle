@@ -28,7 +28,6 @@ class StopSoundEditorWidget : public ActionEditorWidget
 
     QComboBox * mSoundEdit;
     QDoubleSpinBox* mFadeOutSpinBox;
-    StopSound* mCurrentStopSoundAction;
 
 public:
     explicit StopSoundEditorWidget(QWidget *parent = 0);

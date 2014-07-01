@@ -40,8 +40,6 @@ WaitEditorWidget::WaitEditorWidget(QWidget *parent) :
 
     resizeColumnToContents(0);
 
-    mCurrentAction = 0;
-
     connect(mWaitTypeWidget, SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentIndexChanged(int)));
     connect(mTimeSpin, SIGNAL(valueChanged(double)), this, SLOT(onTimeChanged(double)));
     connect(mSkipBox, SIGNAL(clicked(bool)), this, SLOT(onSkipBoxClicked(bool)));
@@ -49,33 +47,34 @@ WaitEditorWidget::WaitEditorWidget(QWidget *parent) :
 
 void WaitEditorWidget::updateData(Action * action)
 {
-    if (action == mCurrentAction)
+    Wait* wait = qobject_cast<Wait*>(action);
+    if (! wait)
         return;
-    Wait* waitAction = qobject_cast<Wait*>(action);
-    if (! waitAction)
-        return;
-    mCurrentAction = 0; //updating widgets could mess up current action's data
+    ActionEditorWidget::updateData(action);
+    mAction = 0;
 
-    mWaitTypeWidget->setCurrentIndex(waitAction->waitType());
+    mWaitTypeWidget->setCurrentIndex(wait->waitType());
     updateWidgets(mWaitTypeWidget->currentIndex());
-    mTimeSpin->setValue(waitAction->time());
-    mSkipBox->setChecked(waitAction->allowSkipping());
-    mCurrentAction = waitAction;
+    mTimeSpin->setValue(wait->time());
+    mSkipBox->setChecked(wait->allowSkipping());
+    mAction = action;
 }
 
 void WaitEditorWidget::onCurrentIndexChanged(int index)
 {
-    if (! mCurrentAction)
+    Wait* wait = qobject_cast<Wait*>(mAction);
+    if (! wait)
         return;
 
-    mCurrentAction->setWaitTypeFromIndex(index);
+    wait->setWaitTypeFromIndex(index);
     updateWidgets(index);
 }
 
 void WaitEditorWidget::onTimeChanged(double value)
 {
-    if (mCurrentAction)
-        mCurrentAction->setTime(value);
+    Wait* wait = qobject_cast<Wait*>(mAction);
+    if (wait)
+        wait->setTime(value);
 }
 
 void WaitEditorWidget::updateWidgets(int index)
@@ -88,6 +87,6 @@ void WaitEditorWidget::updateWidgets(int index)
 
 void WaitEditorWidget::onSkipBoxClicked(bool clicked)
 {
-    if (mCurrentAction)
-        mCurrentAction->setAllowSkipping(clicked);
+    if (mAction)
+        mAction->setAllowSkipping(clicked);
 }

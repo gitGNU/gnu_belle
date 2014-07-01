@@ -29,7 +29,6 @@ class ChangeGameVariableEditorWidget : public ActionEditorWidget
     QLineEdit* mVariableEdit;
     QComboBox* mOperatorChooser;
     QLineEdit* mValueEdit;
-    ChangeGameVariable* mCurrentAction;
 
 public:
     explicit ChangeGameVariableEditorWidget(ActionEditorWidget *parent = 0);

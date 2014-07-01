@@ -29,7 +29,6 @@ ChangeColorEditorWidget::ChangeColorEditorWidget(QWidget *parent) :
     mChangeObjectBackgroundColorCheckBox = new QCheckBox(this);
     mOpacitySlider->setMinimum(0);
     mOpacitySlider->setMaximum(255);
-    mChangeColorAction = 0;
 
     beginGroup(tr("Change color editor"));
     beginSubGroup(tr("Object"), mObjectsComboBox);
@@ -51,23 +50,27 @@ ChangeColorEditorWidget::ChangeColorEditorWidget(QWidget *parent) :
 
 void ChangeColorEditorWidget::updateData(Action * action)
 {
-    if (! action || mChangeColorAction == action)
+    if (action == mAction)
         return;
 
-    mChangeColorAction = 0;
-    ChangeColor* changeColorAction = qobject_cast<ChangeColor*>(action);
+    ChangeColor* changeColor = qobject_cast<ChangeColor*>(action);
+    if (! changeColor)
+        return;
+
+    ActionEditorWidget::updateData(action);
+    mAction = 0;
 
     mObjectsComboBox->clear();
 
-    if (changeColorAction->sceneObject()) {
-        mObjectsComboBox->addItem(changeColorAction->sceneObject()->objectName());
-        mObjects.append(changeColorAction->sceneObject());
+    if (changeColor->sceneObject()) {
+        mObjectsComboBox->addItem(changeColor->sceneObject()->objectName());
+        mObjects.append(changeColor->sceneObject());
     }
 
     QList<Object*> objects = ResourceManager::resources();
 
     foreach(Object* obj, objects) {
-        if (obj == changeColorAction->sceneObject())
+        if (obj == changeColor->sceneObject())
             continue;
 
         if (obj) {
@@ -76,29 +79,30 @@ void ChangeColorEditorWidget::updateData(Action * action)
         }
     }
 
-    if (! changeColorAction->sceneObject() && ! mObjects.isEmpty())
-        changeColorAction->setSceneObject(mObjects[0]);
+    if (! changeColor->sceneObject() && ! mObjects.isEmpty())
+        changeColor->setSceneObject(mObjects[0]);
 
-    mColorButton->setColor(changeColorAction->color());
-    mOpacitySlider->setValue(changeColorAction->opacity());
+    mColorButton->setColor(changeColor->color());
+    mOpacitySlider->setValue(changeColor->opacity());
 
-    mChangeColorAction = changeColorAction;
-
+    mAction = action;
 }
 
 void ChangeColorEditorWidget::onColorChosen(const QColor & color)
 {
-    if (mChangeColorAction) {
-        mChangeColorAction->setColor(color);
+    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mAction);
+    if (changeColor) {
+        changeColor->setColor(color);
     }
 }
 
 void ChangeColorEditorWidget::onObjectChanged(int index)
 {
-    if (! mChangeColorAction || index < 0 || index >= mObjects.size())
+    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mAction);
+    if (! changeColor || index < 0 || index >= mObjects.size())
         return;
 
-    mChangeColorAction->setSceneObject(mObjects[index]);
+    changeColor->setSceneObject(mObjects[index]);
 
 }
 
@@ -107,8 +111,9 @@ void ChangeColorEditorWidget::onChangeObjectColorToggled(bool checked)
     if (! checked && !mChangeObjectBackgroundColorCheckBox->isChecked())
         mChangeObjectColorCheckBox->setChecked(true);
 
-    if(mChangeColorAction)
-        mChangeColorAction->setChangeObjectColor(mChangeObjectColorCheckBox->isChecked());
+    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mAction);
+    if(changeColor)
+        changeColor->setChangeObjectColor(mChangeObjectColorCheckBox->isChecked());
 }
 
 void ChangeColorEditorWidget::onChangeObjectBackgroundColorToggled(bool checked)
@@ -116,12 +121,14 @@ void ChangeColorEditorWidget::onChangeObjectBackgroundColorToggled(bool checked)
     if (! checked && ! mChangeObjectColorCheckBox->isChecked())
         mChangeObjectBackgroundColorCheckBox->setChecked(true);
 
-    if(mChangeColorAction)
-        mChangeColorAction->setChangeObjectBackgroundColor(mChangeObjectBackgroundColorCheckBox->isChecked());
+    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mAction);
+    if(changeColor)
+        changeColor->setChangeObjectBackgroundColor(mChangeObjectBackgroundColorCheckBox->isChecked());
 }
 
 void ChangeColorEditorWidget::onOpacityChanged(int value)
 {
-    if(mChangeColorAction)
-        mChangeColorAction->setOpacity(value);
+    ChangeColor* changeColor = qobject_cast<ChangeColor*>(mAction);
+    if(changeColor)
+        changeColor->setOpacity(value);
 }

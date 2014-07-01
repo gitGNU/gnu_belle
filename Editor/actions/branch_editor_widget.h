@@ -44,7 +44,6 @@ private slots:
     void onItemRemoved(int);
 
 private:
-    Branch *mCurrentBranch;
     QTextEdit* mConditionEdit;
     ComboBox* mTrueActionsChooser;
     ComboBox* mFalseActionsChooser;

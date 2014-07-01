@@ -46,37 +46,46 @@ ChangeGameVariableEditorWidget::ChangeGameVariableEditorWidget(ActionEditorWidge
     endGroup();
 
     resizeColumnToContents(0);
-
-    mCurrentAction = 0;
 }
 
 void  ChangeGameVariableEditorWidget::updateData(Action * action)
 {
-    mCurrentAction = qobject_cast<ChangeGameVariable*>(action);
-    if (! mCurrentAction)
+    if (action == mAction)
         return;
 
-    mVariableEdit->setText(mCurrentAction->variable());
-    mOperatorChooser->setCurrentIndex(mCurrentAction->operatorIndex());
-    mValueEdit->setText(mCurrentAction->value());
+    ChangeGameVariable* changeGameVariable = qobject_cast<ChangeGameVariable*>(action);
+    if (! changeGameVariable)
+        return;
+
+    ActionEditorWidget::updateData(action);
+    mAction = 0;
+
+    mVariableEdit->setText(changeGameVariable->variable());
+    mOperatorChooser->setCurrentIndex(changeGameVariable->operatorIndex());
+    mValueEdit->setText(changeGameVariable->value());
+
+    mAction = action;
 }
 
 void ChangeGameVariableEditorWidget::onVariableEdited(const QString & text)
 {
-    if (mCurrentAction)
-        mCurrentAction->setVariable(text);
+    ChangeGameVariable* changeGameVariable = qobject_cast<ChangeGameVariable*>(mAction);
+    if (changeGameVariable)
+        changeGameVariable->setVariable(text);
 }
 
 void ChangeGameVariableEditorWidget::onOperatorChanged(int index)
 {
-    if (mCurrentAction)
-        mCurrentAction->setOperatorIndex(index);
+    ChangeGameVariable* changeGameVariable = qobject_cast<ChangeGameVariable*>(mAction);
+    if (changeGameVariable)
+        changeGameVariable->setOperatorIndex(index);
 }
 
 void ChangeGameVariableEditorWidget::onValueEdited(const QString & text)
 {
-    if (mCurrentAction)
-        mCurrentAction->setValue(text);
+    ChangeGameVariable* changeGameVariable = qobject_cast<ChangeGameVariable*>(mAction);
+    if (changeGameVariable)
+        changeGameVariable->setValue(text);
 }
 
 QStringList ChangeGameVariableEditorWidget::operatorsText()

@@ -33,7 +33,6 @@ class DialogueEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-    Dialogue * mCurrentAction;
     QComboBox* mChooseCharacterWidget;
     QComboBox* mChooseTextBoxWidget;
     QTextEdit* mTextEdit;

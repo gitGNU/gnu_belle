@@ -34,7 +34,6 @@ class WaitEditorWidget : public ActionEditorWidget
     QCheckBox* mSkipBox;
     //QLineEdit* mTimeEdit;
     QDoubleSpinBox* mTimeSpin;
-    Wait *mCurrentAction;
 
 public:
     explicit WaitEditorWidget(QWidget *parent = 0);

@@ -18,7 +18,6 @@ class RunScriptEditorWidget : public ActionEditorWidget
 
     QTextEdit* mScriptEdit;
     QLineEdit* mCommentEdit;
-    RunScript* mCurrentAction;
 
 public:
     explicit RunScriptEditorWidget(QWidget *parent = 0);

@@ -36,27 +36,31 @@ ChangeBackgroundEditorWidget::ChangeBackgroundEditorWidget(QWidget *parent) :
 
 void ChangeBackgroundEditorWidget::updateData(Action * action)
 {
-    mCurrentAction = qobject_cast<ChangeBackground*>(action);
-
-    if (! mCurrentAction)
+    if (action == mAction)
         return;
 
-    mImageChooser->blockSignals(true);
-    mChooseBackgroundColorButton->blockSignals(true);
-    mImageChooser->setFilePath(mCurrentAction->backgroundPath());
-    mChooseBackgroundColorButton->setColor(mCurrentAction->backgroundColor());
-    mChooseBackgroundColorButton->blockSignals(false);
-    mImageChooser->blockSignals(false);
+    ChangeBackground* changeBackground = qobject_cast<ChangeBackground*>(action);
+    if (! changeBackground)
+        return;
+
+    ActionEditorWidget::updateData(action);
+    mAction = 0;
+
+    mImageChooser->setFilePath(changeBackground->backgroundPath());
+    mChooseBackgroundColorButton->setColor(changeBackground->backgroundColor());
+    mAction = action;
 }
 
 void ChangeBackgroundEditorWidget::onFileSelected(const QString & filepath)
 {
-    if (mCurrentAction)
-        mCurrentAction->setBackgroundImage(filepath);
+    ChangeBackground* changeBackground = qobject_cast<ChangeBackground*>(mAction);
+    if (changeBackground)
+        changeBackground->setBackgroundImage(filepath);
 }
 
 void ChangeBackgroundEditorWidget::onBackgroundColorSelected(const QColor & color)
 {
-    if (mCurrentAction)
-        mCurrentAction->setBackgroundColor(color);
+    ChangeBackground* changeBackground = qobject_cast<ChangeBackground*>(mAction);
+    if (changeBackground)
+        changeBackground->setBackgroundColor(color);
 }

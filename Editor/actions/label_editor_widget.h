@@ -25,7 +25,6 @@ class LabelEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-    Label * mCurrentLabel;
     QLineEdit *mLabelEdit;
 
 public:

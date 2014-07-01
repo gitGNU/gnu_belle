@@ -38,7 +38,6 @@ class ChangeVisibilityEditorWidget : public ActionEditorWidget
 protected:
     QComboBox * mObjectsWidget;
     QList<Object*> mObjects;
-    ChangeVisibility* mCurrentAction;
     FadeEditorWidget* mFadeEditorWidget;
     SlideEditorWidget* mSlideEditorWidget;
 

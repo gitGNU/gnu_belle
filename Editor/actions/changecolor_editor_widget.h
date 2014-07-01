@@ -39,7 +39,6 @@ private slots:
 
 
 private:
-    ChangeColor* mChangeColorAction;
     QComboBox *mObjectsComboBox;
     ColorPushButton* mColorButton;
     QSlider * mOpacitySlider;

@@ -30,11 +30,26 @@ ActionEditorWidget::ActionEditorWidget(QWidget *parent) :
 
 void ActionEditorWidget::updateData(Action * action)
 {
+    if (action == mAction)
+        return;
+
+    if (mAction)
+        mAction->disconnect(this);
+
+    if (action)
+        connect(action, SIGNAL(destroyed()), this, SLOT(actionDestroyed()));
+
     mAction = action;
     if (! mAction)
         return;
 
     mNameEdit->setText(mAction->objectName());
+
+}
+
+void ActionEditorWidget::actionDestroyed()
+{
+    mAction = 0;
 }
 
 Action* ActionEditorWidget::action()

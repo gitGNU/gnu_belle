@@ -29,7 +29,6 @@ class ChangeBackgroundEditorWidget : public ActionEditorWidget
     Q_OBJECT
 
     ChooseFileButton* mImageChooser;
-    ChangeBackground* mCurrentAction;
     ColorPushButton* mChooseBackgroundColorButton;
 
 public:

@@ -79,7 +79,6 @@ SlideEditorWidget::SlideEditorWidget(QWidget *parent) :
     mStartButton->installEventFilter(this);
     mEndButton->installEventFilter(this);*/
     mIsDown = false;
-    mCurrentSlide = 0;
     resizeColumnToContents(0);
 }
 
@@ -89,7 +88,8 @@ void SlideEditorWidget::updateData(Action * action)
     if (! slide || ! slide->scene())
         return;
 
-    mCurrentSlide = 0;
+    ActionEditorWidget::updateData(action);
+    mAction = 0;
 
     mStartXSlider->setValue(slide->startX());
     mStartYSlider->setValue(slide->startY());
@@ -128,7 +128,7 @@ void SlideEditorWidget::updateData(Action * action)
         mEndYSlider->setRange(-slide->sceneObject()->height(), Scene::height());
     }
 
-    mCurrentSlide = slide;
+    mAction = action;
 }
 
 void SlideEditorWidget::onButtonClicked()
@@ -167,62 +167,66 @@ bool SlideEditorWidget::eventFilter(QObject *obj, QEvent *event)
 
 void SlideEditorWidget::onSliderValueChanged(int value)
 {
-    if (! mCurrentSlide)
+    Slide * slide  = qobject_cast<Slide*>(mAction);
+    if (! slide)
         return;
 
     QString name(sender()->objectName());
     if (name.contains("start")) {
         if (name.contains("x"))
-            mCurrentSlide->setStartX(value);
+            slide->setStartX(value);
         else
-            mCurrentSlide->setStartY(value);
+            slide->setStartY(value);
     }
     else if(name.contains("end")) {
         if (name.contains("x"))
-            mCurrentSlide->setEndX(value);
+            slide->setEndX(value);
         else
-            mCurrentSlide->setEndY(value);
+            slide->setEndY(value);
     }
 
 }
 
 void SlideEditorWidget::onDurationChanged(double dur) {
-    if (mCurrentSlide)
-        mCurrentSlide->setDuration(dur);
+    Slide * slide  = qobject_cast<Slide*>(mAction);
+    if (slide)
+        slide->setDuration(dur);
 }
 
 void SlideEditorWidget::onResourceChanged(int index)
 {
-    if (! mCurrentSlide)
+    Slide * slide  = qobject_cast<Slide*>(mAction);
+    if (! slide)
         return;
 
     if (index >= 0 && index < objects().size()) {
         Object* obj = objects()[index];
 
-        if (mCurrentSlide->sceneObject() != obj) {
-            mCurrentSlide->setSceneObject(obj);
-            mCurrentSlide->setStartX(obj->x());
-            mCurrentSlide->setStartY(obj->y());
+        if (slide->sceneObject() != obj) {
+            slide->setSceneObject(obj);
+            slide->setStartX(obj->x());
+            slide->setStartY(obj->y());
 
-            mStartXSlider->setValue(mCurrentSlide->startX());
-            mStartYSlider->setValue(mCurrentSlide->startY());
+            mStartXSlider->setValue(slide->startX());
+            mStartYSlider->setValue(slide->startY());
         }
     }
 }
 
 void SlideEditorWidget::onGetObjectCoordinates()
 {
-    if (mCurrentSlide && mCurrentSlide->sceneObject()) {
+    Slide * slide  = qobject_cast<Slide*>(mAction);
+    if (slide && slide->sceneObject()) {
         if (sender()->objectName() == "start") {
-            mCurrentSlide->setStartX(mCurrentSlide->sceneObject()->x());
-            mCurrentSlide->setStartY(mCurrentSlide->sceneObject()->y());
-            mStartXSlider->setValue(mCurrentSlide->startX());
-            mStartYSlider->setValue(mCurrentSlide->startY());
+            slide->setStartX(slide->sceneObject()->x());
+            slide->setStartY(slide->sceneObject()->y());
+            mStartXSlider->setValue(slide->startX());
+            mStartYSlider->setValue(slide->startY());
         } else if (sender()->objectName() == "end") {
-            mCurrentSlide->setEndX(mCurrentSlide->sceneObject()->x());
-            mCurrentSlide->setEndY(mCurrentSlide->sceneObject()->y());
-            mEndXSlider->setValue(mCurrentSlide->endX());
-            mEndYSlider->setValue(mCurrentSlide->endY());
+            slide->setEndX(slide->sceneObject()->x());
+            slide->setEndY(slide->sceneObject()->y());
+            mEndXSlider->setValue(slide->endX());
+            mEndYSlider->setValue(slide->endY());
         }
     }
 }

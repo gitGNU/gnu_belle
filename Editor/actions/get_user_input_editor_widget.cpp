@@ -39,37 +39,40 @@ GetUserInputEditorWidget::GetUserInputEditorWidget(QWidget *parent) :
     endGroup();
 
     resizeColumnToContents(0);
-
-    mCurrentAction = 0;
-
 }
 
 void GetUserInputEditorWidget::updateData(Action * action)
 {
-    mCurrentAction = qobject_cast<GetUserInput*>(action);
-
-    if (! mCurrentAction)
+    GetUserInput* userInput = qobject_cast<GetUserInput*>(action);
+    if (! userInput)
         return;
 
-    mMessageEdit->setText(mCurrentAction->message());
-    mVariableEdit->setText(mCurrentAction->variable());
-    mDefaultValueEdit->setText(mCurrentAction->defaultValue());
+    ActionEditorWidget::updateData(action);
+    mAction = 0;
+
+    mMessageEdit->setText(userInput->message());
+    mVariableEdit->setText(userInput->variable());
+    mDefaultValueEdit->setText(userInput->defaultValue());
+    mAction = action;
 }
 
 void GetUserInputEditorWidget::onMessageChanged(const QString & value)
 {
-    if (mCurrentAction)
-        mCurrentAction->setMessage(value);
+    GetUserInput* userInput = qobject_cast<GetUserInput*>(mAction);
+    if (userInput)
+        userInput->setMessage(value);
 }
 
 void GetUserInputEditorWidget::onVariableChanged(const QString & value)
 {
-    if (mCurrentAction)
-        mCurrentAction->setVariable(value);
+    GetUserInput* userInput = qobject_cast<GetUserInput*>(mAction);
+    if (userInput)
+        userInput->setVariable(value);
 }
 
 void GetUserInputEditorWidget::onDefaultValueChanged(const QString & value)
 {
-    if (mCurrentAction)
-        mCurrentAction->setDefaultValue(value);
+    GetUserInput* userInput = qobject_cast<GetUserInput*>(mAction);
+    if (userInput)
+        userInput->setDefaultValue(value);
 }

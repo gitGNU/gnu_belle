@@ -34,8 +34,6 @@ class ShowMenuEditorWidget : public ActionEditorWidget
     QList<QTextEdit*> mConditionEdits;
     QList<ComboBox*> mEventChoosers;
     QComboBox* mChooseNumberOfOptions;
-    ShowMenu* mCurrentShowMenu;
-
 
 public:
     explicit ShowMenuEditorWidget(QWidget *parent = 0);

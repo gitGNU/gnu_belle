@@ -25,25 +25,27 @@ RunScriptEditorWidget::RunScriptEditorWidget(QWidget *parent) :
 
 void RunScriptEditorWidget::updateData(Action *action)
 {
-    mCurrentAction = 0;
     RunScript* runScript = qobject_cast<RunScript*>(action);
     if (! runScript)
         return;
 
-
+    ActionEditorWidget::updateData(action);
+    mAction = 0;
     mScriptEdit->setPlainText(runScript->script());
     mCommentEdit->setText(runScript->comment());
-    mCurrentAction = runScript;
+    mAction = action;
 }
 
 void RunScriptEditorWidget::onScriptTextChanged()
 {
-    if (mCurrentAction)
-        mCurrentAction->setScript(mScriptEdit->toPlainText());
+    RunScript* runScript = qobject_cast<RunScript*>(mAction);
+    if (runScript)
+        runScript->setScript(mScriptEdit->toPlainText());
 }
 
 void RunScriptEditorWidget::onCommentTextEdited(const QString&)
 {
-    if (mCurrentAction)
-        mCurrentAction->setComment(mCommentEdit->text());
+    RunScript* runScript = qobject_cast<RunScript*>(mAction);
+    if (runScript)
+        runScript->setComment(mCommentEdit->text());
 }

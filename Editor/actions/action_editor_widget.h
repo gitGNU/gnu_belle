@@ -29,7 +29,6 @@ class ActionEditorWidget : public PropertiesWidget
 {
     Q_OBJECT
 
-    Action* mAction;
     QLineEdit* mNameEdit;
     QList<Object*> mObjects;
 
@@ -45,8 +44,12 @@ public:
 
 signals:
 
+protected:
+    Action* mAction;
+
 private slots:
     void onNameEdited(const QString& name);
+    void actionDestroyed();
 
 };
 

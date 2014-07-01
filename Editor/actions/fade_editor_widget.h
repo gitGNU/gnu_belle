@@ -27,7 +27,6 @@ class FadeEditorWidget : public ActionEditorWidget
 {
     Q_OBJECT
 
-    Fade* mCurrentAction;
     QComboBox* mObjectChooser;
     QComboBox* mFadeTypeChooser;
     QDoubleSpinBox* mDurationSpin;
