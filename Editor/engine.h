@@ -19,8 +19,10 @@
 
 #include <QString>
 
-#ifdef Q_WS_X11
+#if defined(Q_WS_X11)
     #define ENGINE_DEFAULT_PATH "/usr/share/belle/engine"
+#elif defined(Q_WS_MAC)
+    #define ENGINE_DEFAULT_PATH "Belle.app/Contents/Resources/engine"
 #else
     #define ENGINE_DEFAULT_PATH  "engine"
 #endif
