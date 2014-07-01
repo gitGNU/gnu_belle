@@ -17,15 +17,10 @@
 #ifndef RESOURCE_MANAGER_H
 #define RESOURCE_MANAGER_H
 
-<<<<<<< HEAD
 #if defined(Q_WS_X11)
     #define RESOURCES_DEFAULT_PATH "/usr/share/belle/resources"
 #elif defined(Q_WS_MAC)
     #define RESOURCES_DEFAULT_PATH "Belle.app/Contents/Resources/engine"
-=======
-#ifdef Q_WS_X11
-    #define RESOURCES_DEFAULT_PATH "/usr/share/belle/resources"
->>>>>>> ecbe20ed99b8fe8c825735feba3f749a224bd1e7
 #else
     #define RESOURCES_DEFAULT_PATH  "resources"
 #endif
