@@ -60,18 +60,15 @@ void ChangeVisibilityEditorWidget::updateData(Action * action)
         return;
 
     ActionEditorWidget::updateData(action);
-    mAction = 0;
 
     mFadeEditorWidget->updateData(changeVisibility->fadeAction());
     mSlideEditorWidget->updateData(changeVisibility->slideAction());
 
     setGroupName(changeVisibility->name());
-    mObjectsWidget->clear();
-
     mObjects = findObjects(! changeVisibility->toShow());
 
     mObjectsWidget->blockSignals(true);
-
+    mObjectsWidget->clear();
     for (int i=0; i < mObjects.size(); i++)
         mObjectsWidget->addItem(mObjects[i]->objectName());
     mObjectsWidget->blockSignals(false);
@@ -82,8 +79,6 @@ void ChangeVisibilityEditorWidget::updateData(Action * action)
         //if (lastChangeVisibilityActionForObject(mObjects[0]) == mCurrentAction)
         //    mObjects[0]->setAvailable(! mObjects[0]->isAvailable());
     }
-
-    mAction = action;
 }
 
 void ChangeVisibilityEditorWidget::onObjectChanged(int index)

@@ -31,22 +31,18 @@ ShowEditorWidget::ShowEditorWidget(QWidget *parent):
 
 void ShowEditorWidget::updateData(Action *action)
 {
-    mCurrentShowAction = qobject_cast<Show*>(action);
-    if (! mCurrentShowAction)
-        return;
-
     ChangeVisibilityEditorWidget::updateData(action);
-
 }
 
 void ShowEditorWidget::onStateChanged(int index)
 {
-    if (mCurrentShowAction && mCurrentShowAction->sceneObject()) {
-        Character *character = qobject_cast<Character*>(mCurrentShowAction->sceneObject());
+    Show* show = qobject_cast<Show*>(mAction);
+    if (show && show->sceneObject()) {
+        Character *character = qobject_cast<Character*>(show->sceneObject());
         if (character) {
             character->setCurrentState(mObjectStateWidget->currentText());
-            mCurrentShowAction->setDisplayText(character->objectName() + " (" + character->currentState() + ")");
-            mCurrentShowAction->setCharacterState(mObjectStateWidget->currentText());
+            show->setDisplayText(character->objectName() + " (" + character->currentState() + ")");
+            show->setCharacterState(mObjectStateWidget->currentText());
         }
     }
 }

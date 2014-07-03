@@ -26,9 +26,6 @@ class ShowEditorWidget : public ChangeVisibilityEditorWidget
 {
     Q_OBJECT
 
-private:
-    Show* mCurrentShowAction;
-
 protected:
     QComboBox * mObjectsWidget;
     QComboBox* mObjectStateWidget;
