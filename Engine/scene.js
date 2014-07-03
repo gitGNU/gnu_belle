@@ -211,7 +211,7 @@ Scene.prototype.addObject = function(object) {
 Scene.prototype.removeObject = function(object) {
     var index = this.indexOf(object);
     if (index != -1) {
-      this.objects = this.objects.slice(index, index+1);
+      this.objects.splice(index, 1);
       belle.display.removeObject(object);
     }
 }
