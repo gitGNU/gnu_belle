@@ -637,6 +637,8 @@ void Belle::onNewAction(Action * action)
         ActionsModel * actionsModel = qobject_cast<ActionsModel*> (mActionsView->model());
         if (actionsModel)
             actionsModel->appendAction(action);
+
+        mActionsView->scrollToBottom();
     }
 
 }
