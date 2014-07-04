@@ -797,9 +797,8 @@ void Belle::saveProject()
 void Belle::openFileOrProject(QString filepath)
 {
     QStringList filters;
-    filters << tr("All supported files ") + "(*.js *.json)"
-            << "Javascript (*.js)"
-            << "JSON (*.json)";
+    filters << tr("Game File") + "(game_data.js)"
+            << "Javascript (*.js)";
 
     if (filepath.isEmpty())
         filepath = QFileDialog::getOpenFileName(this, tr("Select project file"), QDir::currentPath(), filters.join(";;"));
