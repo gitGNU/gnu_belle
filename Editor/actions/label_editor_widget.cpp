@@ -46,10 +46,11 @@ void LabelEditorWidget::updateData(Action * action)
 
 void LabelEditorWidget::onLabelEdited(const QString & text)
 {
-    if (! mAction)
+    Label* label = qobject_cast<Label*>(mAction);
+    if (! label)
         return;
 
-    Scene* scene = qobject_cast<Scene*>(mAction->parent());
+    Scene* scene = qobject_cast<Scene*>(label->parent());
     if (! scene)
         return;
 
@@ -63,7 +64,7 @@ void LabelEditorWidget::onLabelEdited(const QString & text)
     }
 
     if (validName) {
-        mAction->setObjectName(text);
+        label->setObjectName(text);
         mLabelEdit->setStyleSheet("");
     }
     else
