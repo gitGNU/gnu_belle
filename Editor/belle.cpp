@@ -793,6 +793,9 @@ void Belle::saveProject()
         ResourceManager::exportResources(projectDir);
         //export gameFile
         exportGameFile(projectDir.absoluteFilePath(GAME_FILENAME));
+
+        if(statusBar())
+            statusBar()->showMessage(tr("Project saved..."), 3000);
     }
 }
 
