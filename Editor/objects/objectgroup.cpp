@@ -40,7 +40,7 @@ ObjectGroup::ObjectGroup(const QVariantMap& data, QObject *parent) :
             if (objects[i].type() == QVariant::Map) {
                 obj = resourceManager->createResource(objects[i].toMap(), false, this);
                 if(obj)
-                    mObjects.append(obj);
+                    append(obj);
             }
             else
                 qWarning() << Q_FUNC_INFO << "Couldn't create resource because it's not a valid JSON object.";
