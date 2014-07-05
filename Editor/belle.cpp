@@ -799,6 +799,32 @@ void Belle::saveProject()
     }
 }
 
+QVariantMap Belle::readGameFile(const QString& filepath) const
+{
+    QVariantMap dataMap;
+
+    QFile file(filepath);
+    if (! file.open(QFile::ReadOnly))
+        return dataMap;
+
+    QString contents = file.readAll();
+    file.close();
+
+    //if new game file format, just remove start ("game.data =")
+    int i = 0;
+    for(i=0; i < contents.size() && contents[i] != '{'; i++);
+    contents = contents.mid(i);
+
+    bool ok;
+    QVariant data = QtJson::Json::parse(contents, ok);
+    if (! ok)
+        return dataMap;
+    if (data.type() != QVariant::Map)
+        return dataMap;
+
+    return data.toMap();
+}
+
 void Belle::openFileOrProject(QString filepath)
 {
     QStringList filters;
@@ -811,29 +837,13 @@ void Belle::openFileOrProject(QString filepath)
     if (filepath.isEmpty())
         return;
 
-    QFile file(filepath);
-    if (! file.open(QFile::ReadOnly))
-        return;
+    QVariantMap object = readGameFile(filepath);
 
-    QString contents = file.readAll();
-    file.close();
-
-    //if new game file format, just remove start ("game.data =")
-    int i = 0;
-    for(i=0; i < contents.size() && contents[i] != '{'; i++);
-    contents = contents.mid(i);
-
-    bool ok;
-    QVariant data = QtJson::Json::parse(contents, ok);
-
-    if (! ok) {
+    if (object.isEmpty()) {
         QMessageBox::warning(this, tr("ERROR"),
                             tr("The game file could not be read correctly."));
         return;
     }
-
-    if (data.type() != QVariant::Map)
-        return;
 
     mDefaultSceneManager->removeScenes(true);
     mPauseSceneManager->removeScenes(true);
@@ -842,7 +852,6 @@ void Belle::openFileOrProject(QString filepath)
     mSavePath = QFileInfo(filepath).absolutePath();
     mCurrentRunDirectory = "";
 
-    QVariantMap object = data.toMap();
     setNovelProperties(object);
     ResourceManager::importResources(object);
 
@@ -881,27 +890,8 @@ void Belle::importScenes(const QVariantList& scenes, SceneManager* sceneManager)
     }
 }
 
-void Belle::exportGameFile(const QString& path)
+QVariantMap Belle::createGameFile() const
 {
-    QString filepath(path);
-
-    if (filepath.isNull() || filepath.isEmpty()) {
-        QString dirpath = QFileDialog::getExistingDirectory(this, tr("Choose the directory to export the game file to"),
-                                                        "",
-                                                        QFileDialog::ShowDirsOnly
-                                                        | QFileDialog::DontResolveSymlinks);
-
-        if (dirpath.isEmpty())
-            return;
-
-        filepath = QDir(dirpath).absoluteFilePath(GAME_FILENAME);
-    }
-
-    QFile file(filepath);
-
-    if (! file.open(QFile::WriteOnly))
-        return;
-
     QVariantMap jsonFile;
     QString font = Utils::font(mNovelData.value("fontSize").toInt(), mNovelData.value("fontFamily").toString());
     QMapIterator<QString, QVariant> it(mNovelData);
@@ -943,6 +933,32 @@ void Belle::exportGameFile(const QString& path)
     QVariantMap pauseScreen;
     pauseScreen.insert("scenes", scenes);
     jsonFile.insert("pauseScreen", pauseScreen);
+
+    return jsonFile;
+}
+
+void Belle::exportGameFile(const QString& path)
+{
+    QString filepath(path);
+
+    if (filepath.isNull() || filepath.isEmpty()) {
+        QString dirpath = QFileDialog::getExistingDirectory(this, tr("Choose the directory to export the game file to"),
+                                                        "",
+                                                        QFileDialog::ShowDirsOnly
+                                                        | QFileDialog::DontResolveSymlinks);
+
+        if (dirpath.isEmpty())
+            return;
+
+        filepath = QDir(dirpath).absoluteFilePath(GAME_FILENAME);
+    }
+
+    QFile file(filepath);
+
+    if (! file.open(QFile::WriteOnly))
+        return;
+
+    QVariantMap jsonFile = createGameFile();
 
     file.write("game.data = ");
     file.write(QtJson::Json::serialize(jsonFile));
@@ -1236,4 +1252,36 @@ QTreeWidget* Belle::scenesWidget(SceneManager* sceneManager)
 Belle* Belle::instance()
 {
     return mInstance;
+}
+
+bool Belle::hasChanges() const
+{
+    if (mSavePath.isEmpty())
+        return true;
+
+    QDir projectDir(mSavePath);
+    if (! projectDir.exists(GAME_FILENAME))
+        return true;
+
+    QVariantMap savedGame = readGameFile(projectDir.absoluteFilePath(GAME_FILENAME));
+    QVariantMap currGame = createGameFile();
+    if (savedGame != currGame)
+        return true;
+    return false;
+}
+
+void Belle::closeEvent(QCloseEvent *event)
+{
+    if (hasChanges()) {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, tr("Quit"), tr("You have unsaved changes.\nDo you want to save changes before closing?"),
+                                      QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel, QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Yes) {
+            saveProject();
+        }
+        else if(reply == QMessageBox::Cancel) {
+            event->ignore();
+        }
+    }
 }
