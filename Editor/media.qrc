@@ -39,5 +39,11 @@
         <file>media/document_export.png</file>
         <file>media/project_open.png</file>
         <file>media/document_save_all.png</file>
+        <file>media/align-horizontal-center.png</file>
+        <file>media/align-horizontal-left.png</file>
+        <file>media/align-horizontal-right.png</file>
+        <file>media/align-vertical-bottom.png</file>
+        <file>media/align-vertical-center.png</file>
+        <file>media/align-vertical-top.png</file>
     </qresource>
 </RCC>

@@ -47,6 +47,8 @@ class DrawingSurfaceWidget : public QWidget
     QAction *mDeleteObject;
     QAction *mEditObject;
     QAction *mCancelEditObject;
+    QAction *mAlignHorizontally;
+    QAction *mAlignVertically;
     Object* mObject;
     
     public:
@@ -91,6 +93,7 @@ class DrawingSurfaceWidget : public QWidget
         void onCancelEditObjectTriggered();
         void onResize(const QResizeEvent&);
         void onObjectDestroyed();
+        void alignObject();
 
    private:
         void performOperation(Clipboard::Operation);

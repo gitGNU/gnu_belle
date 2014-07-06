@@ -78,6 +78,50 @@ DrawingSurfaceWidget::DrawingSurfaceWidget(SceneManager *sceneManager, QWidget *
     mDeleteObject->setShortcutContext(Qt::WidgetShortcut);
     parent->addAction(mDeleteObject);
 
+    //Align horizontally
+    mAlignHorizontally = new QAction(QIcon(":/media/align-horizontal-center.png"), tr("Align Horizontally"), parent);
+    QMenu *menu = new QMenu("Align Horizontally", parent);
+
+    //setup horizontal align actions
+    QAction* alignLeft = new QAction(QIcon(":/media/align-horizontal-left.png"), tr("Align Left"), menu);
+    QAction* alignHCenter = new QAction(QIcon(":/media/align-horizontal-center.png"), tr("Align Center"), menu);
+    QAction* alignRight = new QAction(QIcon(":/media/align-horizontal-right.png"), tr("Align Right"), menu);
+    alignLeft->setObjectName("alignLeft");
+    alignHCenter->setObjectName("alignHCenter");
+    alignRight->setObjectName("alignRight");
+
+    connect(alignLeft, SIGNAL(triggered()), this, SLOT(alignObject()));
+    connect(alignHCenter, SIGNAL(triggered()), this, SLOT(alignObject()));
+    connect(alignRight, SIGNAL(triggered()), this, SLOT(alignObject()));
+
+    menu->addAction(alignLeft);
+    menu->addAction(alignHCenter);
+    menu->addAction(alignRight);
+    mAlignHorizontally->setMenu(menu);
+    parent->addAction(mAlignHorizontally);
+
+    //Align vertically
+    mAlignVertically = new QAction(QIcon(":/media/align-vertical-center.png"), tr("Align Vertically"), parent);
+    menu = new QMenu("Align Vertically", parent);
+
+    //setup vertical align actions
+    QAction* alignTop = new QAction(QIcon(":/media/align-vertical-top.png"), tr("Align Top"), menu);
+    QAction* alignVCenter = new QAction(QIcon(":/media/align-vertical-center.png"), tr("Align Center"), menu);
+    QAction* alignBottom = new QAction(QIcon(":/media/align-vertical-bottom.png"), tr("Align Bottom"), menu);
+    alignTop->setObjectName("alignTop");
+    alignVCenter->setObjectName("alignVCenter");
+    alignBottom->setObjectName("alignBottom");
+
+    connect(alignTop, SIGNAL(triggered()), this, SLOT(alignObject()));
+    connect(alignVCenter, SIGNAL(triggered()), this, SLOT(alignObject()));
+    connect(alignBottom, SIGNAL(triggered()), this, SLOT(alignObject()));
+
+    menu->addAction(alignTop);
+    menu->addAction(alignVCenter);
+    menu->addAction(alignBottom);
+    mAlignVertically->setMenu(menu);
+    parent->addAction(mAlignVertically);
+
     mClearBackground = new QAction(tr("Clear Background"), this);
 
     connect(mEditObject, SIGNAL(triggered()), this, SLOT(onEditObjectTriggered()));
@@ -321,7 +365,7 @@ void DrawingSurfaceWidget::resizeEvent(QResizeEvent * event)
 
 void DrawingSurfaceWidget::onCustomContextMenuRequested(const QPoint& point)
 {
-    if (! mSceneManager->currentScene() && ! mObject)
+    if (! mSceneManager->currentScene() || mObject)
         return;
 
     QMenu menu;
@@ -349,6 +393,11 @@ void DrawingSurfaceWidget::onCustomContextMenuRequested(const QPoint& point)
         menu.addAction(mMoveDown);
         menu.addAction(mFillWidth);
         menu.addSeparator();
+        if (! mObject) {
+            menu.addAction(mAlignHorizontally);
+            menu.addAction(mAlignVertically);
+            menu.addSeparator();
+        }
         menu.addAction(mCopyObject);
         menu.addAction(mCutObject);
         if (! mSceneManager->clipboard()->isEmpty())
@@ -525,4 +574,34 @@ void DrawingSurfaceWidget::onObjectDestroyed()
 void DrawingSurfaceWidget::setSceneManager(SceneManager* sceneManager)
 {
     mSceneManager = sceneManager;
+}
+
+void DrawingSurfaceWidget::alignObject() {
+    if (! sender())
+        return;
+
+    Object* object = selectedObject();
+    if (! object)
+        return;
+
+    QString action = sender()->objectName();
+
+    if (action == "alignLeft") {
+        object->setX(0);
+    }
+    else if (action == "alignHCenter") {
+        object->setX(Scene::width()/2 - object->width()/2);
+    }
+    else if (action == "alignRight") {
+        object->setX(Scene::width() - object->width());
+    }
+    else if (action == "alignTop") {
+        object->setY(0);
+    }
+    else if (action == "alignVCenter") {
+        object->setY(Scene::height()/2 - object->height()/2);
+    }
+    else if (action == "alignBottom") {
+        object->setY(Scene::height()-object->height());
+    }
 }

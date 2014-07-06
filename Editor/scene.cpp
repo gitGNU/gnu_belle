@@ -284,6 +284,7 @@ void Scene::fillWidth()
     if (! mSelectedObject)
         return;
 
+    mSelectedObject->setX(0);
     mSelectedObject->setWidth(Scene::width());
     emit dataChanged();
 }

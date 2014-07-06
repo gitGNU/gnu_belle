@@ -308,8 +308,9 @@ void Object::setY(int y)
 {
     mSceneRect.moveTo(mSceneRect.x(), y + mPadding.top());
     updateResizeRects();
-    emit dataChanged();
-    //emit positionChanged(x(), y);
+    QVariantMap data;
+    data.insert("y", y);
+    emit dataChanged(data);
 }
 
 void Object::setX(int x)
@@ -319,7 +320,6 @@ void Object::setX(int x)
     QVariantMap data;
     data.insert("x", x);
     emit dataChanged(data);
-    //emit positionChanged(x, y());
 }
 
 int Object::x() const
