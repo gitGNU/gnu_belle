@@ -45,13 +45,20 @@ public:
 
 protected:
     virtual void dropEvent(QDropEvent *);
+    QList<Action*> selectedActions() const;
 
 signals:
+    void actionCopied(const QList<Action*>&);
+    void actionCut(const QList<Action*>&);
+    void actionPasted(const QList<Action*>&);
 
 private slots:
     void onContextMenuRequested(const QPoint&);
     void onDeleteAction();
     void onItemClicked(const QModelIndex&);
+    void onCopyAction();
+    void onCutAction();
+    void onPasteAction();
 
 private:
     QAction* mDeleteAction;

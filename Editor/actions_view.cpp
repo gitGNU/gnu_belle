@@ -174,7 +174,7 @@ ActionsView::ActionsView(QWidget *parent) :
     setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     //actions
-    /*mCopyAction = new QAction(QIcon(":/media/editcopy.png"), tr("Copy"), this);
+    mCopyAction = new QAction(QIcon(":/media/editcopy.png"), tr("Copy"), this);
     mCopyAction->setShortcut(QKeySequence("Ctrl+C"));
     mCopyAction->setShortcutContext(Qt::WidgetShortcut);
     addAction(mCopyAction);
@@ -187,16 +187,16 @@ ActionsView::ActionsView(QWidget *parent) :
     mPasteAction = new QAction(QIcon(":/media/editpaste.png"), tr("Paste"), this);
     mPasteAction->setShortcut(QKeySequence("Ctrl+V"));
     mPasteAction->setShortcutContext(Qt::WidgetShortcut);
-    addAction(mPasteAction);*/
+    addAction(mPasteAction);
 
     mDeleteAction = new QAction(QIcon(":/media/delete.png"), tr("Delete"), this);
     mDeleteAction->setShortcut(QKeySequence::Delete);
     mDeleteAction->setShortcutContext(Qt::WidgetShortcut);
     addAction(mDeleteAction);
 
-    /*connect(mCopyAction, SIGNAL(triggered()), this, SLOT(onDeleteAction()));
-    connect(mCutAction, SIGNAL(triggered()), this, SLOT(onDeleteAction()));
-    connect(mPasteAction, SIGNAL(triggered()), this, SLOT(onDeleteAction()));*/
+    connect(mCopyAction, SIGNAL(triggered()), this, SLOT(onCopyAction()));
+    connect(mCutAction, SIGNAL(triggered()), this,  SLOT(onCutAction()));
+    connect(mPasteAction, SIGNAL(triggered()), this, SLOT(onPasteAction()));
     connect(mDeleteAction, SIGNAL(triggered()), this, SLOT(onDeleteAction()));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(onContextMenuRequested(const QPoint&)));
 
@@ -207,18 +207,15 @@ void ActionsView::onContextMenuRequested(const QPoint & point)
 {
     QMenu menu;
 
-    menu.addAction(mDeleteAction);
-
-    /*if (! selectedIndexes().isEmpty()) {
+    if (! selectedIndexes().isEmpty()) {
         menu.addAction(mCopyAction);
         menu.addAction(mCutAction);
-        menu.addAction(mPasteAction);
         menu.addSeparator();
         menu.addAction(mDeleteAction);
     }
     else {
          menu.addAction(mPasteAction);
-    }*/
+    }
     menu.exec(mapToGlobal(point));
 }
 
@@ -235,6 +232,41 @@ void ActionsView::onDeleteAction()
             scene->deleteActionAt(indexes[i].row());
         }
     }
+}
+
+void ActionsView::onCopyAction()
+{
+    QList<QObject*> objects;
+    foreach(Action* action, selectedActions())
+        objects.append(action);
+    if (! objects.isEmpty())
+        Belle::instance()->clipboard()->add(objects, Clipboard::Copy);
+}
+
+void ActionsView::onCutAction()
+{
+    QList<QObject*> objects;
+    foreach(Action* action, selectedActions())
+        objects.append(action);
+    if (! objects.isEmpty())
+        Belle::instance()->clipboard()->add(objects, Clipboard::Cut);
+}
+
+void ActionsView::onPasteAction()
+{
+    Clipboard* clipboard = Belle::instance()->clipboard();
+    QList<Action*> actions = clipboard->actions();
+    Scene* scene = Belle::instance()->currentScene();
+    if (! scene)
+        return;
+
+    foreach(Action* action, actions) {
+        scene->appendAction(action, true);
+    }
+
+    if (clipboard->operation() == Clipboard::Cut)
+        foreach(Action* action, actions)
+            action->deleteLater();
 }
 
 void ActionsView::appendAction(Action* action)
@@ -257,4 +289,17 @@ void ActionsView::onItemClicked(const QModelIndex & index)
     if (parent() && qobject_cast<QWidget*>(parent())) {
         this->setFocus();
     }
+}
+
+QList<Action*> ActionsView::selectedActions() const
+{
+    QList<Action*> actions;
+    Scene* scene = Belle::instance()->currentScene();
+    if (scene) {
+        QModelIndexList indexes = selectedIndexes();
+        for(int i=0; i < indexes.size(); i++)
+            actions.append(scene->actionAt(indexes[i].row()));
+    }
+
+    return actions;
 }
