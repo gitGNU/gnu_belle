@@ -484,13 +484,27 @@ void Scene::setActions(const QList<Action *> & actions)
     mActions = actions;
 }
 
-void Scene::appendAction(Action * action)
+void Scene::appendAction(Action * action, bool copy)
 {
     if (! action)
         return;
 
-    action->setParent(this);
+    if (copy) {
+        action = ActionInfoManager::typeToAction(action->toJsonObject(), this);
+    }
+    else {
+        action->setParent(this);
+    }
+
     mActions.append(action);
+    emit actionAdded(action);
+}
+
+Action* Scene::actionAt(int i) const
+{
+    if (i >= 0 && i < mActions.size())
+        return mActions.at(i);
+    return 0;
 }
 
 QIcon Scene::icon()

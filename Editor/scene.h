@@ -101,7 +101,8 @@ class Scene : public QObject
         void deleteActionAt(int);
         void deleteAction(Action*);
         QList<Action*> actions() const;
-        void appendAction(Action*);
+        void appendAction(Action*, bool copy=false);
+        Action* actionAt(int) const;
 
         virtual QVariantMap toJsonObject(bool internal=true);
         QIcon icon();
@@ -125,6 +126,7 @@ class Scene : public QObject
        void resized(const QResizeEvent&);
        void dataChanged();
        void selectionChanged(Object*);
+       void actionAdded(Action*);
 
 private:
        void init(const QString&);
