@@ -44,16 +44,17 @@ public:
     };
 
 private:
-    QList<Object*> mObjects;
-    QList<Scene*> mScenes;
+    QList<QObject*> mQObjects;
     Clipboard::Operation mOperation;
 
 public:
     explicit Clipboard(QObject *parent = 0);
     bool hasObjects();
     bool hasScenes();
+    bool hasActions();
     QList<Object*> objects();
     QList<Scene*> scenes();
+    QList<Action*> actions();
     Clipboard::Operation operation();
     void add(QObject*, Clipboard::Operation);
     void add(const QList<QObject*>&, Clipboard::Operation);

@@ -25,22 +25,53 @@ Clipboard::Clipboard(QObject *parent) :
 
 bool Clipboard::hasObjects()
 {
-    return ! mObjects.isEmpty();
+    return ! objects().isEmpty();
 }
 
 bool Clipboard::hasScenes()
 {
-    return ! mScenes.isEmpty();
+    return ! scenes().isEmpty();
+}
+
+bool Clipboard::hasActions()
+{
+    return ! actions().isEmpty();
 }
 
 QList<Object*> Clipboard::objects()
 {
-    return mObjects;
+    QList<Object*> objects;
+    foreach(QObject* obj, mQObjects) {
+        Object* object = qobject_cast<Object*>(obj);
+        if (object)
+            objects.append(object);
+    }
+
+    return objects;
+}
+
+QList<Action*> Clipboard::actions()
+{
+    QList<Action*> actions;
+    foreach(QObject* obj, mQObjects) {
+        Action* action = qobject_cast<Action*>(obj);
+        if (action)
+            actions.append(action);
+    }
+
+    return actions;
 }
 
 QList<Scene*> Clipboard::scenes()
 {
-    return mScenes;
+    QList<Scene*> scenes;
+    foreach(QObject* obj, mQObjects) {
+        Scene* scene = qobject_cast<Scene*>(obj);
+        if (scene)
+            scenes.append(scene);
+    }
+
+    return scenes;
 }
 
 Clipboard::Operation Clipboard::operation()
@@ -60,40 +91,25 @@ void Clipboard::add(const QList<QObject*>& objects, Clipboard::Operation op)
 
     foreach(QObject* obj, objects) {
         connect(obj, SIGNAL(destroyed(QObject*)), this, SLOT(onObjectDestroyed(QObject*)));
-        if (qobject_cast<Object*>(obj))
-            mObjects.append(qobject_cast<Object*>(obj));
-        else if (qobject_cast<Scene*>(obj))
-            mScenes.append(qobject_cast<Scene*>(obj));
+        mQObjects.append(obj);
     }
 }
 
 bool Clipboard::isEmpty()
 {
-    return mObjects.isEmpty();
+    return mQObjects.isEmpty();
 }
 
 void Clipboard::clear()
 {
-    foreach(QObject*obj, mObjects)
+    foreach(QObject*obj, mQObjects)
         obj->disconnect(this);
 
-    foreach(QObject*obj, mScenes)
-        obj->disconnect(this);
-
-    mObjects.clear();
-    mScenes.clear();
+    mQObjects.clear();
 }
 
 void Clipboard::onObjectDestroyed(QObject* object)
 {
-    Object* obj = qobject_cast<Object*>(object);
-    if (obj){
-        if (mObjects.contains(obj))
-            mObjects.removeOne(obj);
-    }
-    else {
-        Scene* scene = qobject_cast<Scene*>(object);
-        if (scene && mScenes.contains(scene))
-            mScenes.removeOne(scene);
-    }
+    if (mQObjects.contains(object))
+        mQObjects.removeOne(object);
 }
