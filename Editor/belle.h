@@ -54,6 +54,7 @@ class Belle : public QMainWindow
     SceneManager* mCurrentSceneManager;
     SceneManager* mDefaultSceneManager;
     SceneManager* mPauseSceneManager;
+    Clipboard* mClipboard;
     
     public:
         explicit Belle(QWidget *widget=0);
@@ -61,6 +62,7 @@ class Belle : public QMainWindow
         bool eventFilter(QObject *, QEvent *);
         Scene* currentScene();
         static Belle* instance();
+        Clipboard * clipboard() const;
 
     signals:
         void newAction(Action*);

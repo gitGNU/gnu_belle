@@ -66,6 +66,7 @@ Belle::Belle(QWidget *widget)
     mUi.setupUi( this );
 
     mInstance = this;
+    mClipboard = new Clipboard(this);
 
     //init webview
     mWebView = new QWebView(this);
@@ -85,8 +86,8 @@ Belle::Belle(QWidget *widget)
     //connect(SceneManager::instance(), SIGNAL(selectionChanged(Object*)), this, SLOT(onSelectedObjectChanged(Object*)));
     connect(mDefaultSceneManager, SIGNAL(sceneRemoved(int)), this, SLOT(onSceneRemoved(int)));
     connect(mPauseSceneManager, SIGNAL(sceneRemoved(int)), this, SLOT(onSceneRemoved(int)));
-    mDefaultSceneManager->setClipboard(new Clipboard(this));
-    mPauseSceneManager->setClipboard(new Clipboard(this));
+    mDefaultSceneManager->setClipboard(mClipboard);
+    mPauseSceneManager->setClipboard(mClipboard);
 
     //init drawing widget
     QLayout *vLayout = centralWidget()->layout();
@@ -397,6 +398,7 @@ void Belle::updateActions()
         ActionsModel *model = qobject_cast<ActionsModel*> (mActionsView->model());
         if (model) {
             model->setActions(currentScene()->actions());
+            connect(currentScene(), SIGNAL(actionAdded(Action*)), model, SLOT(appendAction(Action*)), Qt::UniqueConnection);
         }
     }
 }
@@ -634,10 +636,6 @@ void Belle::onNewAction(Action * action)
 {
     if (currentScene()) {
         currentScene()->appendAction(action);
-        ActionsModel * actionsModel = qobject_cast<ActionsModel*> (mActionsView->model());
-        if (actionsModel)
-            actionsModel->appendAction(action);
-
         mActionsView->scrollToBottom();
     }
 
@@ -1284,4 +1282,9 @@ void Belle::closeEvent(QCloseEvent *event)
             event->ignore();
         }
     }
+}
+
+Clipboard* Belle::clipboard() const
+{
+    return mClipboard;
 }
