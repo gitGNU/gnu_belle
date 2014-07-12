@@ -224,12 +224,8 @@ void ActionsView::onDeleteAction()
     Scene* scene = Belle::instance()->currentScene();
     if (scene) {
         QModelIndexList indexes = selectedIndexes();
-        ActionsModel* model = qobject_cast<ActionsModel*>(this->model());
-
         for(int i=indexes.size()-1; i >= 0; --i) {
-
-            model->removeRow(indexes[i].row());
-            scene->deleteActionAt(indexes[i].row());
+            scene->removeActionAt(indexes[i].row(), true);
         }
     }
 }
@@ -256,17 +252,23 @@ void ActionsView::onPasteAction()
 {
     Clipboard* clipboard = Belle::instance()->clipboard();
     QList<Action*> actions = clipboard->actions();
-    Scene* scene = Belle::instance()->currentScene();
-    if (! scene)
+    Scene* currScene = Belle::instance()->currentScene();
+    if (! currScene)
         return;
 
-    foreach(Action* action, actions) {
-        scene->appendAction(action, true);
+    if (clipboard->operation() == Clipboard::Copy) {
+        foreach(Action* action, actions) {
+            currScene->appendAction(action, true);
+        }
     }
-
-    if (clipboard->operation() == Clipboard::Cut)
+    else if (clipboard->operation() == Clipboard::Cut) {
         foreach(Action* action, actions)
-            action->deleteLater();
+            if(action->scene())
+                action->scene()->removeAction(action);
+
+        foreach(Action* action, actions)
+            currScene->appendAction(action);
+    }
 }
 
 void ActionsView::appendAction(Action* action)

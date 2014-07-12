@@ -42,19 +42,9 @@ void ActionsModel::insertAction(int row, Action* action)
     insertRow(row, item);
 }
 
-bool ActionsModel::removeRow(int row, const QModelIndex &parent)
+void ActionsModel::removeAction(int index)
 {
-    Scene* scene = Belle::instance()->currentScene();
-    if (scene) {
-        QList<Action*> actions = scene->actions();
-        if (row >= 0 && row < actions.size()) {
-            disconnect(actions[row], SIGNAL(dataChanged()), this, SLOT(updateView()));
-            if (actions[row] == mCurrentAction)
-                mCurrentAction = 0;
-        }
-    }
-
-    return QStandardItemModel::removeRow(row, parent);
+    removeRow(index);
 }
 
 Action* ActionsModel::actionForIndex(const QModelIndex & index) const
@@ -206,7 +196,7 @@ void ActionsModel::setCurrentAction(const QModelIndex & index)
     mCurrentAction = action;
 
     if (mCurrentAction)
-        connect(mCurrentAction, SIGNAL(destroyed()), this, SLOT(onCurrentActionDestroyed()));
+        connect(mCurrentAction, SIGNAL(destroyed()), this, SLOT(onCurrentActionDestroyed()), Qt::UniqueConnection);
 }
 
 void ActionsModel::onCurrentActionDestroyed()

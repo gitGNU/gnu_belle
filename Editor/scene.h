@@ -98,11 +98,13 @@ class Scene : public QObject
 
         void insertAction(int, Action*);
         void setActions(const QList<Action*>&);
-        void deleteActionAt(int);
-        void deleteAction(Action*);
+        void removeActionAt(int, bool del=false);
+        void removeAction(Action*, bool del=false);
         QList<Action*> actions() const;
         void appendAction(Action*, bool copy=false);
         Action* actionAt(int) const;
+
+        int indexOf(QObject*);
 
         virtual QVariantMap toJsonObject(bool internal=true);
         QIcon icon();
@@ -127,6 +129,7 @@ class Scene : public QObject
        void dataChanged();
        void selectionChanged(Object*);
        void actionAdded(Action*);
+       void actionRemoved(int);
 
 private:
        void init(const QString&);

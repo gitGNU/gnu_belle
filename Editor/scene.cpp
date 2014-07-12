@@ -459,20 +459,24 @@ Object* Scene::highlightedObject()
     return mHighlightedObject;
 }
 
-void Scene::deleteActionAt(int index)
+void Scene::removeActionAt(int index , bool del)
 {
     if (index >= 0 && index < mActions.size()) {
-        Action* action = mActions.takeAt(index);
-        action->deleteLater();
+        Action * action = mActions.takeAt(index);
+
+        if (del)
+            action->deleteLater();
+
+        emit actionRemoved(index);
     }
 }
 
-void Scene::deleteAction(Action* action)
+void Scene::removeAction(Action* action, bool del)
 {
-    if (action)
-        deleteActionAt(mActions.indexOf(action));
+    if (! action)
+        return;
+    removeActionAt(mActions.indexOf(action), del);
 }
-
 
 QList<Action*> Scene::actions() const
 {
@@ -707,4 +711,16 @@ void Scene::resize(int w, int h, bool pos, bool size)
             obj->setHeight(qRound(obj->height()*hratio));
         }
     }
+}
+
+int Scene::indexOf(QObject * obj)
+{
+    if (qobject_cast<Object*>(obj)) {
+        return mObjects.indexOf(qobject_cast<Object*>(obj));
+    }
+    else if (qobject_cast<Action*>(obj)) {
+        return mActions.indexOf(qobject_cast<Action*>(obj));
+    }
+
+    return -1;
 }

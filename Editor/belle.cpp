@@ -399,6 +399,7 @@ void Belle::updateActions()
         if (model) {
             model->setActions(currentScene()->actions());
             connect(currentScene(), SIGNAL(actionAdded(Action*)), model, SLOT(appendAction(Action*)), Qt::UniqueConnection);
+            connect(currentScene(), SIGNAL(actionRemoved(int)), model, SLOT(removeAction(int)), Qt::UniqueConnection);
         }
     }
 }

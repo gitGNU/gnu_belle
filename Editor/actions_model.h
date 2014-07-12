@@ -34,12 +34,12 @@ public:
     virtual bool dropMimeData ( const QMimeData *, Qt::DropAction, int, int, const QModelIndex &);
     virtual QMimeData* mimeData( const QModelIndexList & ) const;
     virtual QStringList mimeTypes() const;
-    bool removeRow(int row, const QModelIndex &parent = QModelIndex());
 
 signals:
 
 public slots:
     void appendAction(Action*);
+    void removeAction(int);
     void setCurrentAction(const QModelIndex&);
     void onCurrentActionDestroyed();
 
